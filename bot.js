@@ -458,8 +458,19 @@ async function postAll() {
   console.log("Daily discovery posted.");
 }
 
+function getSeerrBaseUrl() {
+  const raw = (env.SEERR_URL || "").trim();
+  if (!raw) return "";
+  return raw.replace(/\/+$/, "");
+}
+
 async function loginToSeerr() {
-  const res = await fetch(`${env.SEERR_URL}/api/v1/auth/local`, {
+  const baseUrl = getSeerrBaseUrl();
+  if (!baseUrl) {
+    throw new Error("SEERR_URL is not configured.");
+  }
+
+  const res = await fetch(`${baseUrl}/api/v1/auth/local`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -487,10 +498,6 @@ async function loginToSeerr() {
 }
 
 async function requestInSeerr(mediaType, tmdbId) {
-  if (!seerrCookie) {
-    await loginToSeerr();
-  }
-
   const body = {
     mediaType,
     mediaId: Number(tmdbId),
@@ -501,11 +508,10 @@ async function requestInSeerr(mediaType, tmdbId) {
     body.seasons = "all";
   }
 
-  const res = await fetch(`${env.SEERR_URL}/api/v1/request`, {
+  const res = await seerrFetch("/api/v1/request", {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
-      Cookie: seerrCookie
+      "Content-Type": "application/json"
     },
     body: JSON.stringify(body)
   });
@@ -514,10 +520,14 @@ async function requestInSeerr(mediaType, tmdbId) {
   console.log("Seerr response:", res.status, text);
 
   if (!res.ok) {
-    throw new Error(text);
+    throw new Error(text || `Seerr request failed with status ${res.status}`);
   }
 
-  return JSON.parse(text);
+  try {
+    return JSON.parse(text);
+  } catch (err) {
+    return text;
+  }
 }
 
 client.on("interactionCreate", async (interaction) => {
@@ -525,6 +535,7 @@ client.on("interactionCreate", async (interaction) => {
   if (!interaction.customId.startsWith("request:")) return;
 
   const [, mediaType, tmdbId] = interaction.customId.split(":");
+  if (!mediaType || !tmdbId) return;
 
   try {
     await interaction.deferReply({ ephemeral: true });
@@ -533,19 +544,20 @@ client.on("interactionCreate", async (interaction) => {
       "✅ Request submitted successfully! It is now waiting for approval in Seerr."
     );
   } catch (err) {
-    console.error(err);
+    console.error("Request button failed:", err);
 
     try {
+      const message = `❌ ${err.message || "Unable to submit request."}`;
       if (interaction.deferred || interaction.replied) {
-        await interaction.editReply(`❌ ${err.message}`);
+        await interaction.editReply(message);
       } else {
         await interaction.reply({
-          content: `❌ ${err.message}`,
+          content: message,
           ephemeral: true
         });
       }
     } catch (e) {
-      console.error(e);
+      console.error("Failed to send button error response:", e);
     }
   }
 });
