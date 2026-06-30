@@ -12,9 +12,11 @@ const {
 } = require("discord.js");
 
 const cron = require("node-cron");
+const { getWatchRegion } = require("./lib/watchRegion");
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 const env = process.env;
+const WATCH_REGION = getWatchRegion(env);
 
 const STREAMING_SERVICES = (env.STREAMING_SERVICES || "")
   .split(",")
@@ -334,7 +336,7 @@ async function sendCategoryMessage(channelId, heading, items) {
 }
 
 async function getProviderId(providerName, mediaType = "movie") {
-  const data = await tmdb(`/watch/providers/${mediaType}?watch_region=${env.WATCH_REGION || "AU"}`);
+  const data = await tmdb(`/watch/providers/${mediaType}?watch_region=${WATCH_REGION}`);
   const found = (data.results || []).find((provider) =>
     provider.provider_name.toLowerCase() === providerName.toLowerCase()
   );
@@ -381,7 +383,7 @@ async function postAll() {
   const tvPopular = await tmdb("/tv/popular?language=en-AU&page=1");
   const trending = await tmdb("/trending/all/day?language=en-AU");
   const newReleases = await tmdb(
-    `/discover/movie?language=en-AU&region=${env.WATCH_REGION || "AU"}&sort_by=primary_release_date.desc&primary_release_date.lte=${today}&include_adult=false`
+    `/discover/movie?language=en-AU&region=${WATCH_REGION}&sort_by=primary_release_date.desc&primary_release_date.lte=${today}&include_adult=false`
   );
 
   const movieOfDay = (await selectRecommendations(moviePopular.results || [], 1, usedThisRun, suggestionHistory, { random: true, minRating: 6.7, minVotes: 200, requireEnglish: true }))[0];
@@ -417,7 +419,7 @@ async function postAll() {
     const providerId = await getProviderId(service, "movie");
     if (providerId) {
       const streaming = await tmdb(
-        `/discover/movie?language=en-AU&watch_region=${env.WATCH_REGION || "AU"}&with_watch_providers=${providerId}&sort_by=popularity.desc&include_adult=false`
+        `/discover/movie?language=en-AU&watch_region=${WATCH_REGION}&with_watch_providers=${providerId}&sort_by=popularity.desc&include_adult=false`
       );
 
       const streamingSelection = await selectRecommendations(
