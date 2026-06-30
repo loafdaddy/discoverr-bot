@@ -1,0 +1,156 @@
+{
+  "movie:1392469": {
+    "title": "Cocktail 2",
+    "type": "movie",
+    "tmdbId": 1392469,
+    "category": "movie-of-the-day",
+    "suggestedAt": "2026-06-30"
+  },
+  "tv:5920": {
+    "title": "The Mentalist",
+    "type": "tv",
+    "tmdbId": 5920,
+    "category": "tv-show-of-the-day",
+    "suggestedAt": "2026-06-30"
+  },
+  "movie:1339713": {
+    "title": "Obsession",
+    "type": "movie",
+    "tmdbId": 1339713,
+    "category": "trending",
+    "suggestedAt": "2026-06-30"
+  },
+  "movie:1314481": {
+    "title": "The Devil Wears Prada 2",
+    "type": "movie",
+    "tmdbId": 1314481,
+    "category": "trending",
+    "suggestedAt": "2026-06-30"
+  },
+  "tv:94997": {
+    "title": "House of the Dragon",
+    "type": "tv",
+    "tmdbId": 94997,
+    "category": "trending",
+    "suggestedAt": "2026-06-30"
+  },
+  "tv:124364": {
+    "title": "FROM",
+    "type": "tv",
+    "tmdbId": 124364,
+    "category": "trending",
+    "suggestedAt": "2026-06-30"
+  },
+  "movie:1081003": {
+    "title": "Supergirl",
+    "type": "movie",
+    "tmdbId": 1081003,
+    "category": "trending",
+    "suggestedAt": "2026-06-30"
+  },
+  "movie:1723013": {
+    "title": "Hibla 2",
+    "type": "movie",
+    "tmdbId": 1723013,
+    "category": "new-releases",
+    "suggestedAt": "2026-06-30"
+  },
+  "movie:1722815": {
+    "title": "O Cordeiro",
+    "type": "movie",
+    "tmdbId": 1722815,
+    "category": "new-releases",
+    "suggestedAt": "2026-06-30"
+  },
+  "movie:1721888": {
+    "title": "10,000 Miles From Oslo",
+    "type": "movie",
+    "tmdbId": 1721888,
+    "category": "new-releases",
+    "suggestedAt": "2026-06-30"
+  },
+  "movie:1719781": {
+    "title": "Ugly Ms. Bugsby",
+    "type": "movie",
+    "tmdbId": 1719781,
+    "category": "new-releases",
+    "suggestedAt": "2026-06-30"
+  },
+  "movie:1719103": {
+    "title": "Der unsichtbare Zeuge",
+    "type": "movie",
+    "tmdbId": 1719103,
+    "category": "new-releases",
+    "suggestedAt": "2026-06-30"
+  },
+  "movie:238": {
+    "title": "The Godfather",
+    "type": "movie",
+    "tmdbId": 238,
+    "category": "streaming-binge",
+    "suggestedAt": "2026-06-30"
+  },
+  "movie:680": {
+    "title": "Pulp Fiction",
+    "type": "movie",
+    "tmdbId": 680,
+    "category": "streaming-binge",
+    "suggestedAt": "2026-06-30"
+  },
+  "movie:808": {
+    "title": "Shrek",
+    "type": "movie",
+    "tmdbId": 808,
+    "category": "streaming-binge",
+    "suggestedAt": "2026-06-30"
+  },
+  "movie:4247": {
+    "title": "Scary Movie",
+    "type": "movie",
+    "tmdbId": 4247,
+    "category": "streaming-binge",
+    "suggestedAt": "2026-06-30"
+  },
+  "movie:337167": {
+    "title": "Fifty Shades Freed",
+    "type": "movie",
+    "tmdbId": 337167,
+    "category": "streaming-binge",
+    "suggestedAt": "2026-06-30"
+  },
+  "movie:1007757": {
+    "title": "Swapped",
+    "type": "movie",
+    "tmdbId": 1007757,
+    "category": "hidden-gems",
+    "suggestedAt": "2026-06-30"
+  },
+  "movie:936075": {
+    "title": "Michael",
+    "type": "movie",
+    "tmdbId": 936075,
+    "category": "hidden-gems",
+    "suggestedAt": "2026-06-30"
+  },
+  "movie:687163": {
+    "title": "Project Hail Mary",
+    "type": "movie",
+    "tmdbId": 687163,
+    "category": "hidden-gems",
+    "suggestedAt": "2026-06-30"
+  },
+  "movie:1330021": {
+    "title": "Remarkably Bright Creatures",
+    "type": "movie",
+    "tmdbId": 1330021,
+    "category": "hidden-gems",
+    "suggestedAt": "2026-06-30"
+  },
+  "movie:1383731": {
+    "title": "Protector",
+    "type": "movie",
+    "tmdbId": 1383731,
+    "category": "hidden-gems",
+    "suggestedAt": "2026-06-30"
+  }
+}

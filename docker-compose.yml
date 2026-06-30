@@ -1,0 +1,11 @@
+services:
+  discover-bot:
+    image: node:22-alpine
+    container_name: discover-bot
+    working_dir: /app
+    volumes:
+      - ./:/app
+    command: sh -c "npm install && node bot.js"
+    env_file:
+      - .env
+    restart: unless-stopped
