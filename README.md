@@ -8,7 +8,6 @@ Discoverr posts media recommendations in Discord with request buttons and rich e
 
 ![Discoverr bot screenshot](images/discoverr-screenshot.png)
 
-If you want to replace this image, place your screenshot in the `images` folder and update the file name in the markdown above.
 
 ## What it does
 
