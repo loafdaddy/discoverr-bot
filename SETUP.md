@@ -1,6 +1,6 @@
 # Discoverr Setup
 
-Discoverr is a Discord bot for Seerr/Jellyfin users that posts daily movie and TV discovery recommendations into Discord and adds request buttons so users can request media through Seerr.
+Discoverr is a Discord bot for Seerr/Jellyfin users that posts daily movie and TV discovery recommendations into Discord and adds request buttons so users can request media through Seerr. It is designed to run as a lightweight Docker-based companion service in an ARR-style media stack alongside tools such as Sonarr, Radarr, Lidarr, and Readarr.
 
 ## Requirements
 
