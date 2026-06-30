@@ -343,10 +343,28 @@ async function getProviderId(providerName, mediaType = "movie") {
   return found ? found.provider_id : null;
 }
 
-function todaysStreamingService() {
+function shuffleArray(items) {
+  const shuffled = [...items];
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+  }
+  return shuffled;
+}
+
+async function pickStreamingService(mediaType = "movie") {
   if (!STREAMING_SERVICES.length) return null;
-  const dayOffset = Math.floor(Date.now() / 86_400_000);
-  return STREAMING_SERVICES[dayOffset % STREAMING_SERVICES.length];
+
+  const shuffledServices = shuffleArray(STREAMING_SERVICES);
+  for (const service of shuffledServices) {
+    const providerId = await getProviderId(service, mediaType);
+    if (providerId) {
+      return { service, providerId };
+    }
+    console.warn(`Streaming provider not found: ${service}`);
+  }
+
+  return null;
 }
 
 async function postCategory(channelId, heading, categoryKey, items, usedRecommendations, history, today) {
@@ -414,29 +432,25 @@ async function postAll() {
     await postCategory(env.NEW_RELEASES_CHANNEL_ID, "🆕 New Release", "new-releases", newReleaseSelection, usedThisRun, suggestionHistory, today);
   }
 
-  const service = todaysStreamingService();
-  if (service) {
-    const providerId = await getProviderId(service, "movie");
-    if (providerId) {
-      const streaming = await tmdb(
-        `/discover/movie?language=en-AU&watch_region=${WATCH_REGION}&with_watch_providers=${providerId}&sort_by=popularity.desc&include_adult=false`
-      );
+  const streamingService = await pickStreamingService("movie");
+  if (streamingService) {
+    const { service, providerId } = streamingService;
+    const streaming = await tmdb(
+      `/discover/movie?language=en-AU&watch_region=${WATCH_REGION}&with_watch_providers=${providerId}&sort_by=popularity.desc&include_adult=false`
+    );
 
-      const streamingSelection = await selectRecommendations(
-        (streaming.results || []).map((item) => ({ ...item, media_type: "movie" })),
-        multiItemCount,
-        usedThisRun,
-        suggestionHistory,
-        { minRating: 6.2, minVotes: 100, requireEnglish: true }
-      );
-      if (streamingSelection.length) {
-        await postCategory(env.STREAMING_CHANNEL_ID, `📡 New/Popular on ${service}`, `streaming-${service.toLowerCase()}`, streamingSelection, usedThisRun, suggestionHistory, today);
-      }
-    } else {
-      console.warn(`Streaming provider not found: ${service}`);
+    const streamingSelection = await selectRecommendations(
+      (streaming.results || []).map((item) => ({ ...item, media_type: "movie" })),
+      multiItemCount,
+      usedThisRun,
+      suggestionHistory,
+      { minRating: 6.2, minVotes: 100, requireEnglish: true }
+    );
+    if (streamingSelection.length) {
+      await postCategory(env.STREAMING_CHANNEL_ID, `📡 New/Popular on ${service}`, `streaming-${service.toLowerCase()}`, streamingSelection, usedThisRun, suggestionHistory, today);
     }
   } else {
-    console.warn("No streaming providers configured.");
+    console.warn("No streaming providers configured or available.");
   }
 
   const cutoffYear = new Date().getFullYear() - 2;
