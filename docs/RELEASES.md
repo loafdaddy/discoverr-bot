@@ -49,7 +49,7 @@ docker logs -f discoverr
 
 ### 2.0.0 — 2026-07-19 (TypeScript discovery rewrite)
 
-**Status:** shipped on `improve/discovery-v2` (author NAS smoke-tested) · tag `v2.0.0` after merge to `main`
+**Status:** published · [GitHub release](https://github.com/loafdaddy/discoverr-bot/releases/tag/v2.0.0)
 
 **Highlights**
 - Full rewrite to **TypeScript** (`src/` compiled inside the Docker image)
@@ -67,9 +67,9 @@ docker logs -f discoverr
 - Compose service/container renamed to `discoverr`; image is built from the Dockerfile
 
 **Install**
-- Clone or checkout the `v2.0.0` tag after it is published
+- Clone or checkout the `v2.0.0` tag
 - Follow [SETUP.md](../SETUP.md)
-- GitHub: https://github.com/loafdaddy/discoverr-bot/releases (create `v2.0.0` when tagging)
+- GitHub: https://github.com/loafdaddy/discoverr-bot/releases/tag/v2.0.0
 
 **Known gaps:** see [TODO.md](TODO.md)
 

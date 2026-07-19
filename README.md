@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="docs/RELEASES.md">v2.0.0</a>
+  <a href="https://github.com/loafdaddy/discoverr-bot/releases/tag/v2.0.0">v2.0.0</a>
   ·
   <a href="docs/RELEASES.md">Release history</a>
   ·
@@ -37,7 +37,7 @@ Published notes live in [docs/RELEASES.md](docs/RELEASES.md). Tag GitHub release
 
 | Version | Date | Notes |
 |---------|------|-------|
-| **[2.0.0](docs/RELEASES.md#200--2026-07-19-typescript-discovery-rewrite)** | 2026-07-19 | TypeScript rewrite, diversified discovery, numeric Seerr status |
+| **[2.0.0](https://github.com/loafdaddy/discoverr-bot/releases/tag/v2.0.0)** | 2026-07-19 | TypeScript rewrite, diversified discovery, Docker-only runtime |
 
 Architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · Status: [docs/TODO.md](docs/TODO.md) · Direction: [docs/ROADMAP.md](docs/ROADMAP.md) · Brand: [data/brand/README.md](data/brand/README.md) · Config: [.env.example](.env.example)
 

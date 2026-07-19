@@ -18,7 +18,7 @@ Related: [ARCHITECTURE.md](ARCHITECTURE.md) · [ROADMAP.md](ROADMAP.md) · [RELE
 
 ## Next
 
-- [ ] Merge `improve/discovery-v2`, then tag and publish **v2.0.0** on GitHub
+- [x] Merge `improve/discovery-v2`, tag and publish **v2.0.0** on GitHub
 - [x] Live Discord / NAS smoke test (`POST_ON_START` + Docker Compose) — verified by author
 - [ ] Confirm AVAILABLE library titles never post against a real Seerr instance (spot-check in Seerr UI)
 - [ ] Optional: dry-run / log-only mode for discovery without posting
