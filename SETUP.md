@@ -10,7 +10,7 @@ For a shorter overview, see [README.md](README.md).
 
 ## Requirements
 
-- Docker and Docker Compose **or** Node.js 16.11+
+- Docker and Docker Compose **or** Node.js 18+
 - Discord server where you can add a bot
 - Discord bot token
 - TMDb API key
@@ -36,12 +36,12 @@ For a shorter overview, see [README.md](README.md).
 
 Create a category such as **Discover** with:
 
-- 🎬 `movie-of-the-day`
-- 📺 `tv-show-of-the-day`
-- 🔥 `trending-movies-tv`
-- 🆕 `new-releases`
-- 📡 `new-on-streaming`
-- 💎 `hidden-gems`
+- `movie-of-the-day`
+- `tv-show-of-the-day`
+- `trending-movies-tv`
+- `new-releases`
+- `new-on-streaming`
+- `hidden-gems`
 
 Each channel should allow the bot to send messages and embed links.
 
@@ -63,7 +63,7 @@ Each channel should allow the bot to send messages and embed links.
 3. Do **not** grant admin or auto-approve if you want the normal approval queue.
 4. Put that username and password in `.env` as `SEERR_USERNAME` and `SEERR_PASSWORD`.
 
-Discoverr uses Seerr cookie-based login so requests behave like a normal Seerr user.
+Discoverr uses Seerr cookie-based login so requests behave like a normal Seerr user. Before recommending a title it checks Seerr numeric media status and skips available, pending, processing, partially available, and blacklisted items.
 
 ## Environment configuration
 
@@ -89,6 +89,13 @@ Fill in every value you need before starting the bot. Unused channel IDs can sta
 | `STREAMING_CHANNEL_ID` | Discord channel ID |
 | `HIDDEN_GEMS_CHANNEL_ID` | Discord channel ID |
 | `POST_ON_START` | `true` only while testing |
+| `CRON_SCHEDULE` | Cron expression (default `0 9 * * *`) |
+| `TZ` | IANA timezone (default `Australia/Melbourne`) |
+| `TMDB_LANGUAGE` | TMDb language param (default `en-AU`) |
+| `TMDB_PAGES` | How many TMDb pages to fetch per source (default `4`) |
+| `HISTORY_TTL_DAYS` | Days before a suggested title can appear again (default `90`) |
+| `MIN_RATING` / `MIN_VOTES` | Global quality floors |
+| `SEERR_FAIL_CLOSED` | Skip titles when Seerr lookup fails (default `true`) |
 
 ### Watch region
 
@@ -97,7 +104,7 @@ Fill in every value you need before starting the bot. Unused channel IDs can sta
 - A two-letter country code such as `AU`, `US`, `GB`, `CA`, or `JP`
 - A friendly value such as `USA`, `United States`, or `Australia`
 
-The bot normalizes common names to TMDb-compatible codes (see `lib/watchRegion.js`).
+The bot normalizes common names to TMDb-compatible codes (see `src/lib/watchRegion.ts`).
 
 ## Docker setup
 
@@ -106,13 +113,20 @@ docker compose up -d
 docker logs -f discoverr
 ```
 
-The Compose service mounts this directory and runs `npm install && node bot.js` on `node:22-alpine`.
+The Compose service mounts this directory, runs `npm ci`, builds TypeScript, then starts `node dist/index.js` on `node:22-alpine`.
 
 ## Node setup
 
 ```bash
 npm install
-node bot.js
+npm run build
+npm start
+```
+
+For development without a build step:
+
+```bash
+npm run dev
 ```
 
 ## Testing
@@ -122,6 +136,12 @@ POST_ON_START=true
 ```
 
 Confirm embeds and request buttons in Discord, then set `POST_ON_START=false`.
+
+Unit tests (no live APIs):
+
+```bash
+npm test
+```
 
 ## Updating
 
@@ -137,9 +157,9 @@ docker compose up -d
 |---------|--------|
 | Bot posts nothing | Channel permissions and `*_CHANNEL_ID` values |
 | Request button fails | Seerr username/password and permissions |
-| Future releases too often | TMDb filters in `bot.js` |
-| Duplicate recommendations | `data/suggested.json` |
-| Too many posts | Category posting logic and schedule in `bot.js` |
+| Library titles still appear | Seerr login; numeric status handling; `SEERR_FAIL_CLOSED` |
+| Same titles return too soon | `data/suggested.json` and `HISTORY_TTL_DAYS` |
+| Schedule wrong time | `CRON_SCHEDULE` and `TZ` |
 
 ## Brand
 

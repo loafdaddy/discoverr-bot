@@ -5,7 +5,7 @@ services:
     working_dir: /app
     volumes:
       - ./:/app
-    command: sh -c "npm install && node bot.js"
+    command: sh -c "npm ci && npm run build && node dist/index.js"
     env_file:
       - .env
     restart: unless-stopped
