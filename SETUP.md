@@ -4,9 +4,9 @@
   <img src="data/brand/discoverr-mark.svg" alt="Discoverr mark" width="72"/>
 </p>
 
-Discoverr posts daily movie and TV recommendations into Discord and adds request buttons that submit to Seerr. It is meant to run as a lightweight Docker companion in an ARR-style media stack (Sonarr, Radarr, Lidarr, Readarr, and friends).
+Step-by-step install for Discoverr — a TypeScript Discord bot that posts daily movie and TV recommendations and submits Seerr requests from Discord buttons.
 
-For a shorter overview, see [README.md](README.md).
+For a shorter overview see [README.md](README.md). For module design see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Requirements
 
@@ -18,7 +18,7 @@ For a shorter overview, see [README.md](README.md).
 - Dedicated Seerr/Jellyfin user for the bot
 - Discord channels for each recommendation category you want
 
-## Discord setup
+## 1. Discord setup
 
 1. Open the [Discord Developer Portal](https://discord.com/developers/applications).
 2. Create a new application, then add a bot.
@@ -31,27 +31,32 @@ For a shorter overview, see [README.md](README.md).
    - Use External Emojis
 5. In Discord, enable Developer Mode.
 6. Right-click each channel and copy its channel ID.
+7. Optional: upload [`data/brand/discoverr-mark.svg`](data/brand/discoverr-mark.svg) as the bot avatar (export to PNG if Discord requires it).
 
 ### Recommended channels
 
 Create a category such as **Discover** with:
 
-- `movie-of-the-day`
-- `tv-show-of-the-day`
-- `trending-movies-tv`
-- `new-releases`
-- `new-on-streaming`
-- `hidden-gems`
+| Channel | Env variable |
+|---------|----------------|
+| `movie-of-the-day` | `MOVIE_OF_DAY_CHANNEL_ID` |
+| `tv-show-of-the-day` | `TV_OF_DAY_CHANNEL_ID` |
+| `trending-movies-tv` | `TRENDING_CHANNEL_ID` |
+| `new-releases` | `NEW_RELEASES_CHANNEL_ID` |
+| `new-on-streaming` | `STREAMING_CHANNEL_ID` |
+| `hidden-gems` | `HIDDEN_GEMS_CHANNEL_ID` |
 
-Each channel should allow the bot to send messages and embed links.
+Each channel should allow the bot to send messages and embed links. Leave an env value blank to disable that category.
 
-## TMDb setup
+## 2. TMDb setup
 
 1. Create a [TMDb](https://www.themoviedb.org/) account.
 2. Open account API settings and create a free developer API key.
 3. Set `TMDB_API_KEY` in `.env`.
 
-## Seerr setup
+Discoverr uses TMDb discover/trending/provider endpoints. `TMDB_LANGUAGE` (default `en-AU`) and `WATCH_REGION` shape results for your locale.
+
+## 3. Seerr setup
 
 1. Create a dedicated Seerr/Jellyfin user named `Discoverr` (or similar).
 2. Grant:
@@ -63,15 +68,25 @@ Each channel should allow the bot to send messages and embed links.
 3. Do **not** grant admin or auto-approve if you want the normal approval queue.
 4. Put that username and password in `.env` as `SEERR_USERNAME` and `SEERR_PASSWORD`.
 
-Discoverr uses Seerr cookie-based login so requests behave like a normal Seerr user. Before recommending a title it checks Seerr numeric media status and skips available, pending, processing, partially available, and blacklisted items.
+Discoverr uses Seerr cookie-based local login (`email` + password). Before recommending a title it checks numeric media status and skips:
 
-## Environment configuration
+- pending
+- processing
+- partially available
+- available
+- blacklisted
+
+If a Seerr lookup fails, `SEERR_FAIL_CLOSED=true` (default) skips the title.
+
+## 4. Environment configuration
 
 ```bash
 cp .env.example .env
 ```
 
-Fill in every value you need before starting the bot. Unused channel IDs can stay blank if you skip that category.
+Edit `.env` before starting. Full template: [.env.example](.env.example).
+
+### Required values
 
 | Variable | Purpose |
 |----------|---------|
@@ -82,20 +97,21 @@ Fill in every value you need before starting the bot. Unused channel IDs can sta
 | `DISCORD_TOKEN` | Discord bot token |
 | `WATCH_REGION` | Discovery region (`AU`, `US`, `GB`, or names like `USA`) |
 | `STREAMING_SERVICES` | Comma-separated streaming services to feature |
-| `MOVIE_OF_DAY_CHANNEL_ID` | Discord channel ID |
-| `TV_OF_DAY_CHANNEL_ID` | Discord channel ID |
-| `TRENDING_CHANNEL_ID` | Discord channel ID |
-| `NEW_RELEASES_CHANNEL_ID` | Discord channel ID |
-| `STREAMING_CHANNEL_ID` | Discord channel ID |
-| `HIDDEN_GEMS_CHANNEL_ID` | Discord channel ID |
-| `POST_ON_START` | `true` only while testing |
-| `CRON_SCHEDULE` | Cron expression (default `0 9 * * *`) |
-| `TZ` | IANA timezone (default `Australia/Melbourne`) |
-| `TMDB_LANGUAGE` | TMDb language param (default `en-AU`) |
-| `TMDB_PAGES` | How many TMDb pages to fetch per source (default `4`) |
-| `HISTORY_TTL_DAYS` | Days before a suggested title can appear again (default `90`) |
-| `MIN_RATING` / `MIN_VOTES` | Global quality floors |
-| `SEERR_FAIL_CLOSED` | Skip titles when Seerr lookup fails (default `true`) |
+| `*_CHANNEL_ID` | One Discord channel ID per category you use |
+
+### Scheduling and discovery tuning
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `POST_ON_START` | `false` | `true` only while testing |
+| `CRON_SCHEDULE` | `0 9 * * *` | Cron expression |
+| `TZ` | `Australia/Melbourne` | IANA timezone (`TIMEZONE` alias OK) |
+| `TMDB_LANGUAGE` | `en-AU` | TMDb language param |
+| `TMDB_PAGES` | `4` | Pages fetched per source |
+| `HISTORY_TTL_DAYS` | `90` | Days before a suggested title can appear again |
+| `MIN_RATING` | `6.2` | Global rating floor |
+| `MIN_VOTES` | `80` | Global vote-count floor |
+| `SEERR_FAIL_CLOSED` | `true` | Skip titles when Seerr lookup fails |
 
 ### Watch region
 
@@ -104,18 +120,34 @@ Fill in every value you need before starting the bot. Unused channel IDs can sta
 - A two-letter country code such as `AU`, `US`, `GB`, `CA`, or `JP`
 - A friendly value such as `USA`, `United States`, or `Australia`
 
-The bot normalizes common names to TMDb-compatible codes (see `src/lib/watchRegion.ts`).
+Normalization lives in [`src/lib/watchRegion.ts`](src/lib/watchRegion.ts).
 
-## Docker setup
+### Streaming services
+
+Names must match TMDb watch-provider names for your region, for example:
+
+```env
+STREAMING_SERVICES="Netflix,Disney Plus,Amazon Prime Video,Apple TV Plus,Stan,BINGE,Paramount Plus"
+```
+
+Unknown names are logged and skipped; the bot tries the next configured service.
+
+## 5. Docker setup
 
 ```bash
 docker compose up -d
 docker logs -f discoverr
 ```
 
-The Compose service mounts this directory, runs `npm ci`, builds TypeScript, then starts `node dist/index.js` on `node:22-alpine`.
+The Compose service:
 
-## Node setup
+- image: `node:22-alpine`
+- container name: `discoverr`
+- command: `npm ci && npm run build && node dist/index.js`
+- mounts the repo at `/app`
+- loads `.env`
+
+## 6. Node setup
 
 ```bash
 npm install
@@ -123,25 +155,39 @@ npm run build
 npm start
 ```
 
-For development without a build step:
+Development (runs TypeScript with `tsx`):
 
 ```bash
 npm run dev
 ```
 
-## Testing
+Useful scripts:
+
+```bash
+npm run typecheck
+npm test
+```
+
+## 7. Smoke test
 
 ```env
 POST_ON_START=true
 ```
 
-Confirm embeds and request buttons in Discord, then set `POST_ON_START=false`.
+Restart the bot, confirm embeds and Request buttons in Discord, then set `POST_ON_START=false`.
 
-Unit tests (no live APIs):
+## Upgrading from `bot.js` (v1)
 
-```bash
-npm test
-```
+1. Pull latest `main` / release with the TypeScript layout.
+2. Ensure Node 18+ (Docker image already uses 22).
+3. Copy any new variables from `.env.example` into your existing `.env`.
+4. Stop using `node bot.js` — entrypoint is `dist/index.js` after `npm run build`.
+5. Recreate the container so the service name `discoverr` is used:
+   ```bash
+   docker compose down
+   docker compose up -d
+   ```
+6. Optional: delete `data/suggested.json` if you want a clean recommendation history.
 
 ## Updating
 
@@ -155,11 +201,13 @@ docker compose up -d
 
 | Symptom | Check |
 |---------|--------|
-| Bot posts nothing | Channel permissions and `*_CHANNEL_ID` values |
-| Request button fails | Seerr username/password and permissions |
-| Library titles still appear | Seerr login; numeric status handling; `SEERR_FAIL_CLOSED` |
+| Bot posts nothing | Channel permissions and `*_CHANNEL_ID` values; watch logs for empty selections |
+| Request button fails | Seerr username/password and permissions; cookie login uses `email` field |
+| Library titles still appear | Seerr login works; numeric status handling; `SEERR_FAIL_CLOSED` |
 | Same titles return too soon | `data/suggested.json` and `HISTORY_TTL_DAYS` |
 | Schedule wrong time | `CRON_SCHEDULE` and `TZ` |
+| `npm ci` / build fails in Docker | Valid `package-lock.json`; disk space; Node image pull |
+| Streaming category silent | Provider names match TMDb for `WATCH_REGION` |
 
 ## Brand
 
