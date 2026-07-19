@@ -28,7 +28,7 @@ This is **v2.0.0** of the TypeScript rewrite. Features work; discovery and Seerr
 > TMDb discovery + Discord embeds + one-click Seerr requests.
 
 <p align="center">
-  <img src="images/discoverr-screenshot.png" alt="Discoverr Discord embed with request button" width="640"/>
+  <img src="docs/assets/screenshot-discord.png" alt="Discoverr Discord embed with request button" width="640"/>
 </p>
 
 ## Releases

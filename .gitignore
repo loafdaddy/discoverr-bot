@@ -4,5 +4,3 @@ dist/
 data/suggested.json
 npm-debug.log
 .DS_Store
-cookies.txt
-!.env.example
