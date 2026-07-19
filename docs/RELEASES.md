@@ -33,8 +33,8 @@ cd discoverr-bot
 git checkout v2.0.0
 cp .env.example .env
 # fill required values
-docker compose up -d
-# or: npm ci && npm run build && npm start
+docker compose up -d --build
+docker logs -f discoverr
 ```
 
 ### Release notes checklist
@@ -52,19 +52,19 @@ docker compose up -d
 **Status:** in tree on `improve/discovery-v2` · tag after merge to `main`
 
 **Highlights**
-- Full rewrite to **TypeScript** (`src/` → `dist/`); entrypoint is `node dist/index.js` / `npm start`
+- Full rewrite to **TypeScript** (`src/` compiled inside the Docker image)
 - Diversified discovery: multi-page TMDb pools, rotating genre/sort, weighted mid-list sampling
 - Suggestion history cooldown via `HISTORY_TTL_DAYS` (default 90)
 - Seerr availability uses numeric `media.status` (AVAILABLE / PENDING / etc.); fail-closed lookups by default
 - Configurable `CRON_SCHEDULE`, `TZ`, `TMDB_LANGUAGE`, `TMDB_PAGES`, `MIN_RATING`, `MIN_VOTES`
 - Runtime Discord strings without emoji; brand kit under `data/brand/`
 - Unit tests for status mapping, history TTL, watch region, sampling
-- Docker Compose: `npm ci && npm run build && node dist/index.js` (container `discoverr`)
+- **Docker-only** operator path: `Dockerfile` + `docker compose up -d --build` (container `discoverr`, `./data` mounted)
 
 **Breaking (from the old `bot.js` bot)**
-- No more `node bot.js` — build then `npm start`, or use Compose
+- No more `node bot.js` / host npm run — use Docker Compose
 - New optional env knobs (see [`.env.example`](../.env.example)); merge them into existing `.env` files
-- Compose service/container renamed to `discoverr`
+- Compose service/container renamed to `discoverr`; image is built from the Dockerfile
 
 **Install**
 - Clone or checkout the `v2.0.0` tag after it is published

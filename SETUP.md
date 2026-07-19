@@ -4,13 +4,15 @@
   <img src="data/brand/discoverr-mark.svg" alt="Discoverr mark" width="72"/>
 </p>
 
-Step-by-step install for Discoverr — a TypeScript Discord bot that posts daily movie and TV recommendations and submits Seerr requests from Discord buttons.
+Step-by-step install for Discoverr — a Discord bot that posts daily movie and TV recommendations and submits Seerr requests from Discord buttons.
 
-For a shorter overview see [README.md](README.md). For module design see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Releases: [docs/RELEASES.md](docs/RELEASES.md).
+**Runtime is Docker only.** You do not install Node or npm on the host. Contributors who change code can use npm for tests — see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+Overview: [README.md](README.md) · Architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · Releases: [docs/RELEASES.md](docs/RELEASES.md).
 
 ## Requirements
 
-- Docker and Docker Compose **or** Node.js 18+
+- Docker and Docker Compose
 - Discord server where you can add a bot
 - Discord bot token
 - TMDb API key
@@ -68,13 +70,7 @@ Discoverr uses TMDb discover/trending/provider endpoints. `TMDB_LANGUAGE` (defau
 3. Do **not** grant admin or auto-approve if you want the normal approval queue.
 4. Put that username and password in `.env` as `SEERR_USERNAME` and `SEERR_PASSWORD`.
 
-Discoverr uses Seerr cookie-based local login (`email` + password). Before recommending a title it checks numeric media status and skips:
-
-- pending
-- processing
-- partially available
-- available
-- blacklisted
+Discoverr uses Seerr cookie-based local login (`email` + password). Before recommending a title it checks numeric media status and skips pending, processing, partially available, available, and blacklisted items.
 
 If a Seerr lookup fails, `SEERR_FAIL_CLOSED=true` (default) skips the title.
 
@@ -115,12 +111,7 @@ Edit `.env` before starting. Full template: [.env.example](.env.example).
 
 ### Watch region
 
-`WATCH_REGION` can be:
-
-- A two-letter country code such as `AU`, `US`, `GB`, `CA`, or `JP`
-- A friendly value such as `USA`, `United States`, or `Australia`
-
-Normalization lives in [`src/lib/watchRegion.ts`](src/lib/watchRegion.ts).
+`WATCH_REGION` can be a two-letter code (`AU`, `US`, `GB`, …) or a friendly name (`USA`, `Australia`). Normalization lives in [`src/lib/watchRegion.ts`](src/lib/watchRegion.ts).
 
 ### Streaming services
 
@@ -132,86 +123,77 @@ STREAMING_SERVICES="Netflix,Disney Plus,Amazon Prime Video,Apple TV Plus,Stan,BI
 
 Unknown names are logged and skipped; the bot tries the next configured service.
 
-## 5. Docker setup
+## 5. Run with Docker
 
 ```bash
-docker compose up -d
+docker compose up -d --build
 docker logs -f discoverr
 ```
 
-The Compose service:
+What this does:
 
-- image: `node:22-alpine`
-- container name: `discoverr`
-- command: `npm ci && npm run build && node dist/index.js`
-- mounts the repo at `/app`
-- loads `.env`
+- Builds an image from [`Dockerfile`](Dockerfile) (installs deps, compiles TypeScript, runs `node dist/index.js`)
+- Loads `.env`
+- Mounts `./data` into the container for `suggested.json` persistence
+- Container name: `discoverr`
 
-## 6. Node setup
-
-```bash
-npm install
-npm run build
-npm start
-```
-
-Development (runs TypeScript with `tsx`):
+Rebuild after pulling code changes:
 
 ```bash
-npm run dev
+docker compose up -d --build
 ```
 
-Useful scripts:
-
-```bash
-npm run typecheck
-npm test
-```
-
-## 7. Smoke test
+## 6. Smoke test
 
 ```env
 POST_ON_START=true
 ```
 
-Restart the bot, confirm embeds and Request buttons in Discord, then set `POST_ON_START=false`.
+```bash
+docker compose up -d --build
+docker logs -f discoverr
+```
+
+Confirm embeds and Request buttons in Discord, then set `POST_ON_START=false` and recreate:
+
+```bash
+docker compose up -d --build
+```
 
 ## Upgrading from `bot.js` (v1)
 
-1. Pull latest `main` / release with the TypeScript layout.
-2. Ensure Node 18+ (Docker image already uses 22).
-3. Copy any new variables from `.env.example` into your existing `.env`.
-4. Stop using `node bot.js` — entrypoint is `dist/index.js` after `npm run build`.
-5. Recreate the container so the service name `discoverr` is used:
+1. Pull latest code with the TypeScript + Dockerfile layout.
+2. Copy any new variables from `.env.example` into your existing `.env`.
+3. Stop using `node bot.js` / bind-mount `npm` Compose — use the image build path:
    ```bash
    docker compose down
-   docker compose up -d
+   docker compose up -d --build
    ```
-6. Optional: delete `data/suggested.json` if you want a clean recommendation history.
+4. Optional: delete `data/suggested.json` if you want a clean recommendation history.
 
 ## Updating
 
 ```bash
 git pull
 docker compose down
-docker compose up -d
+docker compose up -d --build
 ```
 
 ## Troubleshooting
 
 | Symptom | Check |
 |---------|--------|
-| Bot posts nothing | Channel permissions and `*_CHANNEL_ID` values; watch logs for empty selections |
+| Bot posts nothing | Channel permissions and `*_CHANNEL_ID` values; `docker logs -f discoverr` |
 | Request button fails | Seerr username/password and permissions; cookie login uses `email` field |
 | Library titles still appear | Seerr login works; numeric status handling; `SEERR_FAIL_CLOSED` |
 | Same titles return too soon | `data/suggested.json` and `HISTORY_TTL_DAYS` |
 | Schedule wrong time | `CRON_SCHEDULE` and `TZ` |
-| `npm ci` / build fails in Docker | Valid `package-lock.json`; disk space; Node image pull |
+| Image build fails | Docker can pull `node:22-alpine`; disk space; valid `package-lock.json` |
 | Streaming category silent | Provider names match TMDb for `WATCH_REGION` |
 
 ## Releases
 
-Version history and the cut-a-release checklist: [docs/RELEASES.md](docs/RELEASES.md).  
+Version history and cut-a-release checklist: [docs/RELEASES.md](docs/RELEASES.md).  
 Living status: [docs/TODO.md](docs/TODO.md).
 
 ## Brand

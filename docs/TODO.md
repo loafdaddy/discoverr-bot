@@ -14,6 +14,7 @@ Related: [ARCHITECTURE.md](ARCHITECTURE.md) · [ROADMAP.md](ROADMAP.md) · [RELE
 - [x] Strip runtime emoji from Discord strings
 - [x] Unit tests for status, history, region, sampling
 - [x] Brand kit + Cadence-style docs / release structure
+- [x] Docker-only operator path (`Dockerfile` + Compose mount for `data/`)
 
 ## Next
 
@@ -22,10 +23,10 @@ Related: [ARCHITECTURE.md](ARCHITECTURE.md) · [ROADMAP.md](ROADMAP.md) · [RELE
 - [ ] Confirm AVAILABLE library titles never post against a real Seerr instance
 - [ ] Optional: dry-run / log-only mode for discovery without posting
 - [ ] Optional: TV support in the streaming category (movies-only today)
-- [ ] Optional: health endpoint or clearer startup config validation errors
+- [ ] Optional: clearer startup config validation errors in container logs
 
 ## Later
 
 - [ ] Per-server or per-channel genre allow/deny lists
 - [ ] CI (typecheck + test) on pull requests
-- [ ] Official container image publish (GHCR) in addition to Compose-from-source
+- [ ] Publish prebuilt image to GHCR (optional; Compose-from-source remains primary)

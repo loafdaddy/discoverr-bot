@@ -54,54 +54,28 @@ Discovery is diversified on purpose: multi-page TMDb pools, rotating genres/sort
 
 ## Quick start
 
-### Docker Compose (recommended)
+Discoverr is meant to run with **Docker Compose** alongside the rest of your ARR stack. You do not need Node or npm on the host.
 
 ```bash
 git clone https://github.com/loafdaddy/discoverr-bot.git
 cd discoverr-bot
 cp .env.example .env
 # edit .env — Discord token, TMDb key, Seerr URL/creds, channel IDs
-docker compose up -d
+docker compose up -d --build
 docker logs -f discoverr
 ```
 
-Compose runs `npm ci`, compiles TypeScript, then starts `node dist/index.js`.
+Compose builds the image from the [`Dockerfile`](Dockerfile) (TypeScript compile happens inside the image) and mounts `./data` for suggestion history.
 
-### Node.js 18+
-
-```bash
-npm install
-cp .env.example .env
-# edit .env
-npm run build
-npm start
-```
-
-Local development (no compile step):
-
-```bash
-npm run dev
-```
-
-Full walkthrough: [SETUP.md](SETUP.md). Design notes: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+Full walkthrough: [SETUP.md](SETUP.md). Design notes: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Contributor tooling: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Requirements
 
+- Docker and Docker Compose
 - Discord server and bot token
 - TMDb API key
 - Working Seerr install + dedicated Seerr/Jellyfin user for the bot
 - Discord channels for each category you want to use
-- Docker Compose **or** Node.js 18+
-
-## npm scripts
-
-| Script | What it does |
-|--------|----------------|
-| `npm run build` | Compile `src/` → `dist/` |
-| `npm start` | Run `node dist/index.js` |
-| `npm run dev` | Run TypeScript directly with `tsx` |
-| `npm test` | Unit tests (no live TMDb/Seerr) |
-| `npm run typecheck` | `tsc --noEmit` |
 
 ## Configuration
 
@@ -184,40 +158,37 @@ Confirm posts and request buttons, then set it back to `false`.
 
 ## Upgrading from the old JavaScript bot
 
-If you previously ran `node bot.js`:
+If you previously ran `node bot.js` or bind-mounted Compose + `npm`:
 
-1. Pull the latest code (TypeScript lives under `src/`).
-2. Run `npm install` (or let Compose run `npm ci`).
-3. Merge new keys from `.env.example` into your `.env` (`CRON_SCHEDULE`, `TZ`, `HISTORY_TTL_DAYS`, etc.).
-4. Start with `npm run build && npm start` or `docker compose up -d`.
-5. Keep `data/suggested.json` if you want existing cooldown history; delete it to reset.
+1. Pull the latest code.
+2. Merge new keys from `.env.example` into your `.env`.
+3. Recreate with a rebuild: `docker compose down && docker compose up -d --build`
+4. Keep `data/suggested.json` if you want existing cooldown history; delete it to reset.
 
-The Compose service is named `discoverr` (logs: `docker logs -f discoverr`).
+Logs: `docker logs -f discoverr`.
 
 ## Updating
 
 ```bash
 git pull
 docker compose down
-docker compose up -d
+docker compose up -d --build
 ```
 
 ## Project map
 
 | Path | What it is |
 |------|------------|
+| `Dockerfile` | Image build (compile + run) |
+| `docker-compose.yml` | Operator run path |
 | `src/` | TypeScript application |
-| `dist/` | Compiled output (`npm run build`, gitignored) |
-| `test/` | Unit tests |
-| `data/` | Runtime suggestion history |
+| `test/` | Unit tests (contributors) |
+| `data/` | Mounted volume: suggestion history |
 | `data/brand/` | Lockup, mark, brand notes |
-| `docs/ARCHITECTURE.md` | Design and module map |
-| `docs/RELEASES.md` | Version history and how to cut a release |
-| `docs/ROADMAP.md` / `docs/TODO.md` | Direction and living status |
+| `docs/` | Architecture, releases, roadmap, TODO |
 | `.env.example` | Environment template |
 | `SETUP.md` | Detailed setup guide |
 | `CONTRIBUTING.md` | Contributor workflow |
-| `docker-compose.yml` | Node 22 Alpine build + run |
 
 ## Troubleshooting
 
@@ -228,7 +199,7 @@ docker compose up -d
 | Library titles still appear | Seerr login; `SEERR_FAIL_CLOSED`; see architecture status table |
 | Same titles return too soon | `data/suggested.json` and `HISTORY_TTL_DAYS` |
 | Schedule at the wrong time | `CRON_SCHEDULE` and `TZ` |
-| Container restarts / build fails | `docker logs -f discoverr`; Node 18+; valid `.env` |
+| Container restarts / build fails | `docker logs -f discoverr`; Docker build output; valid `.env` |
 
 ## Brand
 

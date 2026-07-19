@@ -11,7 +11,7 @@ Stay a **small ARR companion**: Discord recommendations + Seerr request buttons.
 ## Themes
 
 1. **Discovery quality** — less blockbuster repetition, clearer category identity
-2. **Operator UX** — boring Docker/Node installs, honest docs, predictable env
+2. **Operator UX** — boring Docker Compose installs (no host Node), honest docs, predictable env
 3. **Integrations** — solid Seerr status/request handling; TMDb as the metadata source
 4. **Project hygiene** — TypeScript, tests for filter/status logic, SemVer releases
 

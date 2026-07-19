@@ -1,11 +1,10 @@
 services:
   discoverr:
-    image: node:22-alpine
+    build: .
     container_name: discoverr
-    working_dir: /app
-    volumes:
-      - ./:/app
-    command: sh -c "npm ci && npm run build && node dist/index.js"
     env_file:
       - .env
+    volumes:
+      # Persist suggestion history (and keep host data/brand if present)
+      - ./data:/app/data
     restart: unless-stopped

@@ -80,8 +80,10 @@ When lookup fails, `SEERR_FAIL_CLOSED=true` (default) skips the title instead of
 
 ## Build and deploy
 
+Operators run **Docker only** — no host Node/npm required.
+
 - Source: TypeScript in `src/`
-- Compile: `npm run build` → `dist/`
-- Run: `node dist/index.js` (or `npm run dev` via `tsx` for local work)
-- Docker Compose: `npm ci && npm run build && node dist/index.js` inside `node:22-alpine`
+- Image: [`Dockerfile`](../Dockerfile) multi-stage build (`npm ci` → `tsc` → production `node dist/index.js`)
+- Compose: [`docker-compose.yml`](../docker-compose.yml) builds the image, loads `.env`, mounts `./data` for history
+- Contributors may use `npm run typecheck` / `npm test` on the host — see [CONTRIBUTING.md](../CONTRIBUTING.md)
 - Versions and tags: [RELEASES.md](RELEASES.md)
