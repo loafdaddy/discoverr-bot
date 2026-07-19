@@ -1,4 +1,5 @@
 import "dotenv/config";
+import { resolveCronSchedule } from "./lib/schedule";
 import { getWatchRegion } from "./lib/watchRegion";
 import type { AppConfig } from "./types";
 
@@ -62,7 +63,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     streamingChannelId: optional(env, "STREAMING_CHANNEL_ID", ""),
     hiddenGemsChannelId: optional(env, "HIDDEN_GEMS_CHANNEL_ID", ""),
     postOnStart: optionalBool(env, "POST_ON_START", false),
-    cronSchedule: optional(env, "CRON_SCHEDULE", "0 9 * * *"),
+    cronSchedule: resolveCronSchedule(env),
     timezone: optional(env, "TZ", optional(env, "TIMEZONE", "Australia/Melbourne")),
     tmdbLanguage: optional(env, "TMDB_LANGUAGE", "en-AU"),
     historyTtlDays: optionalInt(env, "HISTORY_TTL_DAYS", 90),

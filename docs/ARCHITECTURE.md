@@ -28,7 +28,8 @@ Cron / POST_ON_START
 
 | Path | Responsibility |
 |------|----------------|
-| [`src/index.ts`](../src/index.ts) | Discord client login, cron schedule, `POST_ON_START` |
+| [`src/index.ts`](../src/index.ts) | Discord client login, cron schedule (`POST_TIME` / `CRON_SCHEDULE`), `POST_ON_START` |
+| [`src/lib/schedule.ts`](../src/lib/schedule.ts) | Resolve post time env → cron expression |
 | [`src/config.ts`](../src/config.ts) | Typed environment loading and defaults |
 | [`src/tmdb/client.ts`](../src/tmdb/client.ts) | TMDb HTTP client, multi-page fetch, genres, providers |
 | [`src/tmdb/sources.ts`](../src/tmdb/sources.ts) | Category-specific candidate builders |

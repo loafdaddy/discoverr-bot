@@ -95,13 +95,31 @@ Edit `.env` before starting. Full template: [.env.example](.env.example).
 | `STREAMING_SERVICES` | Comma-separated streaming services to feature |
 | `*_CHANNEL_ID` | One Discord channel ID per category you use |
 
-### Scheduling and discovery tuning
+### When to post
+
+Set a daily time in your timezone (recommended):
+
+```env
+POST_TIME=09:00
+TZ=Australia/Melbourne
+```
+
+Examples: `POST_TIME=07:30` with `TZ=Europe/London`, or `POST_TIME=18:00` with `TZ=America/New_York`.
+
+Alternatives:
+
+| Variable | Purpose |
+|----------|---------|
+| `POST_HOUR` / `POST_MINUTE` | Same as `POST_TIME`, if `POST_TIME` is unset (`POST_MINUTE` defaults to `0`) |
+| `CRON_SCHEDULE` | Full cron (e.g. `0 9 * * *`). **Overrides** `POST_TIME` / `POST_HOUR` when set |
+
+Default if nothing is set: **09:00** daily. After changing these, recreate: `docker compose up -d --build`. Logs should show `Scheduled discovery: every day at …`.
+
+### Other tuning
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
 | `POST_ON_START` | `false` | `true` only while testing |
-| `CRON_SCHEDULE` | `0 9 * * *` | Cron expression |
-| `TZ` | `Australia/Melbourne` | IANA timezone (`TIMEZONE` alias OK) |
 | `TMDB_LANGUAGE` | `en-AU` | TMDb language param |
 | `TMDB_PAGES` | `4` | Pages fetched per source |
 | `HISTORY_TTL_DAYS` | `90` | Days before a suggested title can appear again |
@@ -192,7 +210,7 @@ docker compose up -d --build
 | Request button fails | Seerr username/password and permissions; cookie login uses `email` field |
 | Library titles still appear | Seerr login works; numeric status handling; `SEERR_FAIL_CLOSED` |
 | Same titles return too soon | `data/suggested.json` and `HISTORY_TTL_DAYS` |
-| Schedule wrong time | `CRON_SCHEDULE` and `TZ` |
+| Schedule wrong time | `POST_TIME` / `CRON_SCHEDULE` and `TZ`; recreate after `.env` edits; check log line `Scheduled discovery` |
 | Image build fails | Docker can pull `node:22-alpine`; disk space; valid `package-lock.json` |
 | Streaming category silent | Provider names match TMDb for `WATCH_REGION` |
 

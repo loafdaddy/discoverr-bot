@@ -98,8 +98,10 @@ All settings live in `.env`. Start from [.env.example](.env.example).
 | Variable | Default | Purpose |
 |----------|---------|---------|
 | `POST_ON_START` | `false` | Post immediately on boot (testing) |
-| `CRON_SCHEDULE` | `0 9 * * *` | Daily schedule |
-| `TZ` | `Australia/Melbourne` | IANA timezone (`TIMEZONE` also accepted) |
+| `POST_TIME` | `09:00` | Daily post time (`HH:MM`, 24-hour) in `TZ` |
+| `POST_HOUR` / `POST_MINUTE` | — | Alternative to `POST_TIME` if that is unset |
+| `CRON_SCHEDULE` | — | Full cron expression; **overrides** `POST_TIME` / `POST_HOUR` when set |
+| `TZ` | `Australia/Melbourne` | IANA timezone for the schedule (`TIMEZONE` also accepted) |
 | `TMDB_LANGUAGE` | `en-AU` | TMDb language |
 | `TMDB_PAGES` | `4` | Pages fetched per source |
 | `HISTORY_TTL_DAYS` | `90` | Cooldown before a title can be suggested again |
@@ -107,6 +109,24 @@ All settings live in `.env`. Start from [.env.example](.env.example).
 | `SEERR_FAIL_CLOSED` | `true` | Skip titles when Seerr lookup fails |
 
 `WATCH_REGION` accepts country codes or friendly names; the bot normalizes common values for TMDb.
+
+### Setting the post time
+
+Posts run once per day in your chosen timezone. Easiest:
+
+```env
+POST_TIME=18:30
+TZ=America/New_York
+```
+
+Or use a cron expression (overrides `POST_TIME`):
+
+```env
+CRON_SCHEDULE=30 18 * * *
+TZ=America/New_York
+```
+
+After changing schedule env vars, recreate the container: `docker compose up -d --build`. Check logs for `Scheduled discovery: every day at …`.
 
 ## Discord setup
 
@@ -148,7 +168,7 @@ Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Usage
 
-Once running, the bot posts on `CRON_SCHEDULE` in `TZ`. For a smoke test, set in `.env`:
+Once running, the bot posts daily at `POST_TIME` (or `CRON_SCHEDULE`) in `TZ`. For a smoke test, set in `.env`:
 
 ```env
 POST_ON_START=true
@@ -204,7 +224,7 @@ docker compose up -d --build
 | Request buttons fail | Seerr username/password and permissions |
 | Library titles still appear | Seerr login; `SEERR_FAIL_CLOSED`; see architecture status table |
 | Same titles return too soon | `data/suggested.json` and `HISTORY_TTL_DAYS` |
-| Schedule at the wrong time | `CRON_SCHEDULE` and `TZ` |
+| Schedule at the wrong time | `POST_TIME` / `CRON_SCHEDULE` and `TZ`; recreate container after `.env` edits |
 | Container restarts / build fails | `docker logs -f discoverr`; Docker build output; valid `.env` |
 
 ## Brand
