@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 128 128" role="img" aria-label="Discoverr mark">
+  <defs>
+    <linearGradient id="bg" x1="18%" y1="0%" x2="82%" y2="100%">
+      <stop offset="0%" stop-color="#163247"/>
+      <stop offset="55%" stop-color="#0C1C28"/>
+      <stop offset="100%" stop-color="#061018"/>
+    </linearGradient>
+    <linearGradient id="beam" x1="0%" y1="50%" x2="100%" y2="50%">
+      <stop offset="0%" stop-color="#9AF0E8"/>
+      <stop offset="45%" stop-color="#4FD1C5"/>
+      <stop offset="100%" stop-color="#2A9B94"/>
+    </linearGradient>
+    <linearGradient id="facet" x1="30%" y1="10%" x2="70%" y2="90%">
+      <stop offset="0%" stop-color="#6BE0D6" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#248F88" stop-opacity="0.95"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="30" fill="url(#bg)"/>
+  <circle cx="64" cy="64" r="44" fill="#4FD1C5" opacity="0.07"/>
+  <!-- Radar arcs -->
+  <path
+    fill="none"
+    stroke="url(#beam)"
+    stroke-width="4.5"
+    stroke-linecap="round"
+    opacity="0.55"
+    d="M38 64a26 26 0 0 1 26-26"/>
+  <path
+    fill="none"
+    stroke="url(#beam)"
+    stroke-width="4.5"
+    stroke-linecap="round"
+    opacity="0.8"
+    d="M30 64a34 34 0 0 1 34-34"/>
+  <path
+    fill="none"
+    stroke="url(#beam)"
+    stroke-width="5"
+    stroke-linecap="round"
+    d="M22 64a42 42 0 0 1 42-42"/>
+  <!-- Center finder -->
+  <circle cx="64" cy="64" r="10" fill="url(#facet)"/>
+  <circle cx="64" cy="64" r="3.5" fill="#E8F6F5"/>
+  <!-- Accent spark -->
+  <path
+    fill="#9AF0E8"
+    d="M92 40l2.2 5.2 5.4 1.2-4.2 3.6 1.4 5.4L92 52.4l-4.8 3 1.4-5.4-4.2-3.6 5.4-1.2z"/>
+</svg>

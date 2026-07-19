@@ -1,7 +1,7 @@
 services:
-  discover-bot:
+  discoverr:
     image: node:22-alpine
-    container_name: discover-bot
+    container_name: discoverr
     working_dir: /app
     volumes:
       - ./:/app
