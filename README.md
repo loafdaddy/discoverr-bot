@@ -6,80 +6,105 @@
 
 <p align="center">
   <strong>Daily media recommendations in Discord, with Seerr request buttons</strong><br/>
-  TMDb · Seerr · Jellyfin · Docker · ARR companion
+  TypeScript · TMDb · Seerr · Jellyfin · Docker · ARR companion
 </p>
 
 <p align="center">
-  <a href="SETUP.md">Setup guide</a>
+  <a href="docs/RELEASES.md">v2.0.0</a>
   ·
-  <a href="data/brand/README.md">Brand</a>
+  <a href="docs/RELEASES.md">Release history</a>
   ·
-  <a href=".env.example">Config example</a>
+  <a href="SETUP.md">Setup</a>
+  ·
+  <a href="CONTRIBUTING.md">Contributing</a>
 </p>
 
 Discoverr is a lightweight Discord bot for Seerr and Jellyfin users. It posts scheduled movie and TV picks into dedicated channels and lets people request titles through Seerr without leaving Discord.
 
 Built to sit beside an ARR-style stack — Sonarr, Radarr, and friends — as a small Docker companion, not another heavyweight service.
 
+This is **v2.0.0** of the TypeScript rewrite. Features work; discovery and Seerr behaviour are actively hardening. **Contributors are welcome** — see [CONTRIBUTING.md](CONTRIBUTING.md).
+
 > TMDb discovery + Discord embeds + one-click Seerr requests.
 
 <p align="center">
-  <img src="images/discoverr-screenshot.png" alt="Discoverr Discord embed with request button" width="640"/>
+  <img src="docs/assets/screenshot-discord.png" alt="Discoverr Discord embed with request button" width="640"/>
 </p>
+
+## Releases
+
+Published notes live in [docs/RELEASES.md](docs/RELEASES.md). Tag GitHub releases when cutting a version.
+
+| Version | Date | Notes |
+|---------|------|-------|
+| **[2.0.0](docs/RELEASES.md#200--2026-07-19-typescript-discovery-rewrite)** | 2026-07-19 | TypeScript rewrite, diversified discovery, numeric Seerr status |
+
+Architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · Status: [docs/TODO.md](docs/TODO.md) · Direction: [docs/ROADMAP.md](docs/ROADMAP.md) · Brand: [data/brand/README.md](data/brand/README.md) · Config: [.env.example](.env.example)
 
 ## What it does
 
-- Movie of the Day and TV of the Day
-- Trending picks
-- New releases
-- Titles newly available on configured streaming services
-- Hidden gems that may not show up in the usual lists
-- Request buttons that submit to Seerr
+- **Movie of the Day** / **TV of the Day** — `/discover` with rotating genre and sort
+- **Trending** — day + week windows, sampled (not just the top three)
+- **New releases** — recent release-date window
+- **Streaming** — titles on a configured watch provider for your region
+- **Hidden gems** — older, lower-popularity, higher-rated titles
+- **Request buttons** — submit to Seerr for approval
+
+Discovery is diversified on purpose: multi-page TMDb pools, rotating genres/sorts, weighted sampling away from the top of popularity lists, and a history cooldown so the same blockbusters do not dominate every week.
 
 ## Quick start
 
-### Docker Compose (recommended)
+Discoverr is meant to run with **Docker Compose** alongside the rest of your ARR stack. You do not need Node or npm on the host.
 
 ```bash
+git clone https://github.com/loafdaddy/discoverr-bot.git
+cd discoverr-bot
 cp .env.example .env
 # edit .env — Discord token, TMDb key, Seerr URL/creds, channel IDs
-docker compose up -d
+docker compose up -d --build
 docker logs -f discoverr
 ```
 
-### Node.js
+Compose builds the image from the [`Dockerfile`](Dockerfile) (TypeScript compile happens inside the image) and mounts `./data` for suggestion history.
 
-```bash
-npm install
-cp .env.example .env
-# edit .env
-node bot.js
-```
-
-Full walkthrough: [SETUP.md](SETUP.md).
+Full walkthrough: [SETUP.md](SETUP.md). Design notes: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Contributor tooling: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Requirements
 
-- Discord server + bot token
+- Docker and Docker Compose
+- Discord server and bot token
 - TMDb API key
-- Working Seerr install and a dedicated Seerr/Jellyfin user for the bot
+- Working Seerr install + dedicated Seerr/Jellyfin user for the bot
 - Discord channels for each category you want to use
-- Docker Compose **or** Node.js 16.11+
 
 ## Configuration
 
-All settings live in `.env`. Copy [.env.example](.env.example) and fill in:
+All settings live in `.env`. Start from [.env.example](.env.example).
+
+### Required
 
 | Variable | Purpose |
 |----------|---------|
 | `TMDB_API_KEY` | TMDb API key |
-| `SEERR_URL` | Seerr base URL |
-| `SEERR_USERNAME` / `SEERR_PASSWORD` | Dedicated bot Seerr user |
+| `SEERR_URL` | Seerr base URL (no trailing slash required) |
+| `SEERR_USERNAME` / `SEERR_PASSWORD` | Dedicated bot Seerr user (sent as local email login) |
 | `DISCORD_TOKEN` | Discord bot token |
 | `WATCH_REGION` | Region for discovery (`AU`, `US`, `GB`, or names like `USA`) |
 | `STREAMING_SERVICES` | Comma-separated TMDb provider names |
-| `*_CHANNEL_ID` | Discord channel per category |
-| `POST_ON_START` | `true` to post immediately on boot (testing) |
+| `*_CHANNEL_ID` | Discord channel per category (blank to skip) |
+
+### Optional (defaults shown in `.env.example`)
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `POST_ON_START` | `false` | Post immediately on boot (testing) |
+| `CRON_SCHEDULE` | `0 9 * * *` | Daily schedule |
+| `TZ` | `Australia/Melbourne` | IANA timezone (`TIMEZONE` also accepted) |
+| `TMDB_LANGUAGE` | `en-AU` | TMDb language |
+| `TMDB_PAGES` | `4` | Pages fetched per source |
+| `HISTORY_TTL_DAYS` | `90` | Cooldown before a title can be suggested again |
+| `MIN_RATING` / `MIN_VOTES` | `6.2` / `80` | Global quality floors |
+| `SEERR_FAIL_CLOSED` | `true` | Skip titles when Seerr lookup fails |
 
 `WATCH_REGION` accepts country codes or friendly names; the bot normalizes common values for TMDb.
 
@@ -92,12 +117,14 @@ All settings live in `.env`. Copy [.env.example](.env.example) and fill in:
 
 Recommended channels under a **Discover** category:
 
-- 🎬 `movie-of-the-day`
-- 📺 `tv-show-of-the-day`
-- 🔥 `trending-movies-tv`
-- 🆕 `new-releases`
-- 📡 `new-on-streaming`
-- 💎 `hidden-gems`
+- `movie-of-the-day`
+- `tv-show-of-the-day`
+- `trending-movies-tv`
+- `new-releases`
+- `new-on-streaming`
+- `hidden-gems`
+
+Optional: set the Discord bot avatar from [`data/brand/discoverr-mark.svg`](data/brand/discoverr-mark.svg).
 
 ## Seerr setup
 
@@ -106,49 +133,87 @@ Create a dedicated Seerr/Jellyfin user (for example `Discoverr`) with:
 - Request · Request Movies · Request Series
 - View Requests · View Recently Added
 
-Skip admin and auto-approve if you want requests to stay in the normal approval queue. Discoverr uses Seerr cookie login so requests behave like that user.
+Skip admin and auto-approve if you want requests to stay in the normal approval queue.
+
+Discoverr uses Seerr cookie login so requests behave like that user. Before recommending a title it checks numeric `media.status` and skips available, pending, processing, partially available, and blacklisted items.
+
+## How discovery works
+
+1. Each category builds a **large candidate pool** (multiple TMDb pages, rotated genre/sort where useful).
+2. Candidates are filtered for release date, language, rating/votes, suggestion history, and Seerr availability.
+3. Picks use **weighted sampling** that prefers mid-list titles over the first popular hit.
+4. Posted titles are written to `data/suggested.json` and blocked until `HISTORY_TTL_DAYS` expires.
+
+Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Usage
 
-Once running, the bot posts on its built-in daily schedule. For a smoke test:
+Once running, the bot posts on `CRON_SCHEDULE` in `TZ`. For a smoke test, set in `.env`:
 
 ```env
 POST_ON_START=true
 ```
 
-Confirm posts and request buttons, then set it back to `false`.
+Then recreate so the container picks up the change:
+
+```bash
+docker compose up -d --build
+```
+
+Confirm posts and request buttons, set `POST_ON_START=false`, and recreate again.
+
+## Upgrading from the old JavaScript bot
+
+If you previously ran `node bot.js` or bind-mounted Compose + `npm`:
+
+1. Pull the latest code.
+2. Merge new keys from `.env.example` into your `.env`.
+3. Recreate with a rebuild: `docker compose down && docker compose up -d --build`
+4. Keep `data/suggested.json` if you want existing cooldown history; delete it to reset.
+
+Logs: `docker logs -f discoverr`.
 
 ## Updating
 
 ```bash
 git pull
 docker compose down
-docker compose up -d
+docker compose up -d --build
 ```
 
 ## Project map
 
 | Path | What it is |
 |------|------------|
-| `bot.js` | Discord client, TMDb/Seerr, cron, posting, request buttons |
-| `lib/watchRegion.js` | Watch-region normalization |
-| `data/` | Runtime suggestion history (`suggested.json`) |
+| `Dockerfile` | Image build (compile + run) |
+| `docker-compose.yml` | Operator run path |
+| `src/` | TypeScript application |
+| `test/` | Unit tests (contributors) |
+| `data/` | Mounted volume: suggestion history |
 | `data/brand/` | Lockup, mark, brand notes |
+| `docs/` | Architecture, releases, roadmap, TODO |
 | `.env.example` | Environment template |
 | `SETUP.md` | Detailed setup guide |
-| `docker-compose.yml` | Node 22 Alpine service |
+| `CONTRIBUTING.md` | Contributor workflow |
 
 ## Troubleshooting
 
-- **Bot posts nothing** — channel permissions and channel IDs
-- **Request buttons fail** — Seerr username/password and permissions
-- **Too many future releases** — TMDb filters in `bot.js`
-- **Duplicate recommendations** — `data/suggested.json`
-- **Too many posts** — posting logic and schedule in `bot.js`
+| Symptom | Check |
+|---------|--------|
+| Bot posts nothing | Channel permissions and `*_CHANNEL_ID` values |
+| Request buttons fail | Seerr username/password and permissions |
+| Library titles still appear | Seerr login; `SEERR_FAIL_CLOSED`; see architecture status table |
+| Same titles return too soon | `data/suggested.json` and `HISTORY_TTL_DAYS` |
+| Schedule at the wrong time | `CRON_SCHEDULE` and `TZ` |
+| Container restarts / build fails | `docker logs -f discoverr`; Docker build output; valid `.env` |
 
 ## Brand
 
-Lockup and mark live in [data/brand/](data/brand/README.md). Accent teal `#4FD1C5` on deep `#0C1C28`; wordmark ends with a teal period.
+Lockup and mark: [data/brand/](data/brand/README.md). Accent teal `#4FD1C5` on deep `#0C1C28`; wordmark ends with a teal period.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). Focused PRs and AI-assisted contributions are welcome.
 
 ## AI disclaimer
 
