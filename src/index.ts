@@ -7,6 +7,7 @@ import { loadConfig } from "./config";
 import { registerInteractions } from "./discord/interactions";
 import { SuggestionHistory } from "./discovery/history";
 import { postAll } from "./discovery/postAll";
+import { describeDailyCron } from "./lib/schedule";
 import { SeerrClient } from "./seerr/client";
 import { TmdbClient } from "./tmdb/client";
 
@@ -38,7 +39,11 @@ async function main(): Promise<void> {
       { timezone: config.timezone }
     );
 
-    console.log(`Scheduled discovery: ${config.cronSchedule} (${config.timezone})`);
+    const dailyAt = describeDailyCron(config.cronSchedule);
+    const when = dailyAt
+      ? `every day at ${dailyAt} ${config.timezone}`
+      : `${config.cronSchedule} (${config.timezone})`;
+    console.log(`Scheduled discovery: ${when} [cron: ${config.cronSchedule}]`);
 
     if (config.postOnStart) {
       try {
