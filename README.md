@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loafdaddy/discoverr-bot/releases/tag/v2.0.0">v2.0.0</a>
+  <a href="https://github.com/loafdaddy/discoverr-bot/releases/tag/v2.1.0">v2.1.0</a>
   ·
   <a href="docs/RELEASES.md">Release history</a>
   ·
@@ -23,7 +23,7 @@ Discoverr is a lightweight Discord bot for Seerr and Jellyfin users. It posts sc
 
 Built to sit beside an ARR-style stack — Sonarr, Radarr, and friends — as a small Docker companion, not another heavyweight service.
 
-This is **v2.0.0** of the TypeScript rewrite. Features work; discovery and Seerr behaviour are actively hardening. **Contributors are welcome** — see [CONTRIBUTING.md](CONTRIBUTING.md).
+This is **v2.1.0**. Features work; discovery and Seerr behaviour are actively hardening. **Contributors are welcome** — see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 > TMDb discovery + Discord embeds + one-click Seerr requests.
 
@@ -37,7 +37,8 @@ Published notes live in [docs/RELEASES.md](docs/RELEASES.md). Tag GitHub release
 
 | Version | Date | Notes |
 |---------|------|-------|
-| **[2.0.0](https://github.com/loafdaddy/discoverr-bot/releases/tag/v2.0.0)** | 2026-07-19 | TypeScript rewrite, diversified discovery, Docker-only runtime |
+| **[2.1.0](https://github.com/loafdaddy/discoverr-bot/releases/tag/v2.1.0)** | 2026-07-19 | `POST_TIME` / timezone-friendly daily schedule |
+| [2.0.0](https://github.com/loafdaddy/discoverr-bot/releases/tag/v2.0.0) | 2026-07-19 | TypeScript rewrite, diversified discovery, Docker-only runtime |
 
 Architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · Status: [docs/TODO.md](docs/TODO.md) · Direction: [docs/ROADMAP.md](docs/ROADMAP.md) · Brand: [data/brand/README.md](data/brand/README.md) · Config: [.env.example](.env.example)
 

@@ -2,7 +2,7 @@
 
 Track every published version here. Update this file when cutting a release, then tag and publish on GitHub.
 
-Current version in tree: **2.0.0** (`package.json`).
+Current version in tree: **2.1.0** (`package.json`).
 
 ## Versioning
 
@@ -22,7 +22,7 @@ Pre-1.0 history lived as an untagged JavaScript bot. **2.0.0** is the first SemV
 2. Set `version` in [`package.json`](../package.json) (and keep lockfile in sync if you use `npm version`)
 3. Add a section below in this file; bump version mentions in [`README.md`](../README.md) / [`SETUP.md`](../SETUP.md) if needed
 4. Commit on `main` (or merge the release PR)
-5. Tag: `git tag -a v2.0.0 -m "Discoverr 2.0.0"`
+5. Tag: `git tag -a v2.1.0 -m "Discoverr 2.1.0"`
 6. Push: `git push origin main --tags`
 7. Create the GitHub release (notes can mirror the section below)
 8. Sanity-check from a clean clone:
@@ -30,7 +30,7 @@ Pre-1.0 history lived as an untagged JavaScript bot. **2.0.0** is the first SemV
 ```bash
 git clone https://github.com/loafdaddy/discoverr-bot.git
 cd discoverr-bot
-git checkout v2.0.0
+git checkout v2.1.0
 cp .env.example .env
 # fill required values
 docker compose up -d --build
@@ -46,6 +46,30 @@ docker logs -f discoverr
 - Include the AI note if the release involved substantial AI-assisted work
 
 ## Releases
+
+### 2.1.0 — 2026-07-19 (configurable post time)
+
+**Status:** published · [GitHub release](https://github.com/loafdaddy/discoverr-bot/releases/tag/v2.1.0)
+
+**Highlights**
+- Set the daily post time in `.env` with simple **`POST_TIME=HH:MM`** (24-hour) plus **`TZ`**
+- Alternatives: `POST_HOUR` / `POST_MINUTE`, or full **`CRON_SCHEDULE`** (overrides the simple options)
+- Clearer startup log: `Scheduled discovery: every day at 18:30 …`
+- Docs and `.env.example` updated for operators
+
+**Upgrade from 2.0.0**
+- Pull / rebuild: `git pull && docker compose up -d --build`
+- Optional: add `POST_TIME` (e.g. `18:30`) and confirm `TZ` matches your region
+- Existing `CRON_SCHEDULE` still works and takes precedence if set
+
+**Install**
+- Clone or checkout the `v2.1.0` tag
+- Follow [SETUP.md](../SETUP.md)
+- GitHub: https://github.com/loafdaddy/discoverr-bot/releases/tag/v2.1.0
+
+**Known gaps:** see [TODO.md](TODO.md)
+
+**AI note:** Parts of this release were developed with AI assistance. AI-assisted contributions remain welcome — see [CONTRIBUTING.md](../CONTRIBUTING.md).
 
 ### 2.0.0 — 2026-07-19 (TypeScript discovery rewrite)
 

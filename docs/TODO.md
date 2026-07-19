@@ -4,7 +4,7 @@ Single living status list. Keep it honest: only check items when verified with a
 
 Related: [ARCHITECTURE.md](ARCHITECTURE.md) · [ROADMAP.md](ROADMAP.md) · [RELEASES.md](RELEASES.md) · [SETUP.md](../SETUP.md) · [CONTRIBUTING.md](../CONTRIBUTING.md)
 
-## Done (v2.0.0)
+## Done (v2.0.0 / v2.1.0)
 
 - [x] TypeScript modular layout (`src/` → `dist/`)
 - [x] Multi-page / rotating discovery sources
@@ -15,11 +15,12 @@ Related: [ARCHITECTURE.md](ARCHITECTURE.md) · [ROADMAP.md](ROADMAP.md) · [RELE
 - [x] Unit tests for status, history, region, sampling
 - [x] Brand kit + Cadence-style docs / release structure
 - [x] Docker-only operator path (`Dockerfile` + Compose mount for `data/`)
+- [x] Simple `POST_TIME` / `POST_HOUR` schedule env (v2.1.0)
+- [x] Publish **v2.0.0** and **v2.1.0** on GitHub
+- [x] Live Discord / NAS smoke test (`POST_ON_START` + Docker Compose) — verified by author
 
 ## Next
 
-- [x] Merge `improve/discovery-v2`, tag and publish **v2.0.0** on GitHub
-- [x] Live Discord / NAS smoke test (`POST_ON_START` + Docker Compose) — verified by author
 - [ ] Confirm AVAILABLE library titles never post against a real Seerr instance (spot-check in Seerr UI)
 - [ ] Optional: dry-run / log-only mode for discovery without posting
 - [ ] Optional: TV support in the streaming category (movies-only today)

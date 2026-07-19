@@ -19,6 +19,7 @@ Stay a **small ARR companion**: Discord recommendations + Seerr request buttons.
 
 - **Pre-2.0** — unversioned JavaScript bot
 - **v2.0.0** — TypeScript rewrite + diversified discovery — see [RELEASES.md](RELEASES.md)
+- **v2.1.0** — `POST_TIME` env for daily schedule — see [RELEASES.md](RELEASES.md)
 - **Next** — items under **Next** in [TODO.md](TODO.md)
 
 ## Non-goals (for now)
