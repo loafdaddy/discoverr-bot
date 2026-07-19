@@ -6,7 +6,7 @@
 
 Step-by-step install for Discoverr — a TypeScript Discord bot that posts daily movie and TV recommendations and submits Seerr requests from Discord buttons.
 
-For a shorter overview see [README.md](README.md). For module design see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+For a shorter overview see [README.md](README.md). For module design see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Releases: [docs/RELEASES.md](docs/RELEASES.md).
 
 ## Requirements
 
@@ -208,6 +208,11 @@ docker compose up -d
 | Schedule wrong time | `CRON_SCHEDULE` and `TZ` |
 | `npm ci` / build fails in Docker | Valid `package-lock.json`; disk space; Node image pull |
 | Streaming category silent | Provider names match TMDb for `WATCH_REGION` |
+
+## Releases
+
+Version history and the cut-a-release checklist: [docs/RELEASES.md](docs/RELEASES.md).  
+Living status: [docs/TODO.md](docs/TODO.md).
 
 ## Brand
 

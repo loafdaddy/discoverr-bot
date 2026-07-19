@@ -84,3 +84,4 @@ When lookup fails, `SEERR_FAIL_CLOSED=true` (default) skips the title instead of
 - Compile: `npm run build` → `dist/`
 - Run: `node dist/index.js` (or `npm run dev` via `tsx` for local work)
 - Docker Compose: `npm ci && npm run build && node dist/index.js` inside `node:22-alpine`
+- Versions and tags: [RELEASES.md](RELEASES.md)

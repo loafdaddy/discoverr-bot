@@ -18,6 +18,8 @@ Docs:
 - [README.md](README.md) — product overview
 - [SETUP.md](SETUP.md) — install walkthrough
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — modules and discovery pipeline
+- [docs/RELEASES.md](docs/RELEASES.md) — version history and how to cut a release
+- [docs/TODO.md](docs/TODO.md) / [docs/ROADMAP.md](docs/ROADMAP.md) — status and direction
 - [data/brand/README.md](data/brand/README.md) — brand assets
 
 ## Development loop
@@ -56,8 +58,12 @@ Typical change flow:
 | `src/discord/` | Embeds, buttons, interactions |
 | `src/lib/` | Shared helpers |
 | `test/` | Unit tests (no live TMDb/Seerr) |
-| `docs/` | Architecture and design notes |
+| `docs/` | Architecture, releases, roadmap, TODO |
 | `data/brand/` | Lockup and mark |
+
+## Releases
+
+When shipping a version, follow [docs/RELEASES.md](docs/RELEASES.md): bump `package.json` version, add a release section, tag `vX.Y.Z`, and publish a GitHub release. Keep [docs/TODO.md](docs/TODO.md) honest.
 
 ## Conventions
 

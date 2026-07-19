@@ -10,26 +10,36 @@
 </p>
 
 <p align="center">
+  <a href="docs/RELEASES.md">v2.0.0</a>
+  ·
+  <a href="docs/RELEASES.md">Release history</a>
+  ·
   <a href="SETUP.md">Setup</a>
   ·
-  <a href="docs/ARCHITECTURE.md">Architecture</a>
-  ·
   <a href="CONTRIBUTING.md">Contributing</a>
-  ·
-  <a href="data/brand/README.md">Brand</a>
-  ·
-  <a href=".env.example">Config</a>
 </p>
 
 Discoverr is a lightweight Discord bot for Seerr and Jellyfin users. It posts scheduled movie and TV picks into dedicated channels and lets people request titles through Seerr without leaving Discord.
 
 Built to sit beside an ARR-style stack — Sonarr, Radarr, and friends — as a small Docker companion, not another heavyweight service.
 
+This is **v2.0.0** of the TypeScript rewrite. Features work; discovery and Seerr behaviour are actively hardening. **Contributors are welcome** — see [CONTRIBUTING.md](CONTRIBUTING.md).
+
 > TMDb discovery + Discord embeds + one-click Seerr requests.
 
 <p align="center">
   <img src="images/discoverr-screenshot.png" alt="Discoverr Discord embed with request button" width="640"/>
 </p>
+
+## Releases
+
+Published notes live in [docs/RELEASES.md](docs/RELEASES.md). Tag GitHub releases when cutting a version.
+
+| Version | Date | Notes |
+|---------|------|-------|
+| **[2.0.0](docs/RELEASES.md#200--2026-07-19-typescript-discovery-rewrite)** | 2026-07-19 | TypeScript rewrite, diversified discovery, numeric Seerr status |
+
+Architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · Status: [docs/TODO.md](docs/TODO.md) · Direction: [docs/ROADMAP.md](docs/ROADMAP.md) · Brand: [data/brand/README.md](data/brand/README.md) · Config: [.env.example](.env.example)
 
 ## What it does
 
@@ -202,6 +212,8 @@ docker compose up -d
 | `data/` | Runtime suggestion history |
 | `data/brand/` | Lockup, mark, brand notes |
 | `docs/ARCHITECTURE.md` | Design and module map |
+| `docs/RELEASES.md` | Version history and how to cut a release |
+| `docs/ROADMAP.md` / `docs/TODO.md` | Direction and living status |
 | `.env.example` | Environment template |
 | `SETUP.md` | Detailed setup guide |
 | `CONTRIBUTING.md` | Contributor workflow |
