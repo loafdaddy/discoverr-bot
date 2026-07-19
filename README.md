@@ -148,13 +148,19 @@ Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Usage
 
-Once running, the bot posts on `CRON_SCHEDULE` in `TZ`. For a smoke test:
+Once running, the bot posts on `CRON_SCHEDULE` in `TZ`. For a smoke test, set in `.env`:
 
 ```env
 POST_ON_START=true
 ```
 
-Confirm posts and request buttons, then set it back to `false`.
+Then recreate so the container picks up the change:
+
+```bash
+docker compose up -d --build
+```
+
+Confirm posts and request buttons, set `POST_ON_START=false`, and recreate again.
 
 ## Upgrading from the old JavaScript bot
 

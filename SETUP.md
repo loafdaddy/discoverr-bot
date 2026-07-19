@@ -125,6 +125,8 @@ Unknown names are logged and skipped; the bot tries the next configured service.
 
 ## 5. Run with Docker
 
+Works the same on a NAS (Synology / TrueNAS / Unraid / etc.) as on a regular Docker host: put the repo on a Docker-accessible path, fill `.env`, then Compose.
+
 ```bash
 docker compose up -d --build
 docker logs -f discoverr
@@ -137,7 +139,10 @@ What this does:
 - Mounts `./data` into the container for `suggested.json` persistence
 - Container name: `discoverr`
 
-Rebuild after pulling code changes:
+Tips:
+
+- `SEERR_URL` must be reachable **from inside the container** (Compose service name, LAN IP, or reverse-proxy hostname — not `localhost` unless Seerr is in the same container network namespace).
+- Rebuild after pulling code or changing `.env` values that should apply on next start:
 
 ```bash
 docker compose up -d --build

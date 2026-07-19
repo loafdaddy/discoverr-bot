@@ -49,7 +49,7 @@ docker logs -f discoverr
 
 ### 2.0.0 — 2026-07-19 (TypeScript discovery rewrite)
 
-**Status:** in tree on `improve/discovery-v2` · tag after merge to `main`
+**Status:** shipped on `improve/discovery-v2` (author NAS smoke-tested) · tag `v2.0.0` after merge to `main`
 
 **Highlights**
 - Full rewrite to **TypeScript** (`src/` compiled inside the Docker image)
