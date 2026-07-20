@@ -37,6 +37,25 @@ Built to sit beside an ARR-style stack — Sonarr, Radarr, and friends — as a 
 
 How discovery and Seerr gating work: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
+## Current categories
+
+Recommended Discord channel layout (create these, then paste each channel ID into `.env`):
+
+<p align="center">
+  <img src="docs/assets/screenshot-categories.png" alt="Discoverr Discord category channels" width="280"/>
+</p>
+
+| Channel | Env variable |
+|---------|--------------|
+| `movie-of-the-day` | `MOVIE_OF_DAY_CHANNEL_ID` |
+| `tv-show-of-the-day` | `TV_OF_DAY_CHANNEL_ID` |
+| `trending-movies-tv` | `TRENDING_CHANNEL_ID` |
+| `new-releases` | `NEW_RELEASES_CHANNEL_ID` |
+| `new-on-streaming` | `STREAMING_CHANNEL_ID` |
+| `hidden-gems` | `HIDDEN_GEMS_CHANNEL_ID` |
+
+Full install steps: [SETUP.md](SETUP.md).
+
 ## Quick start
 
 **Docker only** — no Node/npm on the host. Full walkthrough (Discord → TMDb → Seerr → `.env` → run): **[SETUP.md](SETUP.md)**.
