@@ -10,6 +10,12 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/loafdaddy/discoverr-bot/releases/latest"><img src="https://img.shields.io/github/v/release/loafdaddy/discoverr-bot?label=release" alt="Latest release"/></a>
+  <a href="Dockerfile"><img src="https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white" alt="Docker Compose"/></a>
+  <a href="tsconfig.json"><img src="https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white" alt="TypeScript"/></a>
+</p>
+
+<p align="center">
   <a href="https://github.com/loafdaddy/discoverr-bot/releases/tag/v2.1.0">v2.1.0</a>
   ·
   <a href="SETUP.md">Setup</a>
@@ -23,19 +29,29 @@
 
 Discoverr is a lightweight Discord bot for Seerr and Jellyfin users. It posts scheduled movie and TV picks into dedicated channels and lets people request titles through Seerr without leaving Discord.
 
-Built to sit beside an ARR-style stack — Sonarr, Radarr, and friends — as a small Docker companion.
+Built to complement an ARR stack (Sonarr, Radarr and Seerr) as a lightweight Docker companion.
+
+## Why Discoverr?
+
+Most media servers rely on users searching for something to watch. Discoverr flips that around by bringing fresh recommendations directly into Discord every day, complete with one-click Seerr request buttons, making it effortless for your community to discover and request new content.
+
+## Features
+
+- 🎬 Daily Movie & TV recommendations
+- 📈 Trending movies and TV
+- 🆕 New releases
+- 📺 New on streaming services
+- 💎 Hidden gems
+- ✅ One-click Seerr requests
+- 🔒 Prevents duplicate requests through Seerr status checks
+- 🐳 Docker-first deployment
+- ⚡ Lightweight and self-hosted
+
+Discovery pipeline details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 <p align="center">
   <img src="docs/assets/screenshot-discord.png" alt="Discoverr Discord embed with request button" width="640"/>
 </p>
-
-## What it does
-
-- **Movie / TV of the Day**, **Trending**, **New releases**, **Streaming**, **Hidden gems**
-- One-click **Request** buttons that submit to Seerr
-- Diversified TMDb pools so the same blockbusters do not dominate every week
-
-How discovery and Seerr gating work: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Current categories
 
@@ -55,6 +71,15 @@ Recommended Discord channel layout (create these, then paste each channel ID int
 | `hidden-gems` | `HIDDEN_GEMS_CHANNEL_ID` |
 
 Full install steps: [SETUP.md](SETUP.md).
+
+## Works with
+
+- Jellyfin
+- Seerr
+- Sonarr
+- Radarr
+- Docker
+- Discord
 
 ## Quick start
 
@@ -89,7 +114,7 @@ docker logs -f discoverr
 - Working Seerr + dedicated Seerr/Jellyfin user for the bot
 - Discord channels for each category you want
 
-Details and channel list: [SETUP.md](SETUP.md).
+Details: [SETUP.md](SETUP.md).
 
 ## Configuration
 
@@ -104,6 +129,10 @@ TZ=America/New_York
 
 Full variable reference, post-time options, and troubleshooting: [SETUP.md](SETUP.md).
 
+## Security
+
+Discoverr talks to Discord, TMDb, and Seerr. It does not access Jellyfin directly. Requests and availability checks use the dedicated Seerr account you configure, so behaviour stays within the permissions you grant that user in Seerr.
+
 ## Updating
 
 ```bash
@@ -113,6 +142,29 @@ docker compose up -d --build
 ```
 
 Upgrading from the old JavaScript bot: [SETUP.md § Upgrading](SETUP.md#upgrading-from-botjs-v1).
+
+## FAQ
+
+**Does Discoverr download media?**  
+No. It only recommends titles and submits Seerr requests. Sonarr, Radarr, and your download clients handle the rest.
+
+**Does it work without Jellyfin?**  
+It needs Seerr. Seerr can be backed by Jellyfin or Plex; Discoverr itself never talks to the media server.
+
+**Does it require Node.js on the host?**  
+No. Operators run it with Docker Compose only. Node is for contributors (tests / typecheck).
+
+**Can multiple Discord users use it?**  
+Yes. Anyone who can see the channels and click **Request** can submit through the bot’s Seerr account (subject to that account’s permissions).
+
+## Upcoming
+
+From [docs/ROADMAP.md](docs/ROADMAP.md) (day-to-day items: [docs/TODO.md](docs/TODO.md)):
+
+- Better discovery quality — less blockbuster repetition, clearer category identity
+- Stronger Seerr status and request handling
+- Operator UX — predictable Docker Compose installs and env
+- Project hygiene — TypeScript tests and SemVer releases
 
 ## Contributing
 
