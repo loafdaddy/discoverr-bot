@@ -30,8 +30,9 @@ docker logs -f discoverr
 
 Docs:
 
-- [README.md](README.md) — product overview
-- [SETUP.md](SETUP.md) — Docker install walkthrough
+- [README.md](README.md) — short product overview
+- [SETUP.md](SETUP.md) — ordered install (Discord → TMDb → Seerr → Docker)
+- [docs/README.md](docs/README.md) — docs index
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — modules and discovery pipeline
 - [docs/RELEASES.md](docs/RELEASES.md) — version history and how to cut a release
 - [docs/TODO.md](docs/TODO.md) / [docs/ROADMAP.md](docs/ROADMAP.md) — status and direction
