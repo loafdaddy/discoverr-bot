@@ -25,6 +25,8 @@ Related: [ARCHITECTURE.md](ARCHITECTURE.md) · [ROADMAP.md](ROADMAP.md) · [RELE
 - [ ] Optional: dry-run / log-only mode for discovery without posting
 - [ ] Optional: TV support in the streaming category (movies-only today)
 - [ ] Optional: clearer startup config validation errors in container logs
+- [ ] Per-channel recommendation counts (1–5) and streaming mix quotas (e.g. `Netflix:2,HBO:1`)
+- [ ] Optional: paid streaming source-change API (e.g. Watchmode Changes) for true catalog-add feeds
 
 ## Later
 

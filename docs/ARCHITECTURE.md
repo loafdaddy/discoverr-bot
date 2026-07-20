@@ -52,7 +52,7 @@ Categories intentionally avoid “page 1 of `/popular` only”:
 | Movie / TV of the Day | `/discover` with day-rotated genre + sort, multiple pages |
 | Trending | Day + week trending windows, shuffled then sampled |
 | New releases | Recent release-date window, shuffled |
-| Streaming | Provider discover with rotated sort, shuffled |
+| Streaming | Multi-provider shuffle (3 diverse slots); TMDb `/discover` + `with_watch_providers`. Prefers titles newly first-seen in local `data/streaming-catalog.json` (TMDb has no provider add-date — this is “new to our snapshot”, not a Netflix catalog timestamp). Falls back to available/popular on cold start or thin new window. |
 | Hidden gems | Older titles, vote band, low max popularity, genre rotation |
 
 Selection uses Fisher–Yates shuffle and weighted sampling that prefers mid-list candidates over index `0`, so popularity-sorted API responses do not always surface the same blockbusters.
@@ -60,6 +60,8 @@ Selection uses Fisher–Yates shuffle and weighted sampling that prefers mid-lis
 ## History
 
 Suggestions are stored in `data/suggested.json` (gitignored). Keys look like `movie:12345` or `tv:67890`.
+
+Streaming also maintains `data/streaming-catalog.json` (gitignored): first-seen dates per watch-region + provider + title, used only to prefer recently appeared titles in the New on Streaming category.
 
 Entries older than `HISTORY_TTL_DAYS` (default `90`) are pruned on load so the bot can rotate without permanently exhausting pools or repeating the same week of hits forever. Within a single `postAll()` run, `usedThisRun` prevents cross-category duplicates.
 

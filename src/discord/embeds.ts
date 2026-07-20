@@ -45,13 +45,17 @@ export async function sendCategoryMessage(
   channel: TextChannel,
   tmdb: TmdbClient,
   heading: string,
-  items: TmdbItem[]
+  items: TmdbItem[],
+  /** Optional per-item headings (e.g. mixed streaming providers). Falls back to `heading`. */
+  itemHeadings?: string[]
 ): Promise<void> {
   if (!items.length) return;
 
   const embeds = [];
-  for (const item of items) {
-    const embed = await buildRecommendationEmbed(tmdb, heading, item);
+  for (let index = 0; index < items.length; index += 1) {
+    const item = items[index];
+    const itemHeading = itemHeadings?.[index] ?? heading;
+    const embed = await buildRecommendationEmbed(tmdb, itemHeading, item);
     if (embed) embeds.push(embed);
   }
 

@@ -106,22 +106,30 @@ export async function fetchNewReleaseCandidates(
   return shuffleArray(items.map((item) => withMediaType(item, "movie")));
 }
 
-export async function pickStreamingService(
+export interface ResolvedStreamingService {
+  service: string;
+  providerId: number;
+}
+
+/** Resolve configured STREAMING_SERVICES names to TMDb provider IDs for the watch region. */
+export async function resolveStreamingServices(
   tmdb: TmdbClient,
   config: AppConfig,
   mediaType: MediaType = "movie"
-): Promise<{ service: string; providerId: number } | null> {
-  if (!config.streamingServices.length) return null;
+): Promise<ResolvedStreamingService[]> {
+  if (!config.streamingServices.length) return [];
 
-  for (const service of shuffleArray(config.streamingServices)) {
+  const resolved: ResolvedStreamingService[] = [];
+  for (const service of config.streamingServices) {
     const providerId = await tmdb.getProviderId(service, mediaType);
     if (providerId) {
-      return { service, providerId };
+      resolved.push({ service, providerId });
+    } else {
+      console.warn(`Streaming provider not found: ${service}`);
     }
-    console.warn(`Streaming provider not found: ${service}`);
   }
 
-  return null;
+  return resolved;
 }
 
 export async function fetchStreamingCandidates(
