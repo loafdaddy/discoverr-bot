@@ -18,13 +18,13 @@ Visual direction: dark, calm, teal accent — discovery and media signal, with a
 | Deep bottom | `#061018` | Mark background shadow |
 | Soft text | `#E8F6F5` | Wordmark |
 
-Wordmark ends with a teal period tucked against the final letter (not floating).
+Wordmark ends with a teal period at normal font spacing.
 
 ## Typography
 
 Lockup wordmark is **Cantarell Extra Bold** (GNOME’s classic UI face), outlined as SVG paths so GitHub and other hosts render the same weight without needing the font installed.
 
-The teal period is placed optically tight against the final letter (aligned to the stem at x-height, not the full glyph bounding box).
+The teal period uses the font’s normal advance after `Discoverr` (as in typed `Discoverr.`).
 
 Fallback stack if you re-edit as live text: `Cantarell Extra Bold, Cantarell, Adwaita Sans, Inter, Segoe UI, Ubuntu, system-ui, sans-serif` at weight **800**.
 
