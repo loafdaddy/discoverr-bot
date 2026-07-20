@@ -7,14 +7,14 @@ import {
   fetchHiddenGemCandidates,
   fetchMovieOfDayCandidates,
   fetchNewReleaseCandidates,
-  fetchStreamingCandidates,
   fetchTrendingCandidates,
-  fetchTvOfDayCandidates,
-  pickStreamingService
+  fetchTvOfDayCandidates
 } from "../tmdb/sources";
 import type { AppConfig, TmdbItem } from "../types";
 import type { SuggestionHistory } from "./history";
 import { selectRecommendations } from "./select";
+import { StreamingCatalog } from "./streamingCatalog";
+import { selectStreamingPicks } from "./streamingSelect";
 
 async function postCategory(
   client: Client,
@@ -25,7 +25,11 @@ async function postCategory(
   items: TmdbItem[],
   usedRecommendations: Set<string>,
   history: SuggestionHistory,
-  today: string
+  today: string,
+  options?: {
+    itemHeadings?: string[];
+    itemCategoryKeys?: string[];
+  }
 ): Promise<void> {
   if (!channelId || !items.length) return;
 
@@ -36,16 +40,23 @@ async function postCategory(
       return;
     }
 
-    await sendCategoryMessage(channel as TextChannel, tmdb, heading, items);
+    await sendCategoryMessage(
+      channel as TextChannel,
+      tmdb,
+      heading,
+      items,
+      options?.itemHeadings
+    );
 
-    for (const item of items) {
+    for (let index = 0; index < items.length; index += 1) {
+      const item = items[index];
       const key = itemKey(item);
       usedRecommendations.add(key);
       history.set(key, {
         title: titleOf(item),
         type: mediaTypeOf(item),
         tmdbId: Number(item.id),
-        category: categoryKey,
+        category: options?.itemCategoryKeys?.[index] ?? categoryKey,
         suggestedAt: today
       });
     }
@@ -171,32 +182,43 @@ export async function postAll(
     );
   }
 
-  const streamingService = await pickStreamingService(tmdb, config, "movie");
-  if (streamingService) {
-    const { service, providerId } = streamingService;
-    const streamingCandidates = await fetchStreamingCandidates(tmdb, config, providerId);
-    const streamingSelection = await selectRecommendations(
-      streamingCandidates,
-      multiItemCount,
+  const streamingCatalog = new StreamingCatalog(StreamingCatalog.defaultPath());
+  await streamingCatalog.load();
+  const { picks: streamingPicks, resolvedCount: streamingResolved } =
+    await selectStreamingPicks(
+      tmdb,
+      config,
+      seerr,
+      history,
+      usedThisRun,
+      streamingCatalog,
+      today,
+      baseFilters,
+      multiItemCount
+    );
+  await streamingCatalog.save();
+
+  if (streamingPicks.length) {
+    const streamingItems = streamingPicks.map((pick) => pick.item);
+    const itemHeadings = streamingPicks.map(
+      (pick) => `New or popular on ${pick.service}`
+    );
+    const itemCategoryKeys = streamingPicks.map(
+      (pick) => `streaming-${pick.service.toLowerCase()}`
+    );
+    await postCategory(
+      client,
+      tmdb,
+      config.streamingChannelId,
+      itemHeadings[0],
+      itemCategoryKeys[0],
+      streamingItems,
       usedThisRun,
       history,
-      seerr,
-      baseFilters
+      today,
+      { itemHeadings, itemCategoryKeys }
     );
-    if (streamingSelection.length) {
-      await postCategory(
-        client,
-        tmdb,
-        config.streamingChannelId,
-        `New or popular on ${service}`,
-        `streaming-${service.toLowerCase()}`,
-        streamingSelection,
-        usedThisRun,
-        history,
-        today
-      );
-    }
-  } else {
+  } else if (streamingResolved === 0) {
     console.warn("No streaming providers configured or available.");
   }
 
