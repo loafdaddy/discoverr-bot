@@ -4,7 +4,7 @@ Single living status list. Keep it honest: only check items when verified with a
 
 Related: [ARCHITECTURE.md](ARCHITECTURE.md) · [ROADMAP.md](ROADMAP.md) · [RELEASES.md](RELEASES.md) · [SETUP.md](../SETUP.md) · [CONTRIBUTING.md](../CONTRIBUTING.md)
 
-## Done (v2.0.0 / v2.1.0)
+## Done (v2.0.0 / v2.1.0 / v2.2.0)
 
 - [x] TypeScript modular layout (`src/` → `dist/`)
 - [x] Multi-page / rotating discovery sources
@@ -18,6 +18,9 @@ Related: [ARCHITECTURE.md](ARCHITECTURE.md) · [ROADMAP.md](ROADMAP.md) · [RELE
 - [x] Simple `POST_TIME` / `POST_HOUR` schedule env (v2.1.0)
 - [x] Publish **v2.0.0** and **v2.1.0** on GitHub
 - [x] Live Discord / NAS smoke test (`POST_ON_START` + Docker Compose) — verified by author
+- [x] New on streaming: shuffled multi-provider mix (3 slots) (v2.2.0)
+- [x] Streaming first-seen catalog for better “new” preference within TMDb limits (v2.2.0)
+- [x] Publish **v2.2.0** on GitHub
 
 ## Next
 

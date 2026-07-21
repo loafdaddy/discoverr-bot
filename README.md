@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loafdaddy/discoverr-bot/releases/tag/v2.1.0">v2.1.0</a>
+  <a href="https://github.com/loafdaddy/discoverr-bot/releases/tag/v2.2.0">v2.2.0</a>
   ·
   <a href="SETUP.md">Setup</a>
   ·
@@ -40,7 +40,7 @@ Most media servers rely on users searching for something to watch. Discoverr fli
 - 🎬 Daily Movie & TV recommendations
 - 📈 Trending movies and TV
 - 🆕 New releases
-- 📺 New on streaming services
+- 📺 New on streaming (mixed providers; prefers newly seen titles)
 - 💎 Hidden gems
 - ✅ One-click Seerr requests
 - 🔒 Prevents duplicate requests through Seerr status checks

@@ -153,7 +153,9 @@ List streaming services you want featured. Names must match TMDb watch-provider 
 STREAMING_SERVICES="Netflix,Disney Plus,Amazon Prime Video,Apple TV Plus,Stan,BINGE,Paramount Plus"
 ```
 
-Unknown names are logged and skipped. Adjust the list to what you actually subscribe to.
+Each daily **New on streaming** post picks up to **3** titles across a **shuffled mix** of these providers (different services when possible). Unknown names are logged and skipped — adjust the list to what you actually subscribe to.
+
+TMDb does not expose “date added to Netflix.” Discoverr approximates “new” with a local first-seen snapshot in `data/streaming-catalog.json` (same Compose volume as suggestion history). It prefers titles newly visible in that snapshot, and falls back to available/popular on cold start or a thin new window. Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 Also pick when to post (24-hour time + timezone):
 
@@ -213,7 +215,7 @@ What this does:
 
 - Builds from [`Dockerfile`](Dockerfile) (deps + TypeScript compile + `node dist/index.js`)
 - Loads `.env`
-- Mounts `./data` for suggestion history (`suggested.json`)
+- Mounts `./data` for suggestion history (`suggested.json`) and streaming first-seen catalog (`streaming-catalog.json`)
 - Names the container `discoverr`
 
 Look for a log line like `Scheduled discovery: every day at …`.
@@ -262,7 +264,7 @@ docker compose up -d --build
 | `SEERR_URL` | Seerr base URL (reachable from the container) |
 | `SEERR_USERNAME` / `SEERR_PASSWORD` | Dedicated Seerr user |
 | `WATCH_REGION` | Discovery region |
-| `STREAMING_SERVICES` | Comma-separated TMDb provider names |
+| `STREAMING_SERVICES` | Comma-separated TMDb provider names (mixed across daily posts) |
 | `*_CHANNEL_ID` | Discord channel per category (blank to skip) |
 
 ### Schedule
@@ -310,7 +312,7 @@ docker compose down
 docker compose up -d --build
 ```
 
-4. Keep `data/suggested.json` for existing cooldown history, or delete it to reset.
+4. Keep `data/suggested.json` for existing cooldown history, or delete it to reset. Optional: delete `data/streaming-catalog.json` to re-seed streaming first-seen dates.
 
 ---
 
