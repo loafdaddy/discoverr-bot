@@ -50,7 +50,7 @@ docker logs -f discoverr
 
 ### 3.0.0 — Config Update (2026-07-23)
 
-**Status:** in tree · tag when publishing
+**Status:** published · [GitHub release](https://github.com/loafdaddy/discoverr-bot/releases/tag/v3.0.0)
 
 **Headline:** Operator settings move to durable `data/settings.json`. Secrets stay in `.env`. Existing `.env` files keep working without edits.
 
@@ -88,7 +88,9 @@ docker logs -f discoverr
 4. When ready for the new knobs, follow [SETUP.md § Upgrading to 3.0.0](../SETUP.md#upgrading-to-300-from-2x) and [Editing settings](../SETUP.md#editing-settings)
 
 **Install (new)**
+- Clone or checkout the `v3.0.0` tag
 - Follow [SETUP.md](../SETUP.md): secrets in `.env`, copy `settings.example.json` → `data/settings.json`
+- GitHub: https://github.com/loafdaddy/discoverr-bot/releases/tag/v3.0.0
 
 **Known gaps:** see [TODO.md](TODO.md)
 

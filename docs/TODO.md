@@ -22,6 +22,7 @@ Related: [ARCHITECTURE.md](ARCHITECTURE.md) · [ROADMAP.md](ROADMAP.md) · [RELE
 - [x] Streaming first-seen catalog for better “new” preference within TMDb limits (v2.2.0)
 - [x] Publish **v2.2.0** on GitHub
 - [x] **v3.0.0 Config Update** — durable `data/settings.json` (secrets stay in `.env`; env bridge for existing installs)
+- [x] Publish **v3.0.0** on GitHub
 - [x] Per-channel recommendation counts (1–3) and streaming mix quotas
 - [x] TV support in the streaming category (`streaming.includeTv`)
 - [x] Clearer startup settings validation errors
