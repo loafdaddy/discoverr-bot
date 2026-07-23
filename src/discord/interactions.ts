@@ -1,8 +1,13 @@
 import type { Client } from "discord.js";
+import type { SuggestionHistory } from "../discovery/history";
 import type { SeerrClient } from "../seerr/client";
 import type { MediaType } from "../types";
 
-export function registerInteractions(client: Client, seerr: SeerrClient): void {
+export function registerInteractions(
+  client: Client,
+  seerr: SeerrClient,
+  history: SuggestionHistory
+): void {
   client.on("interactionCreate", async (interaction) => {
     if (!interaction.isButton()) return;
     if (!interaction.customId.startsWith("request:")) return;
@@ -14,6 +19,12 @@ export function registerInteractions(client: Client, seerr: SeerrClient): void {
     try {
       await interaction.deferReply({ ephemeral: true });
       await seerr.request(mediaType as MediaType, Number(tmdbId));
+
+      const today = new Date().toISOString().split("T")[0];
+      await history.load();
+      history.markRequested(mediaType as MediaType, Number(tmdbId), today);
+      await history.save();
+
       await interaction.editReply(
         "Request submitted successfully. It is now waiting for approval in Seerr."
       );

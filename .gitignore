@@ -3,5 +3,8 @@ dist/
 .env
 data/suggested.json
 data/streaming-catalog.json
+data/settings.json
+graphify-out/
+
 npm-debug.log
 .DS_Store

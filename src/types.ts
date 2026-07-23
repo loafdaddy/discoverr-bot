@@ -32,6 +32,17 @@ export interface HistoryEntry {
   tmdbId: number;
   category: string;
   suggestedAt: string;
+  /** Set when a Discord Request button succeeds. */
+  requestedAt?: string;
+}
+
+export interface CategoryPostCounts {
+  movieOfTheDay: number;
+  tvOfTheDay: number;
+  trending: number;
+  newReleases: number;
+  streaming: number;
+  hiddenGems: number;
 }
 
 export interface AppConfig {
@@ -42,19 +53,28 @@ export interface AppConfig {
   discordToken: string;
   watchRegion: string;
   streamingServices: string[];
+  streamingQuotas: Record<string, number>;
+  streamingIncludeTv: boolean;
+  streamingNewWindowDays: number;
   movieOfDayChannelId: string;
   tvOfDayChannelId: string;
   trendingChannelId: string;
   newReleasesChannelId: string;
   streamingChannelId: string;
   hiddenGemsChannelId: string;
+  categoryPostCounts: CategoryPostCounts;
   postOnStart: boolean;
+  dryRun: boolean;
   cronSchedule: string;
   timezone: string;
   tmdbLanguage: string;
-  historyTtlDays: number;
+  /** Cooldown after a suggestion when the title was not requested. 0 = never re-enter. */
+  suggestedTtlDays: number;
+  /** Cooldown after a successful Request. 0 = never re-enter. */
+  requestedTtlDays: number;
   minRating: number;
   minVotes: number;
+  requireEnglish: boolean;
   seerrFailClosed: boolean;
   pagesToFetch: number;
 }

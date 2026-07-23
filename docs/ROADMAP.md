@@ -11,7 +11,7 @@ Stay a **small ARR companion**: Discord recommendations + Seerr request buttons.
 ## Themes
 
 1. **Discovery quality** — less blockbuster repetition, clearer category identity
-2. **Operator UX** — boring Docker Compose installs (no host Node), honest docs, predictable env
+2. **Operator UX** — boring Docker Compose installs (no host Node), honest docs, predictable settings + secrets in env
 3. **Integrations** — solid Seerr status/request handling; TMDb as the metadata source
 4. **Project hygiene** — TypeScript, tests for filter/status logic, SemVer releases
 
@@ -21,6 +21,7 @@ Stay a **small ARR companion**: Discord recommendations + Seerr request buttons.
 - **v2.0.0** — TypeScript rewrite + diversified discovery — see [RELEASES.md](RELEASES.md)
 - **v2.1.0** — `POST_TIME` env for daily schedule — see [RELEASES.md](RELEASES.md)
 - **v2.2.0** — New on streaming multi-provider mix + local first-seen preference — see [RELEASES.md](RELEASES.md)
+- **v3.0.0** — Config Update (`data/settings.json`, post counts, streaming TV/quotas, memory TTLs, dry-run) — see [RELEASES.md](RELEASES.md)
 - **Next** — items under **Next** in [TODO.md](TODO.md)
 
 ## Non-goals (for now)

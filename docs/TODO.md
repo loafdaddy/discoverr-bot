@@ -4,7 +4,7 @@ Single living status list. Keep it honest: only check items when verified with a
 
 Related: [ARCHITECTURE.md](ARCHITECTURE.md) · [ROADMAP.md](ROADMAP.md) · [RELEASES.md](RELEASES.md) · [SETUP.md](../SETUP.md) · [CONTRIBUTING.md](../CONTRIBUTING.md)
 
-## Done (v2.0.0 / v2.1.0 / v2.2.0)
+## Done (v2.0.0 / v2.1.0 / v2.2.0 / v3.0.0)
 
 - [x] TypeScript modular layout (`src/` → `dist/`)
 - [x] Multi-page / rotating discovery sources
@@ -21,14 +21,16 @@ Related: [ARCHITECTURE.md](ARCHITECTURE.md) · [ROADMAP.md](ROADMAP.md) · [RELE
 - [x] New on streaming: shuffled multi-provider mix (3 slots) (v2.2.0)
 - [x] Streaming first-seen catalog for better “new” preference within TMDb limits (v2.2.0)
 - [x] Publish **v2.2.0** on GitHub
+- [x] **v3.0.0 Config Update** — durable `data/settings.json` (secrets stay in `.env`; env bridge for existing installs)
+- [x] Per-channel recommendation counts (1–3) and streaming mix quotas
+- [x] TV support in the streaming category (`streaming.includeTv`)
+- [x] Clearer startup settings validation errors
+- [x] Dry-run / log-only discovery (`discovery.dryRun`)
+- [x] Dual memory TTLs (`suggestedTtlDays` / `requestedTtlDays`) + `requestedAt` on Request
 
 ## Next
 
 - [ ] Confirm AVAILABLE library titles never post against a real Seerr instance (spot-check in Seerr UI)
-- [ ] Optional: dry-run / log-only mode for discovery without posting
-- [ ] Optional: TV support in the streaming category (movies-only today)
-- [ ] Optional: clearer startup config validation errors in container logs
-- [ ] Per-channel recommendation counts (1–5) and streaming mix quotas (e.g. `Netflix:2,HBO:1`)
 - [ ] Optional: paid streaming source-change API (e.g. Watchmode Changes) for true catalog-add feeds
 
 ## Later

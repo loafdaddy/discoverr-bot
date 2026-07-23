@@ -12,19 +12,23 @@ import { SeerrClient } from "./seerr/client";
 import { TmdbClient } from "./tmdb/client";
 
 async function main(): Promise<void> {
-  const config = loadConfig();
+  const config = await loadConfig();
   const tmdb = new TmdbClient(config);
   const seerr = new SeerrClient(config);
-  const history = new SuggestionHistory(SuggestionHistory.defaultPath(), config.historyTtlDays);
+  const history = new SuggestionHistory(
+    SuggestionHistory.defaultPath(),
+    config.suggestedTtlDays,
+    config.requestedTtlDays
+  );
 
   const client = new Client({ intents: [GatewayIntentBits.Guilds] });
-  registerInteractions(client, seerr);
+  registerInteractions(client, seerr, history);
 
   client.once("ready", async () => {
     console.log(`Logged in as ${client.user?.tag}`);
 
     if (!cron.validate(config.cronSchedule)) {
-      throw new Error(`Invalid CRON_SCHEDULE: ${config.cronSchedule}`);
+      throw new Error(`Invalid cron schedule: ${config.cronSchedule}`);
     }
 
     cron.schedule(
@@ -44,6 +48,9 @@ async function main(): Promise<void> {
       ? `every day at ${dailyAt} ${config.timezone}`
       : `${config.cronSchedule} (${config.timezone})`;
     console.log(`Scheduled discovery: ${when} [cron: ${config.cronSchedule}]`);
+    if (config.dryRun) {
+      console.log("discovery.dryRun is enabled — posts will be logged only.");
+    }
 
     if (config.postOnStart) {
       try {

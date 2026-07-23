@@ -19,6 +19,7 @@ import { selectStreamingPicks } from "./streamingSelect";
 async function postCategory(
   client: Client,
   tmdb: TmdbClient,
+  config: AppConfig,
   channelId: string,
   heading: string,
   categoryKey: string,
@@ -32,6 +33,15 @@ async function postCategory(
   }
 ): Promise<void> {
   if (!channelId || !items.length) return;
+
+  if (config.dryRun) {
+    const titles = items.map((item) => titleOf(item)).join(", ");
+    console.log(`[dry-run] Would post to ${categoryKey}: ${heading} — ${titles}`);
+    for (const item of items) {
+      usedRecommendations.add(itemKey(item));
+    }
+    return;
+  }
 
   try {
     const channel = await client.channels.fetch(channelId);
@@ -52,12 +62,14 @@ async function postCategory(
       const item = items[index];
       const key = itemKey(item);
       usedRecommendations.add(key);
+      const existing = history.get(key);
       history.set(key, {
         title: titleOf(item),
         type: mediaTypeOf(item),
         tmdbId: Number(item.id),
         category: options?.itemCategoryKeys?.[index] ?? categoryKey,
-        suggestedAt: today
+        suggestedAt: today,
+        requestedAt: existing?.requestedAt
       });
     }
     await history.save();
@@ -73,37 +85,43 @@ export async function postAll(
   seerr: SeerrClient,
   history: SuggestionHistory
 ): Promise<void> {
-  console.log("Posting daily discovery...");
+  console.log(config.dryRun ? "Dry-run discovery (no Discord posts)..." : "Posting daily discovery...");
 
   await history.load();
   seerr.clearCache();
 
   const today = new Date().toISOString().split("T")[0];
   const usedThisRun = new Set<string>();
-  const multiItemCount = 3;
+  const counts = config.categoryPostCounts;
   const baseFilters = {
     minRating: config.minRating,
     minVotes: config.minVotes,
-    requireEnglish: true as const
+    requireEnglish: config.requireEnglish
   };
 
   const movieCandidates = await fetchMovieOfDayCandidates(tmdb, config);
-  const movieOfDay = (
-    await selectRecommendations(movieCandidates, 1, usedThisRun, history, seerr, {
+  const movieOfDaySelection = await selectRecommendations(
+    movieCandidates,
+    counts.movieOfTheDay,
+    usedThisRun,
+    history,
+    seerr,
+    {
       ...baseFilters,
       minRating: Math.max(config.minRating, 6.5),
       minVotes: Math.max(config.minVotes, 120)
-    })
-  )[0];
+    }
+  );
 
-  if (movieOfDay) {
+  if (movieOfDaySelection.length) {
     await postCategory(
       client,
       tmdb,
+      config,
       config.movieOfDayChannelId,
       "Movie of the Day",
       "movie-of-the-day",
-      [movieOfDay],
+      movieOfDaySelection,
       usedThisRun,
       history,
       today
@@ -111,22 +129,28 @@ export async function postAll(
   }
 
   const tvCandidates = await fetchTvOfDayCandidates(tmdb, config);
-  const tvOfDay = (
-    await selectRecommendations(tvCandidates, 1, usedThisRun, history, seerr, {
+  const tvOfDaySelection = await selectRecommendations(
+    tvCandidates,
+    counts.tvOfTheDay,
+    usedThisRun,
+    history,
+    seerr,
+    {
       ...baseFilters,
       minRating: Math.max(config.minRating, 6.6),
       minVotes: Math.max(config.minVotes, 100)
-    })
-  )[0];
+    }
+  );
 
-  if (tvOfDay) {
+  if (tvOfDaySelection.length) {
     await postCategory(
       client,
       tmdb,
+      config,
       config.tvOfDayChannelId,
       "TV Show of the Day",
       "tv-show-of-the-day",
-      [tvOfDay],
+      tvOfDaySelection,
       usedThisRun,
       history,
       today
@@ -136,7 +160,7 @@ export async function postAll(
   const trendingCandidates = await fetchTrendingCandidates(tmdb, config);
   const trendingSelection = await selectRecommendations(
     trendingCandidates,
-    multiItemCount,
+    counts.trending,
     usedThisRun,
     history,
     seerr,
@@ -146,6 +170,7 @@ export async function postAll(
     await postCategory(
       client,
       tmdb,
+      config,
       config.trendingChannelId,
       "Trending",
       "trending",
@@ -159,7 +184,7 @@ export async function postAll(
   const newReleaseCandidates = await fetchNewReleaseCandidates(tmdb, config);
   const newReleaseSelection = await selectRecommendations(
     newReleaseCandidates,
-    multiItemCount,
+    counts.newReleases,
     usedThisRun,
     history,
     seerr,
@@ -172,6 +197,7 @@ export async function postAll(
     await postCategory(
       client,
       tmdb,
+      config,
       config.newReleasesChannelId,
       "New Release",
       "new-releases",
@@ -194,7 +220,7 @@ export async function postAll(
       streamingCatalog,
       today,
       baseFilters,
-      multiItemCount
+      counts.streaming
     );
   await streamingCatalog.save();
 
@@ -209,6 +235,7 @@ export async function postAll(
     await postCategory(
       client,
       tmdb,
+      config,
       config.streamingChannelId,
       itemHeadings[0],
       itemCategoryKeys[0],
@@ -226,7 +253,7 @@ export async function postAll(
   const hiddenCandidates = await fetchHiddenGemCandidates(tmdb, config);
   const hiddenGemSelection = await selectRecommendations(
     hiddenCandidates,
-    1,
+    counts.hiddenGems,
     usedThisRun,
     history,
     seerr,
@@ -235,13 +262,14 @@ export async function postAll(
       minVotes: 300,
       maxPopularity: 60,
       maxReleaseYear: cutoffYear,
-      requireEnglish: true
+      requireEnglish: config.requireEnglish
     }
   );
   if (hiddenGemSelection.length) {
     await postCategory(
       client,
       tmdb,
+      config,
       config.hiddenGemsChannelId,
       "Hidden Gem",
       "hidden-gems",
@@ -252,5 +280,5 @@ export async function postAll(
     );
   }
 
-  console.log("Daily discovery posted.");
+  console.log(config.dryRun ? "Dry-run discovery finished." : "Daily discovery posted.");
 }

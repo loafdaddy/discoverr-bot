@@ -1,13 +1,34 @@
 import fs from "fs/promises";
 import path from "path";
-import type { HistoryEntry } from "../types";
+import type { HistoryEntry, MediaType } from "../types";
+
+function cutoffIso(ttlDays: number): string {
+  const cutoff = new Date();
+  cutoff.setUTCDate(cutoff.getUTCDate() - ttlDays);
+  return cutoff.toISOString().split("T")[0];
+}
+
+function isExpired(
+  entry: HistoryEntry,
+  suggestedTtlDays: number,
+  requestedTtlDays: number
+): boolean {
+  if (entry.requestedAt) {
+    if (requestedTtlDays <= 0) return false;
+    return entry.requestedAt < cutoffIso(requestedTtlDays);
+  }
+  if (suggestedTtlDays <= 0) return false;
+  if (!entry.suggestedAt) return true;
+  return entry.suggestedAt < cutoffIso(suggestedTtlDays);
+}
 
 export class SuggestionHistory {
   private entries = new Map<string, HistoryEntry>();
 
   constructor(
     private readonly filePath: string,
-    private readonly ttlDays: number
+    private readonly suggestedTtlDays: number,
+    private readonly requestedTtlDays: number = suggestedTtlDays
   ) {}
 
   static defaultPath(): string {
@@ -42,14 +63,8 @@ export class SuggestionHistory {
   }
 
   private pruneExpired(): void {
-    if (this.ttlDays <= 0) return;
-
-    const cutoff = new Date();
-    cutoff.setUTCDate(cutoff.getUTCDate() - this.ttlDays);
-    const cutoffIso = cutoff.toISOString().split("T")[0];
-
     for (const [key, entry] of this.entries) {
-      if (!entry.suggestedAt || entry.suggestedAt < cutoffIso) {
+      if (isExpired(entry, this.suggestedTtlDays, this.requestedTtlDays)) {
         this.entries.delete(key);
       }
     }
@@ -59,8 +74,31 @@ export class SuggestionHistory {
     return this.entries.has(key);
   }
 
+  get(key: string): HistoryEntry | undefined {
+    return this.entries.get(key);
+  }
+
   set(key: string, entry: HistoryEntry): void {
     this.entries.set(key, entry);
+  }
+
+  /** Record a successful Seerr request for memory cooldowns. */
+  markRequested(
+    mediaType: MediaType,
+    tmdbId: number,
+    today: string,
+    title?: string
+  ): void {
+    const key = `${mediaType}:${tmdbId}`;
+    const existing = this.entries.get(key);
+    this.entries.set(key, {
+      title: title ?? existing?.title ?? `${mediaType} ${tmdbId}`,
+      type: mediaType,
+      tmdbId,
+      category: existing?.category ?? "request",
+      suggestedAt: existing?.suggestedAt ?? today,
+      requestedAt: today
+    });
   }
 
   async save(): Promise<void> {

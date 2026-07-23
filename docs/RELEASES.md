@@ -2,7 +2,7 @@
 
 Track every published version here. Update this file when cutting a release, then tag and publish on GitHub.
 
-Current version in tree: **2.2.0** (`package.json`).
+Current version in tree: **3.0.0** (`package.json`).
 
 ## Versioning
 
@@ -22,7 +22,7 @@ Pre-1.0 history lived as an untagged JavaScript bot. **2.0.0** is the first SemV
 2. Set `version` in [`package.json`](../package.json) (and keep lockfile in sync if you use `npm version`)
 3. Add a section below in this file; bump version mentions in [`README.md`](../README.md) / [`SETUP.md`](../SETUP.md) if needed
 4. Commit on `main` (or merge the release PR)
-5. Tag: `git tag -a v2.2.0 -m "Discoverr 2.2.0"`
+5. Tag: `git tag -a v3.0.0 -m "Discoverr 3.0.0"`
 6. Push: `git push origin main --tags`
 7. Create the GitHub release (notes can mirror the section below)
 8. Sanity-check from a clean clone:
@@ -30,9 +30,10 @@ Pre-1.0 history lived as an untagged JavaScript bot. **2.0.0** is the first SemV
 ```bash
 git clone https://github.com/loafdaddy/discoverr-bot.git
 cd discoverr-bot
-git checkout v2.2.0
+git checkout v3.0.0
 cp .env.example .env
-# fill required values
+cp settings.example.json data/settings.json
+# fill secrets + settings
 docker compose up -d --build
 docker logs -f discoverr
 ```
@@ -46,6 +47,52 @@ docker logs -f discoverr
 - Include the AI note if the release involved substantial AI-assisted work
 
 ## Releases
+
+### 3.0.0 — Config Update (2026-07-23)
+
+**Status:** in tree · tag when publishing
+
+**Headline:** Operator settings move to durable `data/settings.json`. Secrets stay in `.env`. Existing `.env` files keep working without edits.
+
+**Highlights**
+- **`data/settings.json`** on the Compose volume — channels, schedule, post counts, streaming mix, memory, dry-run (survives image upgrades)
+- **Secrets-only `.env`** — `DISCORD_TOKEN`, `TMDB_API_KEY`, `SEERR_*` (required as before)
+- **Env migration bridge** — if `settings.json` is missing, all previous non-secret env vars still apply (`*_CHANNEL_ID`, `STREAMING_SERVICES`, `POST_TIME`, `HISTORY_TTL_DAYS`, …)
+- Per-category **post counts (1–3)** and optional **streaming quotas** (e.g. Netflix:1, Prime:2)
+- **TV in New on Streaming** (`streaming.includeTv`, default `true`)
+- **Dual memory TTLs** — `suggestedTtlDays` / `requestedTtlDays`; Request button writes `requestedAt`
+- **`discovery.dryRun`** — log picks without Discord posts
+- Clearer startup validation errors for invalid settings
+
+**Your `.env` is safe**
+- Do **not** delete or rewrite your existing `.env` to upgrade
+- Required secrets are unchanged
+- Optional: leave non-secret keys in `.env`; they still work until you move them into `settings.json`
+- Copying `settings.example.json` with blank channel IDs does **not** wipe channels still set in `.env` (blank strings fall back to env)
+
+**Behaviour change to know**
+- Without a settings file, **New on Streaming includes TV** by default (`includeTv: true`). Set `"streaming": { "includeTv": false }` in `data/settings.json` for 2.x movies-only behaviour.
+
+**Upgrade from 2.x (recommended path)**
+
+1. Back up `.env` and `./data` (optional but smart)
+2. Pull and rebuild — **do not create `settings.json` yet** if you want zero config work:
+
+```bash
+git pull
+docker compose up -d --build
+docker logs -f discoverr
+```
+
+3. Confirm logs show schedule + posts still using your env channels/services
+4. When ready for the new knobs, follow [SETUP.md § Upgrading to 3.0.0](../SETUP.md#upgrading-to-300-from-2x) and [Editing settings](../SETUP.md#editing-settings)
+
+**Install (new)**
+- Follow [SETUP.md](../SETUP.md): secrets in `.env`, copy `settings.example.json` → `data/settings.json`
+
+**Known gaps:** see [TODO.md](TODO.md)
+
+---
 
 ### 2.2.0 — 2026-07-21 (streaming mix + first-seen “new”)
 

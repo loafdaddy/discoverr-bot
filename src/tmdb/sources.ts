@@ -109,6 +109,7 @@ export async function fetchNewReleaseCandidates(
 export interface ResolvedStreamingService {
   service: string;
   providerId: number;
+  mediaType: MediaType;
 }
 
 /** Resolve configured STREAMING_SERVICES names to TMDb provider IDs for the watch region. */
@@ -123,9 +124,9 @@ export async function resolveStreamingServices(
   for (const service of config.streamingServices) {
     const providerId = await tmdb.getProviderId(service, mediaType);
     if (providerId) {
-      resolved.push({ service, providerId });
+      resolved.push({ service, providerId, mediaType });
     } else {
-      console.warn(`Streaming provider not found: ${service}`);
+      console.warn(`Streaming provider not found (${mediaType}): ${service}`);
     }
   }
 
@@ -135,16 +136,31 @@ export async function resolveStreamingServices(
 export async function fetchStreamingCandidates(
   tmdb: TmdbClient,
   config: AppConfig,
-  providerId: number
+  providerId: number,
+  mediaType: MediaType = "movie"
 ): Promise<TmdbItem[]> {
   const lang = config.tmdbLanguage;
+  const voteFloor = Math.max(40, Math.floor(config.minVotes * 0.5));
+
+  if (mediaType === "tv") {
+    const sorts = ["popularity.desc", "vote_average.desc", "first_air_date.desc"] as const;
+    const sort = pickRotated(sorts, 5);
+    const path =
+      `/discover/tv?language=${lang}&watch_region=${config.watchRegion}` +
+      `&with_watch_providers=${providerId}&with_watch_monetization_types=flatrate` +
+      `&sort_by=${sort}&include_adult=false` +
+      `&vote_count.gte=${voteFloor}`;
+    const items = await tmdb.fetchPages(path, config.pagesToFetch);
+    return shuffleArray(items.map((item) => withMediaType(item, "tv")));
+  }
+
   const sorts = ["popularity.desc", "vote_average.desc", "primary_release_date.desc"] as const;
   const sort = pickRotated(sorts, 5);
   const path =
     `/discover/movie?language=${lang}&watch_region=${config.watchRegion}` +
     `&with_watch_providers=${providerId}&with_watch_monetization_types=flatrate` +
     `&sort_by=${sort}&include_adult=false` +
-    `&vote_count.gte=${Math.max(40, Math.floor(config.minVotes * 0.5))}`;
+    `&vote_count.gte=${voteFloor}`;
 
   const items = await tmdb.fetchPages(path, config.pagesToFetch);
   return shuffleArray(items.map((item) => withMediaType(item, "movie")));

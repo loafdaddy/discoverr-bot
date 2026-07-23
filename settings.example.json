@@ -1,0 +1,55 @@
+{
+  "categories": {
+    "movieOfTheDay": { "postCount": 1 },
+    "tvOfTheDay": { "postCount": 1 },
+    "trending": { "postCount": 3 },
+    "newReleases": { "postCount": 3 },
+    "streaming": { "postCount": 3 },
+    "hiddenGems": { "postCount": 1 }
+  },
+  "streaming": {
+    "services": [
+      "Netflix",
+      "Disney Plus",
+      "Amazon Prime Video",
+      "Apple TV Plus",
+      "Stan",
+      "BINGE",
+      "Paramount Plus"
+    ],
+    "quotas": {},
+    "includeTv": true,
+    "newWindowDays": 21
+  },
+  "discovery": {
+    "minRating": 6.2,
+    "minVotes": 80,
+    "requireEnglish": true,
+    "pagesToFetch": 4,
+    "dryRun": false
+  },
+  "memory": {
+    "suggestedTtlDays": 90,
+    "requestedTtlDays": 90
+  },
+  "schedule": {
+    "postTime": "09:00",
+    "timezone": "Australia/Melbourne"
+  },
+  "channels": {
+    "movieOfTheDay": "",
+    "tvOfTheDay": "",
+    "trending": "",
+    "newReleases": "",
+    "streaming": "",
+    "hiddenGems": ""
+  },
+  "postOnStart": false,
+  "seerr": {
+    "failClosed": true
+  },
+  "tmdb": {
+    "language": "en-AU",
+    "watchRegion": "AU"
+  }
+}
