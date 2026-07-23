@@ -4,7 +4,7 @@
   <img src="data/brand/discoverr-mark.svg" alt="Discoverr mark" width="72"/>
 </p>
 
-Dummy-proof install. Do the steps **in order** — secrets go in `.env`; channels, schedule, and tuning go in `data/settings.json` so upgrades do not wipe them.
+Dummy-proof install. Do the steps **in order** — each step collects a value you will paste into `.env` at the end. Extra configuration for posts is optional (step 8).
 
 **Runtime is Docker only.** You do not install Node or npm on the host. Contributors: [CONTRIBUTING.md](CONTRIBUTING.md).
 
@@ -20,10 +20,11 @@ Overview: [README.md](README.md) · Architecture: [docs/ARCHITECTURE.md](docs/AR
 | 1 | Discord | `DISCORD_TOKEN` + channel IDs |
 | 2 | TMDb | `TMDB_API_KEY` |
 | 3 | Seerr | `SEERR_URL`, `SEERR_USERNAME`, `SEERR_PASSWORD` |
-| 4 | Settings | `data/settings.json` (region, streaming, channels, schedule) |
-| 5 | Fill `.env` | Secrets only |
+| 4 | Region & streaming | `WATCH_REGION`, `STREAMING_SERVICES` |
+| 5 | Fill `.env` | Complete config file |
 | 6 | Run | Container up |
 | 7 | Smoke test | Posts + Request buttons working |
+| 8 | Extra post config *(optional)* | `data/settings.json` only if you want it |
 
 ---
 
@@ -75,17 +76,17 @@ DISCORD_TOKEN=paste_token_here
 1. In Discord: **User Settings → Advanced → Developer Mode** = on.
 2. Create a category (e.g. **Discover**) with channels like:
 
-| Channel name | Settings key (`channels.*`) |
-|--------------|------------------------------|
-| `movie-of-the-day` | `movieOfTheDay` |
-| `tv-show-of-the-day` | `tvOfTheDay` |
-| `trending-movies-tv` | `trending` |
-| `new-releases` | `newReleases` |
-| `new-on-streaming` | `streaming` |
-| `hidden-gems` | `hiddenGems` |
+| Channel name | Env variable |
+|--------------|--------------|
+| `movie-of-the-day` | `MOVIE_OF_DAY_CHANNEL_ID` |
+| `tv-show-of-the-day` | `TV_OF_DAY_CHANNEL_ID` |
+| `trending-movies-tv` | `TRENDING_CHANNEL_ID` |
+| `new-releases` | `NEW_RELEASES_CHANNEL_ID` |
+| `new-on-streaming` | `STREAMING_CHANNEL_ID` |
+| `hidden-gems` | `HIDDEN_GEMS_CHANNEL_ID` |
 
-3. For each channel: right-click → **Copy Channel ID** → paste into a note for step 4 (`data/settings.json`).
-4. Leave a channel ID blank to disable that category.
+3. For each channel: right-click → **Copy Channel ID** → paste into a note for step 5.
+4. Leave a variable blank in `.env` to disable that category.
 5. Confirm the bot role can view and send in those channels.
 
 Optional: set the bot avatar from [`data/brand/discoverr-mark.svg`](data/brand/discoverr-mark.svg) (export PNG if Discord asks for it). Brand notes: [data/brand/README.md](data/brand/README.md).
@@ -105,7 +106,7 @@ Optional: set the bot avatar from [`data/brand/discoverr-mark.svg`](data/brand/d
 TMDB_API_KEY=paste_key_here
 ```
 
-Optional later: `tmdb.language` / `discovery.pagesToFetch` in settings (defaults `en-AU` / `4`). See [Settings reference](#settings-reference).
+Optional later: `TMDB_LANGUAGE` (default `en-AU`) and `TMDB_PAGES` (default `4`). See [Environment reference](#environment-reference).
 
 **Checkpoint:** you have `TMDB_API_KEY`.
 
@@ -139,63 +140,46 @@ Discoverr logs into Seerr with cookie-based local login (`email` + password). Be
 
 ---
 
-## 4. Operator settings (`data/settings.json`)
+## 4. Region and streaming services
 
-```bash
-cp settings.example.json data/settings.json
+Pick your watch region (TMDb country). Codes work (`AU`, `US`, `GB`, …) and so do common names (`Australia`, `USA`).
+
+```env
+WATCH_REGION=AU
 ```
 
-Edit `data/settings.json` (survives image upgrades; mounted with `./data`):
+List streaming services you want featured. Names must match TMDb watch-provider names for that region:
 
-```json
-{
-  "tmdb": { "watchRegion": "AU", "language": "en-AU" },
-  "streaming": {
-    "services": ["Netflix", "Disney Plus", "Amazon Prime Video", "Stan"],
-    "quotas": {},
-    "includeTv": true,
-    "newWindowDays": 21
-  },
-  "channels": {
-    "movieOfTheDay": "paste_id",
-    "tvOfTheDay": "paste_id",
-    "trending": "paste_id",
-    "newReleases": "paste_id",
-    "streaming": "paste_id",
-    "hiddenGems": "paste_id"
-  },
-  "schedule": { "postTime": "09:00", "timezone": "Australia/Melbourne" },
-  "categories": {
-    "trending": { "postCount": 3 },
-    "streaming": { "postCount": 3 }
-  },
-  "memory": { "suggestedTtlDays": 90, "requestedTtlDays": 90 }
-}
+```env
+STREAMING_SERVICES="Netflix,Disney Plus,Amazon Prime Video,Apple TV Plus,Stan,BINGE,Paramount Plus"
 ```
 
-**Streaming tips**
-- Provider names must match TMDb for your region.
-- Empty `quotas` → soft shuffled mix (default). Example quotas for 3 posts: `"quotas": { "Netflix": 1, "Amazon Prime Video": 2 }` (sum must equal `categories.streaming.postCount`).
-- `includeTv: true` mixes movies and TV in New on Streaming; set `false` for movies only.
-- First-seen “new” preference uses `data/streaming-catalog.json` on the same volume.
+Each daily **New on streaming** post picks up to **3** titles across a **shuffled mix** of these providers (different services when possible). Unknown names are logged and skipped — adjust the list to what you actually subscribe to.
 
-**Memory tips**
-- `suggestedTtlDays` — cooldown after a post if nobody requested it (`0` = never re-enter).
-- `requestedTtlDays` — cooldown from the Request click (`0` = never); can be shorter so popular titles rotate sooner.
+TMDb does not expose “date added to Netflix.” Discoverr approximates “new” with a local first-seen snapshot in `data/streaming-catalog.json` (same Compose volume as suggestion history). It prefers titles newly visible in that snapshot, and falls back to available/popular on cold start or a thin new window. Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
-**Dry-run:** set `"discovery": { "dryRun": true }` to log picks without Discord posts.
+Also pick when to post (24-hour time + timezone):
 
-**Checkpoint:** `data/settings.json` has region, streaming list, channel IDs, and schedule.
+```env
+POST_TIME=09:00
+TZ=Australia/Melbourne
+```
+
+Examples: `POST_TIME=18:30` with `TZ=America/New_York`, or `POST_TIME=07:30` with `TZ=Europe/London`.
+
+**Checkpoint:** you have `WATCH_REGION`, `STREAMING_SERVICES`, `POST_TIME`, and `TZ`.
 
 ---
 
-## 5. Fill `.env` (secrets)
+## 5. Fill `.env`
 
 ```bash
 cp .env.example .env
 ```
 
-Open `.env` and paste secrets from steps 1–3:
+Open `.env` and paste everything from steps 1–4. Full template comments: [.env.example](.env.example).
+
+Minimum to start:
 
 ```env
 DISCORD_TOKEN=...
@@ -203,9 +187,19 @@ TMDB_API_KEY=...
 SEERR_URL=...
 SEERR_USERNAME=...
 SEERR_PASSWORD=...
+WATCH_REGION=AU
+STREAMING_SERVICES="Netflix,Disney Plus,Amazon Prime Video"
+MOVIE_OF_DAY_CHANNEL_ID=...
+TV_OF_DAY_CHANNEL_ID=...
+TRENDING_CHANNEL_ID=...
+NEW_RELEASES_CHANNEL_ID=...
+STREAMING_CHANNEL_ID=...
+HIDDEN_GEMS_CHANNEL_ID=...
+POST_TIME=09:00
+TZ=Australia/Melbourne
 ```
 
-Non-secret env vars still work if you have not created `settings.json` yet (migration bridge). Prefer settings for new installs.
+Leave any `*_CHANNEL_ID` blank to skip that category.
 
 ---
 
@@ -221,13 +215,13 @@ docker logs -f discoverr
 What this does:
 
 - Builds from [`Dockerfile`](Dockerfile) (deps + TypeScript compile + `node dist/index.js`)
-- Loads `.env` secrets + `data/settings.json` (or env fallback)
-- Mounts `./data` for settings, suggestion history, and streaming catalog
+- Loads `.env`
+- Mounts `./data` for suggestion history (`suggested.json`) and streaming first-seen catalog (`streaming-catalog.json`)
 - Names the container `discoverr`
 
-Look for `Loaded operator settings from …` or `No …/settings.json found`, then `Scheduled discovery: every day at …`.
+Look for a log line like `Scheduled discovery: every day at …`.
 
-After changing settings or `.env`, recreate:
+After changing `.env` or pulling code, recreate:
 
 ```bash
 docker compose up -d --build
@@ -237,7 +231,11 @@ docker compose up -d --build
 
 ## 7. Smoke test
 
-1. In `data/settings.json` set `"postOnStart": true` (or `POST_ON_START=true` in `.env` during migration).
+1. In `.env` set:
+
+```env
+POST_ON_START=true
+```
 
 2. Recreate and watch logs:
 
@@ -248,29 +246,48 @@ docker logs -f discoverr
 
 3. In Discord, confirm embeds and **Request** buttons appear in the configured channels.
 4. Click a Request button and confirm a request shows up in Seerr for the Discoverr user.
-5. Set `postOnStart` back to `false` and recreate so you are not posting on every restart.
+5. Set `POST_ON_START=false` and recreate again so you are not posting on every restart:
+
+```bash
+docker compose up -d --build
+```
 
 ---
 
-## Settings reference
+## 8. Extra configuration for posts (optional)
 
-Copy [settings.example.json](settings.example.json). Invalid values fail startup with a clear error in container logs.
+**Skip this unless you want it.** Discoverr works with `.env` alone.
 
-| Area | Keys | Notes |
-|------|------|-------|
-| `categories.*.postCount` | 1–3 | Posts per category per run |
-| `streaming.services` | string[] | TMDb provider names |
-| `streaming.quotas` | map | Sum must equal streaming `postCount` when non-empty |
-| `streaming.includeTv` | bool | Default `true` |
-| `streaming.newWindowDays` | 1–90 | First-seen “new” window |
-| `discovery.*` | rating, votes, pages, `dryRun`, `requireEnglish` | Global discovery knobs |
-| `memory.suggestedTtlDays` / `requestedTtlDays` | 0–3650 | `0` = never re-enter that class |
-| `schedule.postTime` / `cron` / `timezone` | | `cron` overrides `postTime` |
-| `channels.*` | Discord snowflakes | Blank skips category |
-| `seerr.failClosed` | bool | Skip on Seerr lookup failure |
-| `tmdb.language` / `watchRegion` | | |
+If you want extra configuration for posts — for example how many titles per channel, streaming mix quotas, TV in the streaming channel, or longer cooldowns after someone requests a title — use a settings file:
 
-## Secrets (`.env`)
+```bash
+cp settings.example.json data/settings.json
+```
+
+Open `data/settings.json`. Every setting has a `#` comment above it explaining what it does. Change only what you care about; you can delete whole sections you do not need.
+
+| Section | What you can change |
+|---------|---------------------|
+| `categories` | Titles per day per category (1–3) |
+| `streaming.quotas` | Exact count per service (must add up to streaming post count) |
+| `streaming.includeTv` | `true` = movies and TV in streaming (default `false` = movies only) |
+| `streaming.newWindowDays` | Prefer titles newly seen in the catalog |
+| `discovery.dryRun` | Log posts without sending to Discord |
+| `memory` | Separate cooldowns for suggested vs requested titles |
+
+Then rebuild:
+
+```bash
+docker compose up -d --build
+```
+
+`data/settings.json` is not wiped by upgrades. You can remove the file anytime to go back to built-in defaults.
+
+---
+
+## Environment reference
+
+### Required
 
 | Variable | Purpose |
 |----------|---------|
@@ -278,6 +295,31 @@ Copy [settings.example.json](settings.example.json). Invalid values fail startup
 | `TMDB_API_KEY` | TMDb developer API key |
 | `SEERR_URL` | Seerr base URL (reachable from the container) |
 | `SEERR_USERNAME` / `SEERR_PASSWORD` | Dedicated Seerr user |
+| `WATCH_REGION` | Discovery region |
+| `STREAMING_SERVICES` | Comma-separated TMDb provider names (mixed across daily posts) |
+| `*_CHANNEL_ID` | Discord channel per category (blank to skip) |
+
+### Schedule
+
+| Variable | Purpose |
+|----------|---------|
+| `POST_TIME` | Daily time `HH:MM` (24-hour) in `TZ` — easiest |
+| `POST_HOUR` / `POST_MINUTE` | Alternative if `POST_TIME` is unset |
+| `CRON_SCHEDULE` | Full cron; **overrides** `POST_TIME` / `POST_HOUR` when set |
+| `TZ` | IANA timezone (`TIMEZONE` also accepted). Default `Australia/Melbourne` |
+
+Default if nothing is set: **09:00** daily.
+
+### Optional tuning
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `POST_ON_START` | `false` | `true` only while testing |
+| `TMDB_LANGUAGE` | `en-AU` | TMDb language |
+| `TMDB_PAGES` | `4` | Pages fetched per source |
+| `HISTORY_TTL_DAYS` | `90` | Days before a title can be suggested again |
+| `MIN_RATING` / `MIN_VOTES` | `6.2` / `80` | Global quality floors |
+| `SEERR_FAIL_CLOSED` | `true` | Skip titles when Seerr lookup fails |
 
 `WATCH_REGION` normalization lives in [`src/lib/watchRegion.ts`](src/lib/watchRegion.ts).
 
@@ -291,97 +333,12 @@ docker compose down
 docker compose up -d --build
 ```
 
-Your `data/settings.json`, `suggested.json`, and `streaming-catalog.json` stay on the volume. **`.env` is never overwritten by a pull** — git ignores it.
-
----
-
-## Upgrading to 3.0.0 from 2.x
-
-**Short answer:** keep your existing `.env`. You do not have to create `settings.json` on day one.
-
-### Path A — rebuild only (safest, zero config edits)
-
-Your current `.env` (secrets **and** channels / schedule / streaming / tuning) continues to work via the env migration bridge.
-
-```bash
-# optional backup
-cp .env .env.backup
-cp -a data data-backup
-
-git pull
-docker compose up -d --build
-docker logs -f discoverr
-```
-
-Look for: `No …/settings.json found — using defaults and environment variables` and your usual schedule line.
-
-**Note:** 3.0 defaults New on Streaming to **movies + TV**. To stay movies-only without a full settings file:
-
-```bash
-mkdir -p data
-printf '%s\n' '{ "streaming": { "includeTv": false } }' > data/settings.json
-docker compose up -d --build
-```
-
-(Blank channel fields are not required; missing keys keep your `.env` channels.)
-
-### Path B — adopt `data/settings.json` (recommended when you want new knobs)
-
-1. Keep `.env` secrets as they are (`DISCORD_TOKEN`, `TMDB_*`, `SEERR_*`).
-2. Copy the example and fill values **from your current `.env`**:
-
-```bash
-cp settings.example.json data/settings.json
-```
-
-3. Edit `data/settings.json`:
-   - Paste channel IDs into `channels.*`
-   - Paste providers into `streaming.services`
-   - Set `schedule.postTime` / `timezone` to match your old `POST_TIME` / `TZ`
-   - Optionally set post counts, quotas, memory TTLs, `dryRun`
-4. Recreate the container.
-5. After it looks good, you may remove non-secret keys from `.env` (optional cleanup). **Never remove the five secrets.**
-
-Empty channel strings in a copied example **fall back** to `.env` channel IDs so a half-filled file will not silently disable categories.
-
-Full key list: [Settings reference](#settings-reference) · [Editing settings](#editing-settings).
-
----
-
-## Editing settings
-
-File: **`data/settings.json`** (Compose mounts `./data` → `/app/data`).
-
-1. Edit on the host (nano, VS Code, NAS file browser — whatever you use).
-2. Validate JSON (trailing commas will fail startup — the container log names the problem).
-3. Apply:
-
-```bash
-docker compose up -d --build
-docker logs -f discoverr
-```
-
-You should see `Loaded operator settings from …/data/settings.json`.
-
-### Common edits
-
-| Goal | Example |
-|------|---------|
-| 2 trending posts instead of 3 | `"categories": { "trending": { "postCount": 2 } }` |
-| Force Netflix + Prime mix | `"streaming": { "quotas": { "Netflix": 1, "Amazon Prime Video": 2 } }` (sum = streaming `postCount`) |
-| Movies-only streaming | `"streaming": { "includeTv": false }` |
-| Shorter cooldown after Request | `"memory": { "requestedTtlDays": 30 }` |
-| Test without posting | `"discovery": { "dryRun": true }` |
-| Change daily time | `"schedule": { "postTime": "18:30", "timezone": "America/New_York" }` |
-
-Only change the keys you care about — omitted keys keep defaults (and env bridge values where applicable).
-
----
+Your existing `.env` keeps working. You do not need `settings.json` unless you want [extra configuration for posts](#8-extra-configuration-for-posts-optional).
 
 ## Upgrading from `bot.js` (v1)
 
 1. Pull latest code (TypeScript + Dockerfile layout).
-2. Keep secrets in `.env`; for 3.0 prefer `data/settings.json` for channels / schedule (see Path B above).
+2. Merge new keys from `.env.example` into your `.env`.
 3. Stop using `node bot.js` / bind-mount npm Compose:
 
 ```bash
@@ -397,14 +354,14 @@ docker compose up -d --build
 
 | Symptom | Check |
 |---------|--------|
-| Bot posts nothing | Channel IDs in settings; permissions; `docker logs -f discoverr` |
-| Startup fails on settings | Invalid JSON or out-of-range values — read the error line |
+| Bot posts nothing | Channel permissions and `*_CHANNEL_ID`; `docker logs -f discoverr` |
+| Startup fails on settings | Invalid `data/settings.json` — read the error line (`#` comments are fine) |
 | Request button fails | Seerr username/password and permissions; cookie login uses `email` |
-| Library titles still appear | Seerr login; numeric status; `seerr.failClosed` |
-| Same titles return too soon | `data/suggested.json` and `memory.*TtlDays` |
-| Schedule wrong time | `schedule` in settings and recreate |
+| Library titles still appear | Seerr login; numeric status; `SEERR_FAIL_CLOSED` |
+| Same titles return too soon | `data/suggested.json` and `HISTORY_TTL_DAYS` (or `memory.*` in settings) |
+| Schedule wrong time | `POST_TIME` / `CRON_SCHEDULE` and `TZ`; recreate after `.env` edits |
 | Image build fails | Docker can pull `node:22-alpine`; disk space; valid `package-lock.json` |
-| Streaming category silent | Provider names match TMDb for `watchRegion` |
+| Streaming category silent | Provider names match TMDb for `WATCH_REGION` |
 | Seerr unreachable | URL from **inside** the container (not host `localhost` unless networked) |
 
 More on Seerr status codes and discovery: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).

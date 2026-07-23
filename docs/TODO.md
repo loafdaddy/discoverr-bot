@@ -4,7 +4,7 @@ Single living status list. Keep it honest: only check items when verified with a
 
 Related: [ARCHITECTURE.md](ARCHITECTURE.md) · [ROADMAP.md](ROADMAP.md) · [RELEASES.md](RELEASES.md) · [SETUP.md](../SETUP.md) · [CONTRIBUTING.md](../CONTRIBUTING.md)
 
-## Done (v2.0.0 / v2.1.0 / v2.2.0 / v3.0.0)
+## Done (v2.0.0 / v2.1.0 / v2.2.0 / v3.0.0 / v3.1.0)
 
 - [x] TypeScript modular layout (`src/` → `dist/`)
 - [x] Multi-page / rotating discovery sources
@@ -21,8 +21,10 @@ Related: [ARCHITECTURE.md](ARCHITECTURE.md) · [ROADMAP.md](ROADMAP.md) · [RELE
 - [x] New on streaming: shuffled multi-provider mix (3 slots) (v2.2.0)
 - [x] Streaming first-seen catalog for better “new” preference within TMDb limits (v2.2.0)
 - [x] Publish **v2.2.0** on GitHub
-- [x] **v3.0.0 Config Update** — durable `data/settings.json` (secrets stay in `.env`; env bridge for existing installs)
+- [x] **v3.0.0 Config Update** — optional extra post config in `data/settings.json`; `.env` stays primary
 - [x] Publish **v3.0.0** on GitHub
+- [x] **v3.1.0** — restore `.env`-first install; optional commented `settings.json` for extra post config
+- [x] Publish **v3.1.0** on GitHub
 - [x] Per-channel recommendation counts (1–3) and streaming mix quotas
 - [x] TV support in the streaming category (`streaming.includeTv`)
 - [x] Clearer startup settings validation errors

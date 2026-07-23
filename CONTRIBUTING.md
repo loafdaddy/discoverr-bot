@@ -11,8 +11,8 @@ git clone https://github.com/loafdaddy/discoverr-bot.git
 cd discoverr-bot
 npm install
 cp .env.example .env
-cp settings.example.json data/settings.json
-# fill secrets in .env and operator knobs in data/settings.json for a live smoke test via Docker
+# fill in .env for a live smoke test via Docker
+# optional extra post config: cp settings.example.json data/settings.json
 ```
 
 Validate without starting Discord:
@@ -32,7 +32,7 @@ docker logs -f discoverr
 Docs:
 
 - [README.md](README.md) — short product overview
-- [SETUP.md](SETUP.md) — ordered install (Discord → TMDb → Seerr → settings → Docker)
+- [SETUP.md](SETUP.md) — ordered install (Discord → TMDb → Seerr → Docker)
 - [docs/README.md](docs/README.md) — docs index
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — modules and discovery pipeline
 - [docs/RELEASES.md](docs/RELEASES.md) — version history and how to cut a release

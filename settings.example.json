@@ -1,4 +1,20 @@
+# Discoverr — extra configuration for posts (optional)
+#
+# You do NOT need this file to run Discoverr.
+# Normal install uses .env only (see SETUP.md).
+#
+# If you want extra configuration for posts — how many titles per channel,
+# streaming mix, TV in streaming, memory cooldowns, dry-run — copy this file:
+#
+#   cp settings.example.json data/settings.json
+#
+# Then edit the values below. Lines starting with # are comments (safe to leave).
+# After editing: docker compose up -d --build
+#
+# You can delete any section you do not care about; defaults apply for missing keys.
+
 {
+  # How many titles to post in each category per day (min 1, max 3)
   "categories": {
     "movieOfTheDay": { "postCount": 1 },
     "tvOfTheDay": { "postCount": 1 },
@@ -7,49 +23,35 @@
     "streaming": { "postCount": 3 },
     "hiddenGems": { "postCount": 1 }
   },
+
   "streaming": {
-    "services": [
-      "Netflix",
-      "Disney Plus",
-      "Amazon Prime Video",
-      "Apple TV Plus",
-      "Stan",
-      "BINGE",
-      "Paramount Plus"
-    ],
+    # Empty {} = soft shuffled mix across STREAMING_SERVICES from .env
+    # Or set exact counts, e.g. { "Netflix": 1, "Amazon Prime Video": 2 }
+    # Counts must add up to categories.streaming.postCount
     "quotas": {},
-    "includeTv": true,
+
+    # false = movies only (same as older Discoverr); true = movies and TV shows
+    "includeTv": false,
+
+    # Prefer titles first seen in the local catalog within this many days
     "newWindowDays": 21
   },
+
   "discovery": {
-    "minRating": 6.2,
-    "minVotes": 80,
-    "requireEnglish": true,
-    "pagesToFetch": 4,
-    "dryRun": false
+    # true = log what would post, but do not send Discord messages
+    "dryRun": false,
+
+    # Prefer English-language titles
+    "requireEnglish": true
   },
+
   "memory": {
+    # Days before a posted title can be suggested again (if nobody requested it).
+    # If omitted, Discoverr uses HISTORY_TTL_DAYS from .env (default 90).
     "suggestedTtlDays": 90,
+
+    # Days after someone clicks Request before that title can be suggested again.
+    # If omitted, uses the same value as suggestedTtlDays.
     "requestedTtlDays": 90
-  },
-  "schedule": {
-    "postTime": "09:00",
-    "timezone": "Australia/Melbourne"
-  },
-  "channels": {
-    "movieOfTheDay": "",
-    "tvOfTheDay": "",
-    "trending": "",
-    "newReleases": "",
-    "streaming": "",
-    "hiddenGems": ""
-  },
-  "postOnStart": false,
-  "seerr": {
-    "failClosed": true
-  },
-  "tmdb": {
-    "language": "en-AU",
-    "watchRegion": "AU"
   }
 }

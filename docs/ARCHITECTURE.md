@@ -30,8 +30,8 @@ Cron / postOnStart / dryRun
 |------|----------------|
 | [`src/index.ts`](../src/index.ts) | Discord client login, cron schedule, `POST_ON_START` |
 | [`src/lib/schedule.ts`](../src/lib/schedule.ts) | Resolve post time → cron expression |
-| [`src/config.ts`](../src/config.ts) | Secrets from `.env` + merge operator settings |
-| [`src/settings.ts`](../src/settings.ts) | `data/settings.json` load / merge / validate |
+| [`src/config.ts`](../src/config.ts) | Typed `.env` loading (primary) |
+| [`src/settings.ts`](../src/settings.ts) | Optional extra post config (`data/settings.json`) |
 | [`src/tmdb/client.ts`](../src/tmdb/client.ts) | TMDb HTTP client, multi-page fetch, genres, providers |
 | [`src/tmdb/sources.ts`](../src/tmdb/sources.ts) | Category-specific candidate builders |
 | [`src/discovery/select.ts`](../src/discovery/select.ts) | Filter + sample pipeline |
@@ -53,7 +53,7 @@ Categories intentionally avoid “page 1 of `/popular` only”:
 | Movie / TV of the Day | `/discover` with day-rotated genre + sort, multiple pages |
 | Trending | Day + week trending windows, shuffled then sampled |
 | New releases | Recent release-date window, shuffled |
-| Streaming | Multi-provider mix (configurable quotas / post count); TMDb `/discover` for movies and optionally TV (`streaming.includeTv`). Prefers titles newly first-seen in local `data/streaming-catalog.json` (TMDb has no provider add-date — this is “new to our snapshot”, not a Netflix catalog timestamp). Falls back to available/popular on cold start or thin new window. |
+| Streaming | Multi-provider mix; TMDb `/discover` for movies (and optionally TV via `settings.json` `streaming.includeTv`). Prefers titles newly first-seen in local `data/streaming-catalog.json` (TMDb has no provider add-date — this is “new to our snapshot”, not a Netflix catalog timestamp). Falls back to available/popular on cold start or thin new window. |
 | Hidden gems | Older titles, vote band, low max popularity, genre rotation |
 
 Selection uses Fisher–Yates shuffle and weighted sampling that prefers mid-list candidates over index `0`, so popularity-sorted API responses do not always surface the same blockbusters.
@@ -64,15 +64,16 @@ Suggestions are stored in `data/suggested.json` (gitignored). Keys look like `mo
 
 Streaming also maintains `data/streaming-catalog.json` (gitignored): first-seen dates per watch-region + provider + title, used only to prefer recently appeared titles in the New on Streaming category.
 
-Memory cooldowns (from `data/settings.json`, with env fallback):
-- `memory.suggestedTtlDays` — days before an unrequested suggestion can re-enter the pool (`0` = never)
-- `memory.requestedTtlDays` — days after a successful Request button before re-entry (`0` = never); uses `requestedAt` on the history entry
+Memory cooldowns:
+- `HISTORY_TTL_DAYS` in `.env` (default `90`) — unrequested suggestions
+- Optional `memory.requestedTtlDays` / `memory.suggestedTtlDays` in `data/settings.json` — Request button sets `requestedAt` on history
 
 Within a single `postAll()` run, `usedThisRun` prevents cross-category duplicates.
 
-## Operator settings
+## Extra configuration for posts (optional)
 
-Secrets stay in `.env`. Tunables (channels, schedule, post counts, streaming quotas/TV, quality floors, memory, dry-run) live in `data/settings.json` on the Compose volume so image upgrades do not wipe operator preferences. See [`settings.example.json`](../settings.example.json) and [SETUP.md](../SETUP.md).
+`.env` is the primary config (channels, schedule, region, streaming list, quality floors, etc.).  
+`data/settings.json` is **optional** — only if you want extra post configuration (counts, quotas, `includeTv`, dry-run, dual memory TTLs). See [`settings.example.json`](../settings.example.json) and [SETUP.md](../SETUP.md#8-extra-configuration-for-posts-optional).
 
 ## Seerr availability
 

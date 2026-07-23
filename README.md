@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loafdaddy/discoverr-bot/releases/tag/v3.0.0">v3.0.0</a>
+  <a href="https://github.com/loafdaddy/discoverr-bot/releases/tag/v3.1.0">v3.1.0</a>
   ·
   <a href="SETUP.md">Setup</a>
   ·
@@ -55,20 +55,20 @@ Discovery pipeline details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Current categories
 
-Recommended Discord channel layout (create these, then paste each channel ID into `data/settings.json` — or `.env` during migration):
+Recommended Discord channel layout (create these, then paste each channel ID into `.env`):
 
 <p align="center">
   <img src="docs/assets/screenshot-categories.png" alt="Discoverr Discord category channels" width="280"/>
 </p>
 
-| Channel | Settings key | Env fallback |
-|---------|--------------|--------------|
-| `movie-of-the-day` | `channels.movieOfTheDay` | `MOVIE_OF_DAY_CHANNEL_ID` |
-| `tv-show-of-the-day` | `channels.tvOfTheDay` | `TV_OF_DAY_CHANNEL_ID` |
-| `trending-movies-tv` | `channels.trending` | `TRENDING_CHANNEL_ID` |
-| `new-releases` | `channels.newReleases` | `NEW_RELEASES_CHANNEL_ID` |
-| `new-on-streaming` | `channels.streaming` | `STREAMING_CHANNEL_ID` |
-| `hidden-gems` | `channels.hiddenGems` | `HIDDEN_GEMS_CHANNEL_ID` |
+| Channel | Env variable |
+|---------|--------------|
+| `movie-of-the-day` | `MOVIE_OF_DAY_CHANNEL_ID` |
+| `tv-show-of-the-day` | `TV_OF_DAY_CHANNEL_ID` |
+| `trending-movies-tv` | `TRENDING_CHANNEL_ID` |
+| `new-releases` | `NEW_RELEASES_CHANNEL_ID` |
+| `new-on-streaming` | `STREAMING_CHANNEL_ID` |
+| `hidden-gems` | `HIDDEN_GEMS_CHANNEL_ID` |
 
 Full install steps: [SETUP.md](SETUP.md).
 
@@ -89,8 +89,7 @@ Full install steps: [SETUP.md](SETUP.md).
 git clone https://github.com/loafdaddy/discoverr-bot.git
 cd discoverr-bot
 cp .env.example .env
-cp settings.example.json data/settings.json
-# fill .env secrets + data/settings.json using SETUP.md
+# fill .env using SETUP.md (gather Discord, TMDb, Seerr values first)
 docker compose up -d --build
 docker logs -f discoverr
 ```
@@ -105,8 +104,8 @@ docker logs -f discoverr
 | [docs/TODO.md](docs/TODO.md) / [docs/ROADMAP.md](docs/ROADMAP.md) | Status and direction |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Contributor workflow (npm for tests) |
 | [data/brand/README.md](data/brand/README.md) | Lockup, mark, palette |
-| [.env.example](.env.example) | Secrets template |
-| [settings.example.json](settings.example.json) | Operator settings template → `data/settings.json` |
+| [.env.example](.env.example) | Environment template |
+| [settings.example.json](settings.example.json) | Optional extra post config → `data/settings.json` (not required) |
 
 ## Requirements
 
@@ -120,19 +119,18 @@ Details: [SETUP.md](SETUP.md).
 
 ## Configuration
 
-**Secrets** live in `.env` (Discord token, TMDb key, Seerr URL/creds). Start from [.env.example](.env.example).
+All settings live in `.env`. Start from [.env.example](.env.example). Required keys: Discord token, TMDb key, Seerr URL/creds, watch region, streaming services, and channel IDs.
 
-**Operator settings** live in `data/settings.json` on the Compose volume (channels, schedule, post counts, streaming mix/TV, memory TTLs, dry-run, quality floors). Copy [settings.example.json](settings.example.json) → `data/settings.json`. Upgrades keep this file; you do not re-paste channels into `.env`.
+Schedule example:
 
-Env vars for non-secrets still work if `settings.json` is missing (2.x → 3.0 migration bridge). **Your existing `.env` is not invalidated** — see [SETUP.md § Upgrading to 3.0.0](SETUP.md#upgrading-to-300-from-2x).
-
-Schedule example in settings:
-
-```json
-"schedule": { "postTime": "18:30", "timezone": "America/New_York" }
+```env
+POST_TIME=18:30
+TZ=America/New_York
 ```
 
-How to edit knobs day-to-day: [SETUP.md § Editing settings](SETUP.md#editing-settings). Full reference: [SETUP.md](SETUP.md).
+**Optional:** if you want extra configuration for posts (counts, streaming mix, TV in streaming, memory, dry-run), copy [settings.example.json](settings.example.json) → `data/settings.json`. See [SETUP.md § Extra configuration](SETUP.md#8-extra-configuration-for-posts-optional).
+
+Full variable reference and troubleshooting: [SETUP.md](SETUP.md).
 
 ## Security
 
@@ -146,8 +144,7 @@ docker compose down
 docker compose up -d --build
 ```
 
-Upgrading from 2.x: [SETUP.md § Upgrading to 3.0.0](SETUP.md#upgrading-to-300-from-2x) (keep your `.env`).  
-Upgrading from the old JavaScript bot: [SETUP.md § Upgrading from bot.js](SETUP.md#upgrading-from-botjs-v1).
+Your existing `.env` keeps working. Upgrading from the old JavaScript bot: [SETUP.md § Upgrading](SETUP.md#upgrading-from-botjs-v1).
 
 ## FAQ
 
@@ -169,7 +166,7 @@ From [docs/ROADMAP.md](docs/ROADMAP.md) (day-to-day items: [docs/TODO.md](docs/T
 
 - Better discovery quality — less blockbuster repetition, clearer category identity
 - Stronger Seerr status and request handling
-- Operator UX — predictable Docker Compose installs, `data/settings.json` + secrets in `.env`
+- Operator UX — predictable Docker Compose installs and env; optional extra post config in `settings.json`
 - Project hygiene — TypeScript tests and SemVer releases
 
 ## Contributing
