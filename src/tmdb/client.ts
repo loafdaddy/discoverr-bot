@@ -18,6 +18,7 @@ interface TmdbGenre {
 
 export class TmdbClient {
   private genreCache = new Map<string, Map<number, string>>();
+  private providerCache = new Map<string, TmdbProvider[]>();
 
   constructor(private readonly config: AppConfig) {}
 
@@ -55,12 +56,24 @@ export class TmdbClient {
     return results;
   }
 
-  async getProviderId(providerName: string, mediaType: "movie" | "tv"): Promise<number | null> {
+  private async listProviders(mediaType: "movie" | "tv"): Promise<TmdbProvider[]> {
+    const cacheKey = `${mediaType}:${this.config.watchRegion}`;
+    const cached = this.providerCache.get(cacheKey);
+    if (cached) return cached;
+
     const data = await this.get<{ results?: TmdbProvider[] }>(
       `/watch/providers/${mediaType}?watch_region=${this.config.watchRegion}`
     );
-    const found = (data.results || []).find(
-      (provider) => provider.provider_name.toLowerCase() === providerName.toLowerCase()
+    const providers = data.results || [];
+    this.providerCache.set(cacheKey, providers);
+    return providers;
+  }
+
+  async getProviderId(providerName: string, mediaType: "movie" | "tv"): Promise<number | null> {
+    const providers = await this.listProviders(mediaType);
+    const needle = providerName.toLowerCase();
+    const found = providers.find(
+      (provider) => provider.provider_name.toLowerCase() === needle
     );
     return found ? found.provider_id : null;
   }

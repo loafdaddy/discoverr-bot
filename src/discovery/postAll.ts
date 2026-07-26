@@ -99,7 +99,21 @@ export async function postAll(
     requireEnglish: config.requireEnglish
   };
 
-  const movieCandidates = await fetchMovieOfDayCandidates(tmdb, config);
+  // Fetch category pools in parallel; selection stays sequential for usedThisRun.
+  const [
+    movieCandidates,
+    tvCandidates,
+    trendingCandidates,
+    newReleaseCandidates,
+    hiddenCandidates
+  ] = await Promise.all([
+    fetchMovieOfDayCandidates(tmdb, config),
+    fetchTvOfDayCandidates(tmdb, config),
+    fetchTrendingCandidates(tmdb, config),
+    fetchNewReleaseCandidates(tmdb, config),
+    fetchHiddenGemCandidates(tmdb, config)
+  ]);
+
   const movieOfDaySelection = await selectRecommendations(
     movieCandidates,
     counts.movieOfTheDay,
@@ -128,7 +142,6 @@ export async function postAll(
     );
   }
 
-  const tvCandidates = await fetchTvOfDayCandidates(tmdb, config);
   const tvOfDaySelection = await selectRecommendations(
     tvCandidates,
     counts.tvOfTheDay,
@@ -157,7 +170,6 @@ export async function postAll(
     );
   }
 
-  const trendingCandidates = await fetchTrendingCandidates(tmdb, config);
   const trendingSelection = await selectRecommendations(
     trendingCandidates,
     counts.trending,
@@ -181,7 +193,6 @@ export async function postAll(
     );
   }
 
-  const newReleaseCandidates = await fetchNewReleaseCandidates(tmdb, config);
   const newReleaseSelection = await selectRecommendations(
     newReleaseCandidates,
     counts.newReleases,
@@ -250,7 +261,6 @@ export async function postAll(
   }
 
   const cutoffYear = new Date().getFullYear() - 2;
-  const hiddenCandidates = await fetchHiddenGemCandidates(tmdb, config);
   const hiddenGemSelection = await selectRecommendations(
     hiddenCandidates,
     counts.hiddenGems,

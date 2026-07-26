@@ -79,8 +79,11 @@ export async function fetchTrendingCandidates(
   config: AppConfig
 ): Promise<TmdbItem[]> {
   const lang = config.tmdbLanguage;
-  const day = await tmdb.fetchPages(`/trending/all/day?language=${lang}`, Math.min(3, config.pagesToFetch));
-  const week = await tmdb.fetchPages(`/trending/all/week?language=${lang}`, Math.min(3, config.pagesToFetch));
+  const pages = Math.min(3, config.pagesToFetch);
+  const [day, week] = await Promise.all([
+    tmdb.fetchPages(`/trending/all/day?language=${lang}`, pages),
+    tmdb.fetchPages(`/trending/all/week?language=${lang}`, pages)
+  ]);
   const merged = [...day, ...week].filter(
     (item) => item.media_type === "movie" || item.media_type === "tv"
   );
@@ -120,9 +123,15 @@ export async function resolveStreamingServices(
 ): Promise<ResolvedStreamingService[]> {
   if (!config.streamingServices.length) return [];
 
+  const lookups = await Promise.all(
+    config.streamingServices.map(async (service) => {
+      const providerId = await tmdb.getProviderId(service, mediaType);
+      return { service, providerId };
+    })
+  );
+
   const resolved: ResolvedStreamingService[] = [];
-  for (const service of config.streamingServices) {
-    const providerId = await tmdb.getProviderId(service, mediaType);
+  for (const { service, providerId } of lookups) {
     if (providerId) {
       resolved.push({ service, providerId, mediaType });
     } else {

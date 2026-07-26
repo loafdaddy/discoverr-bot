@@ -23,6 +23,7 @@ Stay a **small ARR companion**: Discord recommendations + Seerr request buttons.
 - **v2.2.0** — New on streaming multi-provider mix + local first-seen preference — see [RELEASES.md](RELEASES.md)
 - **v3.0.0** — Optional extra post config in `settings.json` (post counts, quotas, TV streaming, memory, dry-run); `.env` primary — see [RELEASES.md](RELEASES.md)
 - **v3.1.0** — Clarify optional settings: `.env`-first setup, commented `settings.example.json` — see [RELEASES.md](RELEASES.md)
+- **v3.1.1** — Discovery performance polish (fewer Seerr lookups, parallel TMDb fetches) — see [RELEASES.md](RELEASES.md)
 - **Next** — items under **Next** in [TODO.md](TODO.md)
 
 ## Non-goals (for now)

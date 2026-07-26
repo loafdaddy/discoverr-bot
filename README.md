@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loafdaddy/discoverr-bot/releases/tag/v3.1.0">v3.1.0</a>
+  <a href="https://github.com/loafdaddy/discoverr-bot/releases/tag/v3.1.1">v3.1.1</a>
   ·
   <a href="SETUP.md">Setup</a>
   ·

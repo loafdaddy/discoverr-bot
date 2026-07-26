@@ -2,7 +2,7 @@
 
 Track every published version here. Update this file when cutting a release, then tag and publish on GitHub.
 
-Current version in tree: **3.1.0** (`package.json`).
+Current version in tree: **3.1.1** (`package.json`).
 
 ## Versioning
 
@@ -22,7 +22,7 @@ Pre-1.0 history lived as an untagged JavaScript bot. **2.0.0** is the first SemV
 2. Set `version` in [`package.json`](../package.json) (and keep lockfile in sync if you use `npm version`)
 3. Add a section below in this file; bump version mentions in [`README.md`](../README.md) / [`SETUP.md`](../SETUP.md) if needed
 4. Commit on `main` (or merge the release PR)
-5. Tag: `git tag -a v3.1.0 -m "Discoverr 3.1.0"`
+5. Tag: `git tag -a v3.1.1 -m "Discoverr 3.1.1"`
 6. Push: `git push origin main --tags`
 7. Create the GitHub release (notes can mirror the section below)
 8. Sanity-check from a clean clone:
@@ -30,7 +30,7 @@ Pre-1.0 history lived as an untagged JavaScript bot. **2.0.0** is the first SemV
 ```bash
 git clone https://github.com/loafdaddy/discoverr-bot.git
 cd discoverr-bot
-git checkout v3.1.0
+git checkout v3.1.1
 cp .env.example .env
 # fill secrets in .env — see SETUP.md
 # optional: cp settings.example.json data/settings.json
@@ -47,6 +47,36 @@ docker logs -f discoverr
 - Include the AI note if the release involved substantial AI-assisted work
 
 ## Releases
+
+### 3.1.1 — Discovery performance polish (2026-07-26)
+
+**Status:** published · [GitHub release](https://github.com/loafdaddy/discoverr-bot/releases/tag/v3.1.1)
+
+**Headline:** Small discovery-run optimizations — fewer Seerr lookups per pick, parallel TMDb category fetches, cached watch-provider lists.
+
+**Highlights**
+- Cap Seerr availability checks to a modest sample pool (keeps mid-list bias, skips scanning every discover hit)
+- Fetch movie / TV / trending / new / hidden candidate pools in parallel before sequential selection
+- Cache TMDb watch-provider lists per region; resolve configured streaming services concurrently
+- Parallel day + week trending page fetches
+- Unit coverage for Seerr pool capping and AVAILABLE skip behaviour
+
+**Upgrade from 3.1.0**
+
+```bash
+git pull
+docker compose up -d --build
+```
+
+No config or env changes.
+
+**Install (new)**
+- Follow [SETUP.md](../SETUP.md): fill `.env` from `.env.example`
+- GitHub: https://github.com/loafdaddy/discoverr-bot/releases/tag/v3.1.1
+
+**Known gaps:** see [TODO.md](TODO.md)
+
+---
 
 ### 3.1.0 — Optional settings clarified (2026-07-23)
 

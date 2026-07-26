@@ -10,6 +10,15 @@ export interface SelectOptions extends QualityFilters {
   weighted?: boolean;
 }
 
+/**
+ * How many Seerr-cleared titles to gather before sampling.
+ * Enough for mid-list bias without looking up every discover hit.
+ */
+export function seerrPoolTarget(count: number): number {
+  if (count <= 0) return 0;
+  return Math.max(count * 8, 16);
+}
+
 export async function selectRecommendations(
   items: TmdbItem[],
   count: number,
@@ -18,10 +27,13 @@ export async function selectRecommendations(
   seerr: SeerrClient,
   options: SelectOptions = {}
 ): Promise<TmdbItem[]> {
+  if (count <= 0) return [];
+
   const { weighted = true, ...filters } = options;
 
   const eligible: TmdbItem[] = [];
   const candidates = shuffleArray((items || []).filter((item) => !!item && item.id));
+  const poolTarget = seerrPoolTarget(count);
 
   for (const item of candidates) {
     const key = itemKey(item);
@@ -30,6 +42,7 @@ export async function selectRecommendations(
     if (!passesQualityFilters(item, filters)) continue;
     if (await seerr.isUnavailable(mediaTypeOf(item), item.id)) continue;
     eligible.push(item);
+    if (eligible.length >= poolTarget) break;
   }
 
   if (!eligible.length) return [];

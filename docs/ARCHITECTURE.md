@@ -15,7 +15,7 @@ Cron / postOnStart / dryRun
         +--> selectRecommendations()
                 |-- memory TTL (suggested / requested; data/suggested.json)
                 |-- quality filters
-                |-- Seerr numeric media.status gate
+                |-- Seerr numeric media.status gate (capped sample pool)
                 |-- weighted mid-list sampling
         |
         +--> Discord embeds + Request buttons (skipped when dryRun)

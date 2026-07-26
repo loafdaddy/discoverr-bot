@@ -4,7 +4,7 @@ Single living status list. Keep it honest: only check items when verified with a
 
 Related: [ARCHITECTURE.md](ARCHITECTURE.md) · [ROADMAP.md](ROADMAP.md) · [RELEASES.md](RELEASES.md) · [SETUP.md](../SETUP.md) · [CONTRIBUTING.md](../CONTRIBUTING.md)
 
-## Done (v2.0.0 / v2.1.0 / v2.2.0 / v3.0.0 / v3.1.0)
+## Done (v2.0.0 / v2.1.0 / v2.2.0 / v3.0.0 / v3.1.0 / v3.1.1)
 
 - [x] TypeScript modular layout (`src/` → `dist/`)
 - [x] Multi-page / rotating discovery sources
@@ -30,6 +30,8 @@ Related: [ARCHITECTURE.md](ARCHITECTURE.md) · [ROADMAP.md](ROADMAP.md) · [RELE
 - [x] Clearer startup settings validation errors
 - [x] Dry-run / log-only discovery (`discovery.dryRun`)
 - [x] Dual memory TTLs (`suggestedTtlDays` / `requestedTtlDays`) + `requestedAt` on Request
+- [x] **v3.1.1** — discovery performance polish (Seerr pool cap, parallel TMDb fetches, provider cache)
+- [x] Publish **v3.1.1** on GitHub
 
 ## Next
 
