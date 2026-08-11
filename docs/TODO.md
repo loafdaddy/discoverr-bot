@@ -30,7 +30,7 @@ Related: [ARCHITECTURE.md](ARCHITECTURE.md) · [ROADMAP.md](ROADMAP.md) · [RELE
 - [x] TMDb overview language fallback (`TMDB_FALLBACK_LANGUAGE`, issue #4)
 - [x] Startup Seerr health check + clearer login/URL/TLS errors
 - [x] GHCR publish workflow on `v*` tags (optional Compose `image:`)
-- [ ] Cut **v3.2.1** release / publish package visibility on GHCR if needed
+- [x] Cut **v3.2.1** release / publish package visibility on GHCR if needed
 
 ## Operator follow-up (live stack)
 

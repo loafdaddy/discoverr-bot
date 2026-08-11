@@ -27,7 +27,7 @@ Supports **Plex** and **Jellyfin** servers that use Seerr for requests (same Dis
 - **v3.1.0** — Clarify optional settings: `.env`-first setup, commented `settings.example.json` — see [RELEASES.md](RELEASES.md)
 - **v3.1.1** — Discovery performance polish (fewer Seerr lookups, parallel TMDb fetches) — see [RELEASES.md](RELEASES.md)
 - **v3.2.0** — Docs for Plex and Jellyfin servers that use Seerr; no required env or app redesign — see [RELEASES.md](RELEASES.md) · [SETUP.md](../SETUP.md)
-- **v3.2.1** *(in progress, `release/3.2.1`)* — CI, MIT license, TMDb overview fallback (#4), Seerr startup health check, GHCR workflow — see [RELEASES.md](RELEASES.md)
+- **v3.2.1** — CI, MIT license, TMDb overview fallback (#4), Seerr startup health check, GHCR workflow — see [RELEASES.md](RELEASES.md)
 - **Next** — items under **Next** in [TODO.md](TODO.md)
 
 ## Post-3.2.0 (planned themes — not in 3.2.0)

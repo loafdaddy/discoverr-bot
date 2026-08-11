@@ -48,7 +48,9 @@ docker logs -f discoverr
 
 ## Releases
 
-### 3.2.1 — CI, license, overview fallback, Seerr health *(in progress)*
+### 3.2.1 — CI, license, overview fallback, Seerr health (2026-08-11)
+
+**Status:** published · [GitHub release](https://github.com/loafdaddy/discoverr-bot/releases/tag/v3.2.1)
 
 **Branch:** `release/3.2.1`
 
@@ -70,7 +72,12 @@ docker compose up -d --build
 
 Optional new env: `TMDB_FALLBACK_LANGUAGE=en` (default if unset).
 
+**Install (new)**
+- Follow [SETUP.md](../SETUP.md)
+
 **Known gaps:** see [TODO.md](TODO.md)
+
+**AI note:** Parts of this release were developed with AI assistance. AI-assisted contributions remain welcome — see [CONTRIBUTING.md](../CONTRIBUTING.md).
 
 ---
 
