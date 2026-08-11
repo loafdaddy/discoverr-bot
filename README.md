@@ -6,7 +6,7 @@
 
 <p align="center">
   <strong>Daily media recommendations in Discord, with Seerr request buttons</strong><br/>
-  TypeScript · TMDb · Seerr · Jellyfin · Docker · ARR companion
+  TypeScript · TMDb · Seerr · Plex · Jellyfin · Docker · ARR companion
 </p>
 
 <p align="center">
@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loafdaddy/discoverr-bot/releases/tag/v3.1.1">v3.1.1</a>
+  <a href="https://github.com/loafdaddy/discoverr-bot/releases/tag/v3.2.0">v3.2.0</a>
   ·
   <a href="SETUP.md">Setup</a>
   ·
@@ -27,7 +27,7 @@
   <a href="docs/README.md">Docs index</a>
 </p>
 
-Discoverr is a lightweight Discord bot for Seerr and Jellyfin users. It posts scheduled movie and TV picks into dedicated channels and lets people request titles through Seerr without leaving Discord.
+Discoverr is a lightweight Discord bot for Seerr users (Plex or Jellyfin behind Seerr). It posts scheduled movie and TV picks into dedicated channels and lets people request titles through Seerr without leaving Discord.
 
 Built to complement an ARR stack (Sonarr, Radarr and Seerr) as a lightweight Docker companion.
 
@@ -74,12 +74,15 @@ Full install steps: [SETUP.md](SETUP.md).
 
 ## Works with
 
-- Jellyfin
 - Seerr
+- Plex (via Seerr)
+- Jellyfin (via Seerr)
 - Sonarr
 - Radarr
 - Docker
 - Discord
+
+Media-server details: [docs/PLEX.md](docs/PLEX.md).
 
 ## Quick start
 
@@ -100,6 +103,7 @@ docker logs -f discoverr
 |-----|----------------|
 | **[SETUP.md](SETUP.md)** | Step-by-step install: Discord, TMDb, Seerr, env, Docker, smoke test |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Modules, discovery pipeline, Seerr status |
+| [docs/PLEX.md](docs/PLEX.md) | Plex + Jellyfin via Seerr |
 | [docs/RELEASES.md](docs/RELEASES.md) | Version history and how to cut a release |
 | [docs/TODO.md](docs/TODO.md) / [docs/ROADMAP.md](docs/ROADMAP.md) | Status and direction |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Contributor workflow (npm for tests) |
@@ -112,7 +116,7 @@ docker logs -f discoverr
 - Docker and Docker Compose
 - Discord server + bot token
 - TMDb API key
-- Working Seerr + dedicated Seerr/Jellyfin user for the bot
+- Working Seerr (Plex or Jellyfin behind it) + dedicated Seerr user for the bot
 - Discord channels for each category you want
 
 Details: [SETUP.md](SETUP.md).
@@ -134,7 +138,7 @@ Full variable reference and troubleshooting: [SETUP.md](SETUP.md).
 
 ## Security
 
-Discoverr talks to Discord, TMDb, and Seerr. It does not access Jellyfin directly. Requests and availability checks use the dedicated Seerr account you configure, so behaviour stays within the permissions you grant that user in Seerr.
+Discoverr talks to Discord, TMDb, and Seerr. It does not access Plex or Jellyfin directly. Requests and availability checks use the dedicated Seerr account you configure, so behaviour stays within the permissions you grant that user in Seerr.
 
 ## Updating
 
@@ -151,8 +155,11 @@ Your existing `.env` keeps working. Upgrading from the old JavaScript bot: [SETU
 **Does Discoverr download media?**  
 No. It only recommends titles and submits Seerr requests. Sonarr, Radarr, and your download clients handle the rest.
 
+**Does it work with Plex?**  
+Yes. It needs Seerr. Seerr can be backed by Plex, Jellyfin, or Emby; Discoverr itself never talks to the media server. Same `.env` for either stack — see [docs/PLEX.md](docs/PLEX.md).
+
 **Does it work without Jellyfin?**  
-It needs Seerr. Seerr can be backed by Jellyfin or Plex; Discoverr itself never talks to the media server.
+Yes, if you use Plex (or Emby) with Seerr instead. Discoverr only requires Seerr + Discord + TMDb.
 
 **Does it require Node.js on the host?**  
 No. Operators run it with Docker Compose only. Node is for contributors (tests / typecheck).
@@ -165,9 +172,9 @@ Yes. Anyone who can see the channels and click **Request** can submit through th
 From [docs/ROADMAP.md](docs/ROADMAP.md) (day-to-day items: [docs/TODO.md](docs/TODO.md)):
 
 - Better discovery quality — less blockbuster repetition, clearer category identity
-- Stronger Seerr status and request handling
-- Operator UX — predictable Docker Compose installs and env; optional extra post config in `settings.json`
-- Project hygiene — TypeScript tests and SemVer releases
+- Operator UX — Seerr startup health checks; optional env only when needed
+- Integrations — stay Seerr-first; direct Plex/Jellyfin APIs only if demand is proven
+- Project hygiene — CI and SemVer releases
 
 ## Contributing
 

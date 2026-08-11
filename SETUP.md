@@ -114,7 +114,12 @@ Optional later: `TMDB_LANGUAGE` (default `en-AU`) and `TMDB_PAGES` (default `4`)
 
 ## 3. Seerr (third)
 
-1. In Seerr (or Jellyfin, then Seerr), create a **dedicated** user for the bot, e.g. `Discoverr`.
+Discoverr talks only to Seerr. Your media server may be **Plex** or **Jellyfin** (or Emby); Discoverr never connects to them directly. Deep dive: [docs/PLEX.md](docs/PLEX.md).
+
+### Shared steps
+
+1. In Seerr, create a **dedicated local** user for the bot (email + password), e.g. `Discoverr`.  
+   Discoverr uses cookie login (`/api/v1/auth/local`). Plex-imported or OAuth-only accounts often cannot log in that way — prefer a local Seerr user.
 2. Grant that user:
    - Request
    - Request Movies
@@ -135,6 +140,17 @@ SEERR_PASSWORD=that_users_password
 ```
 
 Discoverr logs into Seerr with cookie-based local login (`email` + password). Before recommending a title it checks numeric `media.status` and skips pending, processing, partially available, available, and blacklisted items. Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+### Plex-backed Seerr
+
+1. Link Plex in Seerr and run a full library sync before you rely on “skip already available” behaviour.
+2. Do **not** add a Plex token or Plex URL to Discoverr’s `.env` — only Seerr credentials.
+3. If library titles still appear in Discord, re-sync Plex in Seerr (scan lag is the usual cause).
+
+### Jellyfin-backed Seerr
+
+1. Link Jellyfin in Seerr and ensure libraries are scanned (same as any Seerr + Jellyfin install).
+2. Same Discoverr `.env` as Plex — no media-server-specific keys.
 
 **Checkpoint:** you have `SEERR_URL`, `SEERR_USERNAME`, `SEERR_PASSWORD`.
 
@@ -356,12 +372,15 @@ docker compose up -d --build
 |---------|--------|
 | Bot posts nothing | Channel permissions and `*_CHANNEL_ID`; `docker logs -f discoverr` |
 | Startup fails on settings | Invalid `data/settings.json` — read the error line (`#` comments are fine) |
-| Request button fails | Seerr username/password and permissions; cookie login uses `email` |
-| Library titles still appear | Seerr login; numeric status; `SEERR_FAIL_CLOSED` |
+| Request button fails | Seerr username/password and permissions; cookie login uses `email` (local Seerr user, not OAuth-only) |
+| Library titles still appear | Seerr library sync (Plex or Jellyfin); numeric `media.status`; `SEERR_FAIL_CLOSED`; wait for scan to finish |
+| Recently added still recommended | Stale Seerr scan — trigger a manual Plex/Jellyfin sync in Seerr |
 | Same titles return too soon | `data/suggested.json` and `HISTORY_TTL_DAYS` (or `memory.*` in settings) |
 | Schedule wrong time | `POST_TIME` / `CRON_SCHEDULE` and `TZ`; recreate after `.env` edits |
 | Image build fails | Docker can pull `node:22-alpine`; disk space; valid `package-lock.json` |
 | Streaming category silent | Provider names match TMDb for `WATCH_REGION` |
 | Seerr unreachable | URL from **inside** the container (not host `localhost` unless networked) |
+| Seerr login fails on Plex stack | Use a **local** Seerr user with email/password; Plex OAuth users often cannot use Discoverr’s cookie login |
 
-More on Seerr status codes and discovery: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+More on Seerr status codes and discovery: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).  
+Plex + Jellyfin via Seerr: [docs/PLEX.md](docs/PLEX.md).

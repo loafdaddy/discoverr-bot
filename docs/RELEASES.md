@@ -2,7 +2,7 @@
 
 Track every published version here. Update this file when cutting a release, then tag and publish on GitHub.
 
-Current version in tree: **3.1.1** (`package.json`).
+Current version in tree: **3.2.0** (`package.json`).
 
 ## Versioning
 
@@ -22,7 +22,7 @@ Pre-1.0 history lived as an untagged JavaScript bot. **2.0.0** is the first SemV
 2. Set `version` in [`package.json`](../package.json) (and keep lockfile in sync if you use `npm version`)
 3. Add a section below in this file; bump version mentions in [`README.md`](../README.md) / [`SETUP.md`](../SETUP.md) if needed
 4. Commit on `main` (or merge the release PR)
-5. Tag: `git tag -a v3.1.1 -m "Discoverr 3.1.1"`
+5. Tag: `git tag -a v3.2.0 -m "Discoverr 3.2.0"`
 6. Push: `git push origin main --tags`
 7. Create the GitHub release (notes can mirror the section below)
 8. Sanity-check from a clean clone:
@@ -30,7 +30,7 @@ Pre-1.0 history lived as an untagged JavaScript bot. **2.0.0** is the first SemV
 ```bash
 git clone https://github.com/loafdaddy/discoverr-bot.git
 cd discoverr-bot
-git checkout v3.1.1
+git checkout v3.2.0
 cp .env.example .env
 # fill secrets in .env — see SETUP.md
 # optional: cp settings.example.json data/settings.json
@@ -47,6 +47,44 @@ docker logs -f discoverr
 - Include the AI note if the release involved substantial AI-assisted work
 
 ## Releases
+
+### 3.2.0 — Plex + Jellyfin via Seerr (2026-08-11)
+
+**Status:** ready to publish · branch `release/3.2.0`
+
+**Headline:** Document first-class **Plex and Jellyfin** support through Seerr. No app redesign — Discoverr still talks only to Seerr, Discord, and TMDb. Existing `.env` / Compose path unchanged.
+
+**Highlights**
+- README and SETUP are Seerr-first; “Works with” lists Plex and Jellyfin (via Seerr)
+- SETUP §3: shared Seerr user steps + short Plex vs Jellyfin notes (local Seerr user, library sync)
+- Troubleshooting: scan lag, AVAILABLE still recommended, OAuth-only login failures, container Seerr URL
+- [docs/PLEX.md](PLEX.md): architecture, operator notes, verification record, post-3.2.0 themes
+- Code audit + unit tests: no media-server-specific code; AVAILABLE gating unchanged; **no Phase B code changes**
+
+**Verification**
+- Unit tests and typecheck pass
+- Live Plex-backed Seerr smoke was not runnable in the release prep workspace (no `.env`); operator checklist is in [PLEX.md](PLEX.md) and [TODO.md](TODO.md)
+
+**Upgrade from 3.1.1**
+
+```bash
+git pull
+docker compose up -d --build
+```
+
+No config or env changes. Jellyfin operators need no migration.
+
+**Install (new)**
+- Follow [SETUP.md](../SETUP.md): fill `.env` from `.env.example`
+- Plex or Jellyfin: [docs/PLEX.md](PLEX.md)
+
+**Deferred (post-3.2.0):** Seerr startup health checks; optional new env vars; direct Plex/Jellyfin APIs — see [ROADMAP.md](ROADMAP.md) · [TODO.md](TODO.md)
+
+**Known gaps:** see [TODO.md](TODO.md)
+
+**AI note:** Parts of this release were developed with AI assistance. AI-assisted contributions remain welcome — see [CONTRIBUTING.md](../CONTRIBUTING.md).
+
+---
 
 ### 3.1.1 — Discovery performance polish (2026-07-26)
 

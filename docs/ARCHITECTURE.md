@@ -77,7 +77,7 @@ Within a single `postAll()` run, `usedThisRun` prevents cross-category duplicate
 
 ## Seerr availability
 
-Seerr returns `media.status` as a number:
+Seerr returns `media.status` as a number. The same gate applies whether Seerr is backed by **Plex** or **Jellyfin** — Discoverr never talks to the media server. See [PLEX.md](PLEX.md).
 
 | Value | Meaning | Recommend? |
 |------:|---------|------------|

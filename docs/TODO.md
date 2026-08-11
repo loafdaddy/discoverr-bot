@@ -2,9 +2,9 @@
 
 Single living status list. Keep it honest: only check items when verified with a running bot.
 
-Related: [ARCHITECTURE.md](ARCHITECTURE.md) · [ROADMAP.md](ROADMAP.md) · [RELEASES.md](RELEASES.md) · [SETUP.md](../SETUP.md) · [CONTRIBUTING.md](../CONTRIBUTING.md)
+Related: [ARCHITECTURE.md](ARCHITECTURE.md) · [ROADMAP.md](ROADMAP.md) · [RELEASES.md](RELEASES.md) · [SETUP.md](../SETUP.md) · [CONTRIBUTING.md](../CONTRIBUTING.md) · [PLEX.md](PLEX.md)
 
-## Done (v2.0.0 / v2.1.0 / v2.2.0 / v3.0.0 / v3.1.0 / v3.1.1)
+## Done (v2.0.0 / v2.1.0 / v2.2.0 / v3.0.0 / v3.1.0 / v3.1.1 / v3.2.0)
 
 - [x] TypeScript modular layout (`src/` → `dist/`)
 - [x] Multi-page / rotating discovery sources
@@ -32,10 +32,22 @@ Related: [ARCHITECTURE.md](ARCHITECTURE.md) · [ROADMAP.md](ROADMAP.md) · [RELE
 - [x] Dual memory TTLs (`suggestedTtlDays` / `requestedTtlDays`) + `requestedAt` on Request
 - [x] **v3.1.1** — discovery performance polish (Seerr pool cap, parallel TMDb fetches, provider cache)
 - [x] Publish **v3.1.1** on GitHub
+- [x] **v3.2.0** — Plex + Jellyfin via Seerr docs; code-path verify (no app redesign); no Phase B gaps
+- [x] README / SETUP Seerr-first with Plex and Jellyfin paths
+- [x] [PLEX.md](PLEX.md) verification record + operator smoke checklist
 
-## Next
+## Operator follow-up (live stack)
 
-- [ ] Confirm AVAILABLE library titles never post against a real Seerr instance (spot-check in Seerr UI)
+Keep unchecked until verified on a running bot:
+
+- [ ] Live smoke against a **Plex-backed** Seerr instance (login, posts, Request button)
+- [ ] Confirm AVAILABLE library titles never post (spot-check in Seerr UI)
+
+## Next (after 3.2.0)
+
+- [ ] Startup health checks — Seerr reachability on boot; clearer login failure logs (URL, 401, TLS)
+- [ ] Optional new env vars only if a concrete need appears (e.g. Seerr API-key auth, health-check toggle) — must stay optional for existing operators
+- [ ] Direct Plex / Jellyfin APIs — only if demand is proven (watchlist / continue watching); prefer Seerr-only until then
 - [ ] Optional: paid streaming source-change API (e.g. Watchmode Changes) for true catalog-add feeds
 
 ## Later
