@@ -77,7 +77,7 @@ Within a single `postAll()` run, `usedThisRun` prevents cross-category duplicate
 
 ## Seerr availability
 
-Seerr returns `media.status` as a number. The same gate applies whether Seerr is backed by **Plex** or **Jellyfin** — Discoverr never talks to the media server. See [PLEX.md](PLEX.md).
+Seerr returns `media.status` as a number. The same gate applies for **officially supported** stacks — **Seerr + Plex** and **Seerr + Jellyfin** (and Emby via Seerr). Discoverr never talks to the media server.
 
 | Value | Meaning | Recommend? |
 |------:|---------|------------|

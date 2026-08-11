@@ -32,7 +32,7 @@ Overview: [README.md](README.md) · Architecture: [docs/ARCHITECTURE.md](docs/AR
 
 - [ ] Docker and Docker Compose installed
 - [ ] A Discord server where you can manage channels and invite bots
-- [ ] A working [Seerr](https://docs.seerr.dev/) instance (with Jellyfin or Plex behind it)
+- [ ] A working [Seerr](https://docs.seerr.dev/) instance (**officially supported:** Plex or Jellyfin behind Seerr)
 - [ ] Ability to reach Seerr from the machine that will run Discoverr (LAN IP, hostname, or Compose network — not `localhost` unless Seerr shares the container network)
 
 Clone the repo (or copy it onto your NAS / Docker host):
@@ -114,7 +114,7 @@ Optional later: `TMDB_LANGUAGE` (default `en-AU`) and `TMDB_PAGES` (default `4`)
 
 ## 3. Seerr (third)
 
-Discoverr talks only to Seerr. Your media server may be **Plex** or **Jellyfin** (or Emby); Discoverr never connects to them directly. Deep dive: [docs/PLEX.md](docs/PLEX.md).
+Discoverr talks only to Seerr. **Plex and Jellyfin are both officially supported** behind Seerr (Emby too). Discoverr never connects to the media server directly.
 
 ### Shared steps
 
@@ -141,13 +141,13 @@ SEERR_PASSWORD=that_users_password
 
 Discoverr logs into Seerr with cookie-based local login (`email` + password). Before recommending a title it checks numeric `media.status` and skips pending, processing, partially available, available, and blacklisted items. Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
-### Plex-backed Seerr
+### Plex-backed Seerr (officially supported)
 
 1. Link Plex in Seerr and run a full library sync before you rely on “skip already available” behaviour.
 2. Do **not** add a Plex token or Plex URL to Discoverr’s `.env` — only Seerr credentials.
 3. If library titles still appear in Discord, re-sync Plex in Seerr (scan lag is the usual cause).
 
-### Jellyfin-backed Seerr
+### Jellyfin-backed Seerr (officially supported)
 
 1. Link Jellyfin in Seerr and ensure libraries are scanned (same as any Seerr + Jellyfin install).
 2. Same Discoverr `.env` as Plex — no media-server-specific keys.
@@ -382,5 +382,4 @@ docker compose up -d --build
 | Seerr unreachable | URL from **inside** the container (not host `localhost` unless networked) |
 | Seerr login fails on Plex stack | Use a **local** Seerr user with email/password; Plex OAuth users often cannot use Discoverr’s cookie login |
 
-More on Seerr status codes and discovery: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).  
-Plex + Jellyfin via Seerr: [docs/PLEX.md](docs/PLEX.md).
+More on Seerr status codes and discovery: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).

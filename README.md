@@ -74,15 +74,19 @@ Full install steps: [SETUP.md](SETUP.md).
 
 ## Works with
 
-- Seerr
-- Plex (via Seerr)
-- Jellyfin (via Seerr)
+**Officially supported** media stacks (same Discoverr config for both):
+
+- **Seerr + Plex**
+- **Seerr + Jellyfin**
+
+Also works with the rest of a typical ARR setup:
+
 - Sonarr
 - Radarr
 - Docker
 - Discord
 
-Media-server details: [docs/PLEX.md](docs/PLEX.md).
+Discoverr never talks to Plex or Jellyfin directly — only to Seerr (plus Discord and TMDb). See [SETUP.md § Seerr](SETUP.md#3-seerr-third).
 
 ## Quick start
 
@@ -101,9 +105,8 @@ docker logs -f discoverr
 
 | Doc | What it covers |
 |-----|----------------|
-| **[SETUP.md](SETUP.md)** | Step-by-step install: Discord, TMDb, Seerr, env, Docker, smoke test |
+| **[SETUP.md](SETUP.md)** | Step-by-step install: Discord, TMDb, Seerr (Plex or Jellyfin), env, Docker, smoke test |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Modules, discovery pipeline, Seerr status |
-| [docs/PLEX.md](docs/PLEX.md) | Plex + Jellyfin via Seerr |
 | [docs/RELEASES.md](docs/RELEASES.md) | Version history and how to cut a release |
 | [docs/TODO.md](docs/TODO.md) / [docs/ROADMAP.md](docs/ROADMAP.md) | Status and direction |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Contributor workflow (npm for tests) |
@@ -155,11 +158,11 @@ Your existing `.env` keeps working. Upgrading from the old JavaScript bot: [SETU
 **Does Discoverr download media?**  
 No. It only recommends titles and submits Seerr requests. Sonarr, Radarr, and your download clients handle the rest.
 
-**Does it work with Plex?**  
-Yes. It needs Seerr. Seerr can be backed by Plex, Jellyfin, or Emby; Discoverr itself never talks to the media server. Same `.env` for either stack — see [docs/PLEX.md](docs/PLEX.md).
+**Is Plex officially supported?**  
+Yes. **Plex and Jellyfin are both officially supported** when Seerr is in front of them. Discoverr never talks to the media server — same `.env` and Compose path for either stack. Emby also works the same way via Seerr.
 
 **Does it work without Jellyfin?**  
-Yes, if you use Plex (or Emby) with Seerr instead. Discoverr only requires Seerr + Discord + TMDb.
+Yes — use Plex (or Emby) with Seerr instead. Discoverr only requires Seerr + Discord + TMDb.
 
 **Does it require Node.js on the host?**  
 No. Operators run it with Docker Compose only. Node is for contributors (tests / typecheck).

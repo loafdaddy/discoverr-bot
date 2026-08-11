@@ -2,7 +2,7 @@
 
 Single living status list. Keep it honest: only check items when verified with a running bot.
 
-Related: [ARCHITECTURE.md](ARCHITECTURE.md) · [ROADMAP.md](ROADMAP.md) · [RELEASES.md](RELEASES.md) · [SETUP.md](../SETUP.md) · [CONTRIBUTING.md](../CONTRIBUTING.md) · [PLEX.md](PLEX.md)
+Related: [ARCHITECTURE.md](ARCHITECTURE.md) · [ROADMAP.md](ROADMAP.md) · [RELEASES.md](RELEASES.md) · [SETUP.md](../SETUP.md) · [CONTRIBUTING.md](../CONTRIBUTING.md)
 
 ## Done (v2.0.0 / v2.1.0 / v2.2.0 / v3.0.0 / v3.1.0 / v3.1.1 / v3.2.0)
 
@@ -32,9 +32,9 @@ Related: [ARCHITECTURE.md](ARCHITECTURE.md) · [ROADMAP.md](ROADMAP.md) · [RELE
 - [x] Dual memory TTLs (`suggestedTtlDays` / `requestedTtlDays`) + `requestedAt` on Request
 - [x] **v3.1.1** — discovery performance polish (Seerr pool cap, parallel TMDb fetches, provider cache)
 - [x] Publish **v3.1.1** on GitHub
-- [x] **v3.2.0** — Plex + Jellyfin via Seerr docs; code-path verify (no app redesign); no Phase B gaps
-- [x] README / SETUP Seerr-first with Plex and Jellyfin paths
-- [x] [PLEX.md](PLEX.md) verification record + operator smoke checklist
+- [x] **v3.2.0** — **official Plex + Jellyfin support** via Seerr documented in README/SETUP (no app redesign)
+- [x] README “Works with” and FAQ state Plex and Jellyfin as officially supported
+- [x] SETUP §3: shared Seerr steps + Plex / Jellyfin paths
 
 ## Operator follow-up (live stack)
 

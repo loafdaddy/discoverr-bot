@@ -48,22 +48,22 @@ docker logs -f discoverr
 
 ## Releases
 
-### 3.2.0 — Plex + Jellyfin via Seerr (2026-08-11)
+### 3.2.0 — Official Plex + Jellyfin support (2026-08-11)
 
 **Status:** ready to publish · branch `release/3.2.0`
 
-**Headline:** Document first-class **Plex and Jellyfin** support through Seerr. No app redesign — Discoverr still talks only to Seerr, Discord, and TMDb. Existing `.env` / Compose path unchanged.
+**Headline:** **Plex and Jellyfin are officially supported** through Seerr. No app redesign — Discoverr still talks only to Seerr, Discord, and TMDb. Same `.env` / Compose path for both stacks.
 
 **Highlights**
-- README and SETUP are Seerr-first; “Works with” lists Plex and Jellyfin (via Seerr)
+- README “Works with” and FAQ: official Seerr + Plex and Seerr + Jellyfin
 - SETUP §3: shared Seerr user steps + short Plex vs Jellyfin notes (local Seerr user, library sync)
 - Troubleshooting: scan lag, AVAILABLE still recommended, OAuth-only login failures, container Seerr URL
-- [docs/PLEX.md](PLEX.md): architecture, operator notes, verification record, post-3.2.0 themes
+- Architecture notes that `media.status` gating is the same for both media servers
 - Code audit + unit tests: no media-server-specific code; AVAILABLE gating unchanged; **no Phase B code changes**
 
 **Verification**
 - Unit tests and typecheck pass
-- Live Plex-backed Seerr smoke was not runnable in the release prep workspace (no `.env`); operator checklist is in [PLEX.md](PLEX.md) and [TODO.md](TODO.md)
+- Live Plex-backed Seerr smoke checklist remains in [TODO.md](TODO.md) for operators
 
 **Upgrade from 3.1.1**
 
@@ -72,11 +72,10 @@ git pull
 docker compose up -d --build
 ```
 
-No config or env changes. Jellyfin operators need no migration.
+No config or env changes. Existing Jellyfin operators need no migration.
 
 **Install (new)**
-- Follow [SETUP.md](../SETUP.md): fill `.env` from `.env.example`
-- Plex or Jellyfin: [docs/PLEX.md](PLEX.md)
+- Follow [SETUP.md](../SETUP.md): fill `.env` from `.env.example` (Plex or Jellyfin behind Seerr)
 
 **Deferred (post-3.2.0):** Seerr startup health checks; optional new env vars; direct Plex/Jellyfin APIs — see [ROADMAP.md](ROADMAP.md) · [TODO.md](TODO.md)
 
