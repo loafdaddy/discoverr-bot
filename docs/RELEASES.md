@@ -50,7 +50,7 @@ docker logs -f discoverr
 
 ### 3.2.0 — Plex and Jellyfin via Seerr (2026-08-11)
 
-**Status:** ready to publish · branch `release/3.2.0`
+**Status:** published · [GitHub release](https://github.com/loafdaddy/discoverr-bot/releases/tag/v3.2.0)
 
 **Headline:** Discoverr supports **Plex** and **Jellyfin** servers that use Seerr for requests. No app redesign — still talks only to Seerr, Discord, and TMDb. Same `.env` / Compose path for both stacks.
 
