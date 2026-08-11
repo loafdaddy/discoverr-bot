@@ -74,19 +74,17 @@ Full install steps: [SETUP.md](SETUP.md).
 
 ## Works with
 
-**Officially supported** media stacks (same Discoverr config for both):
+Supports **Plex** and **Jellyfin** servers that use **Seerr** for requests (same Discoverr config for both). Discoverr never talks to Plex or Jellyfin directly — only to Seerr (plus Discord and TMDb).
 
-- **Seerr + Plex**
-- **Seerr + Jellyfin**
-
-Also works with the rest of a typical ARR setup:
-
+- Seerr
+- Plex
+- Jellyfin
 - Sonarr
 - Radarr
 - Docker
 - Discord
 
-Discoverr never talks to Plex or Jellyfin directly — only to Seerr (plus Discord and TMDb). See [SETUP.md § Seerr](SETUP.md#3-seerr-third).
+Setup for either stack: [SETUP.md § Seerr](SETUP.md#3-seerr-third).
 
 ## Quick start
 
@@ -158,8 +156,8 @@ Your existing `.env` keeps working. Upgrading from the old JavaScript bot: [SETU
 **Does Discoverr download media?**  
 No. It only recommends titles and submits Seerr requests. Sonarr, Radarr, and your download clients handle the rest.
 
-**Is Plex officially supported?**  
-Yes. **Plex and Jellyfin are both officially supported** when Seerr is in front of them. Discoverr never talks to the media server — same `.env` and Compose path for either stack. Emby also works the same way via Seerr.
+**Does it work with Plex?**  
+Yes. Discoverr supports Plex and Jellyfin servers that use Seerr for requests. It never talks to the media server — same `.env` and Compose path for either stack. Emby via Seerr works the same way.
 
 **Does it work without Jellyfin?**  
 Yes — use Plex (or Emby) with Seerr instead. Discoverr only requires Seerr + Discord + TMDb.

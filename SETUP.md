@@ -32,7 +32,7 @@ Overview: [README.md](README.md) · Architecture: [docs/ARCHITECTURE.md](docs/AR
 
 - [ ] Docker and Docker Compose installed
 - [ ] A Discord server where you can manage channels and invite bots
-- [ ] A working [Seerr](https://docs.seerr.dev/) instance (**officially supported:** Plex or Jellyfin behind Seerr)
+- [ ] A working [Seerr](https://docs.seerr.dev/) instance (Plex or Jellyfin behind it for requests)
 - [ ] Ability to reach Seerr from the machine that will run Discoverr (LAN IP, hostname, or Compose network — not `localhost` unless Seerr shares the container network)
 
 Clone the repo (or copy it onto your NAS / Docker host):
@@ -114,7 +114,7 @@ Optional later: `TMDB_LANGUAGE` (default `en-AU`) and `TMDB_PAGES` (default `4`)
 
 ## 3. Seerr (third)
 
-Discoverr talks only to Seerr. **Plex and Jellyfin are both officially supported** behind Seerr (Emby too). Discoverr never connects to the media server directly.
+Discoverr talks only to Seerr. It supports **Plex** and **Jellyfin** servers that use Seerr for requests (Emby too). Discoverr never connects to the media server directly.
 
 ### Shared steps
 
@@ -141,13 +141,13 @@ SEERR_PASSWORD=that_users_password
 
 Discoverr logs into Seerr with cookie-based local login (`email` + password). Before recommending a title it checks numeric `media.status` and skips pending, processing, partially available, available, and blacklisted items. Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
-### Plex-backed Seerr (officially supported)
+### Plex + Seerr
 
 1. Link Plex in Seerr and run a full library sync before you rely on “skip already available” behaviour.
 2. Do **not** add a Plex token or Plex URL to Discoverr’s `.env` — only Seerr credentials.
 3. If library titles still appear in Discord, re-sync Plex in Seerr (scan lag is the usual cause).
 
-### Jellyfin-backed Seerr (officially supported)
+### Jellyfin + Seerr
 
 1. Link Jellyfin in Seerr and ensure libraries are scanned (same as any Seerr + Jellyfin install).
 2. Same Discoverr `.env` as Plex — no media-server-specific keys.

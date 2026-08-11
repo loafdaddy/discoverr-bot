@@ -32,8 +32,8 @@ Related: [ARCHITECTURE.md](ARCHITECTURE.md) · [ROADMAP.md](ROADMAP.md) · [RELE
 - [x] Dual memory TTLs (`suggestedTtlDays` / `requestedTtlDays`) + `requestedAt` on Request
 - [x] **v3.1.1** — discovery performance polish (Seerr pool cap, parallel TMDb fetches, provider cache)
 - [x] Publish **v3.1.1** on GitHub
-- [x] **v3.2.0** — **official Plex + Jellyfin support** via Seerr documented in README/SETUP (no app redesign)
-- [x] README “Works with” and FAQ state Plex and Jellyfin as officially supported
+- [x] **v3.2.0** — Docs: supports Plex and Jellyfin servers that use Seerr (no app redesign)
+- [x] README “Works with” and FAQ cover Plex and Jellyfin via Seerr
 - [x] SETUP §3: shared Seerr steps + Plex / Jellyfin paths
 
 ## Operator follow-up (live stack)

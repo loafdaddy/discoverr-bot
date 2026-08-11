@@ -8,13 +8,13 @@ Version history: [RELEASES.md](RELEASES.md).
 
 Stay a **small ARR companion**: Discord recommendations + Seerr request buttons. Prefer better discovery quality and reliable Seerr/Discord behaviour over becoming a full request portal or media manager.
 
-**Officially supported:** Seerr + **Plex**, and Seerr + **Jellyfin** (same Discoverr config). Media servers stay behind Seerr unless a later release intentionally adds direct APIs.
+Supports **Plex** and **Jellyfin** servers that use Seerr for requests (same Discoverr config). Media servers stay behind Seerr unless a later release intentionally adds direct APIs.
 
 ## Themes
 
 1. **Discovery quality** — less blockbuster repetition, clearer category identity
 2. **Operator UX** — boring Docker Compose installs (no host Node), honest docs, predictable `.env`; optional extra post config in `settings.json`; later: Seerr startup health checks
-3. **Integrations** — solid Seerr status/request handling; TMDb as the metadata source; official Plex/Jellyfin support via Seerr (not direct media-server APIs in 3.2.x)
+3. **Integrations** — solid Seerr status/request handling; TMDb as the metadata source; Plex/Jellyfin via Seerr (not direct media-server APIs in 3.2.x)
 4. **Project hygiene** — TypeScript, tests for filter/status logic, SemVer releases
 
 ## Milestones
@@ -26,7 +26,7 @@ Stay a **small ARR companion**: Discord recommendations + Seerr request buttons.
 - **v3.0.0** — Optional extra post config in `settings.json` (post counts, quotas, TV streaming, memory, dry-run); `.env` primary — see [RELEASES.md](RELEASES.md)
 - **v3.1.0** — Clarify optional settings: `.env`-first setup, commented `settings.example.json` — see [RELEASES.md](RELEASES.md)
 - **v3.1.1** — Discovery performance polish (fewer Seerr lookups, parallel TMDb fetches) — see [RELEASES.md](RELEASES.md)
-- **v3.2.0** — Official Plex + Jellyfin support documented (via Seerr); no required env or app redesign — see [RELEASES.md](RELEASES.md) · [SETUP.md](../SETUP.md)
+- **v3.2.0** — Docs for Plex and Jellyfin servers that use Seerr; no required env or app redesign — see [RELEASES.md](RELEASES.md) · [SETUP.md](../SETUP.md)
 - **Next** — items under **Next** in [TODO.md](TODO.md)
 
 ## Post-3.2.0 (planned themes — not in 3.2.0)

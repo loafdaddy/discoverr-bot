@@ -48,14 +48,14 @@ docker logs -f discoverr
 
 ## Releases
 
-### 3.2.0 — Official Plex + Jellyfin support (2026-08-11)
+### 3.2.0 — Plex and Jellyfin via Seerr (2026-08-11)
 
 **Status:** ready to publish · branch `release/3.2.0`
 
-**Headline:** **Plex and Jellyfin are officially supported** through Seerr. No app redesign — Discoverr still talks only to Seerr, Discord, and TMDb. Same `.env` / Compose path for both stacks.
+**Headline:** Discoverr supports **Plex** and **Jellyfin** servers that use Seerr for requests. No app redesign — still talks only to Seerr, Discord, and TMDb. Same `.env` / Compose path for both stacks.
 
 **Highlights**
-- README “Works with” and FAQ: official Seerr + Plex and Seerr + Jellyfin
+- README “Works with” and FAQ: Plex and Jellyfin via Seerr
 - SETUP §3: shared Seerr user steps + short Plex vs Jellyfin notes (local Seerr user, library sync)
 - Troubleshooting: scan lag, AVAILABLE still recommended, OAuth-only login failures, container Seerr URL
 - Architecture notes that `media.status` gating is the same for both media servers
