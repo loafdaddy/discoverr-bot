@@ -22,6 +22,8 @@ npm run typecheck
 npm test
 ```
 
+Pull requests to `main` run the same checks in GitHub Actions (`.github/workflows/ci.yml`). Version tags also build and push `ghcr.io/loafdaddy/discoverr-bot` (`.github/workflows/ghcr.yml`).
+
 Smoke-test the real bot the same way operators do:
 
 ```bash
