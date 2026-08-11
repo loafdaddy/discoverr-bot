@@ -4,7 +4,7 @@ Single living status list. Keep it honest: only check items when verified with a
 
 Related: [ARCHITECTURE.md](ARCHITECTURE.md) · [ROADMAP.md](ROADMAP.md) · [RELEASES.md](RELEASES.md) · [SETUP.md](../SETUP.md) · [CONTRIBUTING.md](../CONTRIBUTING.md)
 
-## Done (v2.0.0 / v2.1.0 / v2.2.0 / v3.0.0 / v3.1.0 / v3.1.1 / v3.2.0)
+## Done (through v3.2.0)
 
 - [x] TypeScript modular layout (`src/` → `dist/`)
 - [x] Multi-page / rotating discovery sources
@@ -16,42 +16,36 @@ Related: [ARCHITECTURE.md](ARCHITECTURE.md) · [ROADMAP.md](ROADMAP.md) · [RELE
 - [x] Brand kit + Cadence-style docs / release structure
 - [x] Docker-only operator path (`Dockerfile` + Compose mount for `data/`)
 - [x] Simple `POST_TIME` / `POST_HOUR` schedule env (v2.1.0)
-- [x] Publish **v2.0.0** and **v2.1.0** on GitHub
+- [x] Publish **v2.0.0**–**v3.2.0** on GitHub
 - [x] Live Discord / NAS smoke test (`POST_ON_START` + Docker Compose) — verified by author
-- [x] New on streaming: shuffled multi-provider mix (3 slots) (v2.2.0)
-- [x] Streaming first-seen catalog for better “new” preference within TMDb limits (v2.2.0)
-- [x] Publish **v2.2.0** on GitHub
-- [x] **v3.0.0 Config Update** — optional extra post config in `data/settings.json`; `.env` stays primary
-- [x] Publish **v3.0.0** on GitHub
-- [x] **v3.1.0** — restore `.env`-first install; optional commented `settings.json` for extra post config
-- [x] Publish **v3.1.0** on GitHub
-- [x] Per-channel recommendation counts (1–3) and streaming mix quotas
-- [x] TV support in the streaming category (`streaming.includeTv`)
-- [x] Clearer startup settings validation errors
-- [x] Dry-run / log-only discovery (`discovery.dryRun`)
-- [x] Dual memory TTLs (`suggestedTtlDays` / `requestedTtlDays`) + `requestedAt` on Request
-- [x] **v3.1.1** — discovery performance polish (Seerr pool cap, parallel TMDb fetches, provider cache)
-- [x] Publish **v3.1.1** on GitHub
-- [x] **v3.2.0** — Docs: supports Plex and Jellyfin servers that use Seerr (no app redesign)
-- [x] README “Works with” and FAQ cover Plex and Jellyfin via Seerr
-- [x] SETUP §3: shared Seerr steps + Plex / Jellyfin paths
+- [x] New on streaming: shuffled multi-provider mix + first-seen catalog (v2.2.0)
+- [x] Optional `settings.json` extra post config (v3.0.0 / clarified v3.1.0)
+- [x] Discovery performance polish (v3.1.1)
+- [x] Docs: supports Plex and Jellyfin servers that use Seerr (v3.2.0)
+
+## v3.2.1 (`release/3.2.1`)
+
+- [x] GitHub Actions CI (typecheck + test on PRs / `main`)
+- [x] MIT `LICENSE`
+- [x] TMDb overview language fallback (`TMDB_FALLBACK_LANGUAGE`, issue #4)
+- [x] Startup Seerr health check + clearer login/URL/TLS errors
+- [x] GHCR publish workflow on `v*` tags (optional Compose `image:`)
+- [ ] Cut **v3.2.1** release / publish package visibility on GHCR if needed
 
 ## Operator follow-up (live stack)
 
-Keep unchecked until verified on a running bot:
-
 - [ ] Live smoke against a **Plex-backed** Seerr instance (login, posts, Request button)
 - [ ] Confirm AVAILABLE library titles never post (spot-check in Seerr UI)
+- [ ] Confirm overview fallback on a non-English `TMDB_LANGUAGE` install
+- [ ] Confirm Seerr health check fails clearly with a bad `SEERR_URL`
 
-## Next (after 3.2.0)
+## Next (after 3.2.1)
 
-- [ ] Startup health checks — Seerr reachability on boot; clearer login failure logs (URL, 401, TLS)
-- [ ] Optional new env vars only if a concrete need appears (e.g. Seerr API-key auth, health-check toggle) — must stay optional for existing operators
-- [ ] Direct Plex / Jellyfin APIs — only if demand is proven (watchlist / continue watching); prefer Seerr-only until then
+- [ ] Optional new env vars only if a concrete need appears (e.g. Seerr API-key auth)
+- [ ] Direct Plex / Jellyfin APIs — only if demand is proven; prefer Seerr-only until then
 - [ ] Optional: paid streaming source-change API (e.g. Watchmode Changes) for true catalog-add feeds
 
 ## Later
 
 - [ ] Per-server or per-channel genre allow/deny lists
-- [ ] CI (typecheck + test) on pull requests
-- [ ] Publish prebuilt image to GHCR (optional; Compose-from-source remains primary)
+- [ ] Make GHCR the documented default install path once packages stay public

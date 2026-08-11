@@ -2,7 +2,7 @@
 
 Track every published version here. Update this file when cutting a release, then tag and publish on GitHub.
 
-Current version in tree: **3.2.0** (`package.json`).
+Current version in tree: **3.2.1** (`package.json`).
 
 ## Versioning
 
@@ -22,7 +22,7 @@ Pre-1.0 history lived as an untagged JavaScript bot. **2.0.0** is the first SemV
 2. Set `version` in [`package.json`](../package.json) (and keep lockfile in sync if you use `npm version`)
 3. Add a section below in this file; bump version mentions in [`README.md`](../README.md) / [`SETUP.md`](../SETUP.md) if needed
 4. Commit on `main` (or merge the release PR)
-5. Tag: `git tag -a v3.2.0 -m "Discoverr 3.2.0"`
+5. Tag: `git tag -a v3.2.1 -m "Discoverr 3.2.1"`
 6. Push: `git push origin main --tags`
 7. Create the GitHub release (notes can mirror the section below)
 8. Sanity-check from a clean clone:
@@ -30,7 +30,7 @@ Pre-1.0 history lived as an untagged JavaScript bot. **2.0.0** is the first SemV
 ```bash
 git clone https://github.com/loafdaddy/discoverr-bot.git
 cd discoverr-bot
-git checkout v3.2.0
+git checkout v3.2.1
 cp .env.example .env
 # fill secrets in .env — see SETUP.md
 # optional: cp settings.example.json data/settings.json
@@ -47,6 +47,32 @@ docker logs -f discoverr
 - Include the AI note if the release involved substantial AI-assisted work
 
 ## Releases
+
+### 3.2.1 — CI, license, overview fallback, Seerr health *(in progress)*
+
+**Branch:** `release/3.2.1`
+
+**Headline:** Operator and contributor hygiene — GitHub Actions CI, MIT license, TMDb overview language fallback ([#4](https://github.com/loafdaddy/discoverr-bot/issues/4)), Seerr startup health check, and GHCR publish workflow.
+
+**Highlights**
+- CI workflow: `npm run typecheck` + `npm test` on pushes/PRs to `main`
+- MIT `LICENSE` (README license section updated)
+- `TMDB_FALLBACK_LANGUAGE` (default `en`) when primary language has no overview
+- Startup Seerr probe (`/api/v1/status` + login) with clearer URL / TLS / credential errors
+- GHCR workflow on `v*` tags; optional `image:` notes in Compose / SETUP (Compose-from-source remains primary)
+
+**Upgrade from 3.2.0**
+
+```bash
+git pull
+docker compose up -d --build
+```
+
+Optional new env: `TMDB_FALLBACK_LANGUAGE=en` (default if unset).
+
+**Known gaps:** see [TODO.md](TODO.md)
+
+---
 
 ### 3.2.0 — Plex and Jellyfin via Seerr (2026-08-11)
 

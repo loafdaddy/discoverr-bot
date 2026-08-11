@@ -83,6 +83,7 @@ export async function loadConfig(env: NodeJS.ProcessEnv = process.env): Promise<
     cronSchedule: resolveCronSchedule(env),
     timezone: optional(env, "TZ", optional(env, "TIMEZONE", "Australia/Melbourne")),
     tmdbLanguage: optional(env, "TMDB_LANGUAGE", "en-AU"),
+    tmdbFallbackLanguage: optional(env, "TMDB_FALLBACK_LANGUAGE", "en"),
     suggestedTtlDays,
     requestedTtlDays,
     minRating: optionalFloat(env, "MIN_RATING", 6.2),

@@ -1,4 +1,5 @@
 import type { AppConfig, TmdbItem } from "../types";
+import { mediaTypeOf } from "../lib/media";
 
 interface TmdbListResponse {
   results?: TmdbItem[];
@@ -19,6 +20,7 @@ interface TmdbGenre {
 export class TmdbClient {
   private genreCache = new Map<string, Map<number, string>>();
   private providerCache = new Map<string, TmdbProvider[]>();
+  private overviewFallbackCache = new Map<string, string | null>();
 
   constructor(private readonly config: AppConfig) {}
 
@@ -54,6 +56,43 @@ export class TmdbClient {
     }
 
     return results;
+  }
+
+  /**
+   * If the item has no overview in the primary TMDb language, refetch details
+   * using TMDB_FALLBACK_LANGUAGE (default `en`). See GitHub issue #4.
+   */
+  async withOverviewFallback(item: TmdbItem): Promise<TmdbItem> {
+    if (item.overview?.trim()) return item;
+
+    const fallback = this.config.tmdbFallbackLanguage?.trim();
+    if (!fallback) return item;
+
+    const primary = this.config.tmdbLanguage.trim().toLowerCase();
+    const fallbackNorm = fallback.toLowerCase();
+    if (primary === fallbackNorm) return item;
+
+    const type = mediaTypeOf(item);
+    const cacheKey = `${type}:${item.id}:${fallbackNorm}`;
+    if (this.overviewFallbackCache.has(cacheKey)) {
+      const cached = this.overviewFallbackCache.get(cacheKey);
+      return cached ? { ...item, overview: cached } : item;
+    }
+
+    try {
+      const details = await this.get<{ overview?: string }>(
+        `/${type}/${item.id}?language=${encodeURIComponent(fallback)}`
+      );
+      const overview = details.overview?.trim() || null;
+      this.overviewFallbackCache.set(cacheKey, overview);
+      return overview ? { ...item, overview } : item;
+    } catch (err) {
+      console.warn(
+        `TMDb overview fallback failed for ${type}:${item.id}: ${(err as Error).message}`
+      );
+      this.overviewFallbackCache.set(cacheKey, null);
+      return item;
+    }
   }
 
   private async listProviders(mediaType: "movie" | "tv"): Promise<TmdbProvider[]> {

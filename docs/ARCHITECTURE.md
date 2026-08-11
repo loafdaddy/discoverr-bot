@@ -8,6 +8,9 @@ Discoverr is a single Node.js process: a Discord bot that runs a daily discovery
 Cron / postOnStart / dryRun
         |
         v
+  Seerr checkHealth()  (startup)
+        |
+        v
     postAll()
         |
         +--> TMDb sources (per category, multi-page; streaming movie+TV)
@@ -18,7 +21,7 @@ Cron / postOnStart / dryRun
                 |-- Seerr numeric media.status gate (capped sample pool)
                 |-- weighted mid-list sampling
         |
-        +--> Discord embeds + Request buttons (skipped when dryRun)
+        +--> Discord embeds (overview fallback language if empty) + Request buttons
                 |
                 v
           Seerr POST /api/v1/request → history.requestedAt
@@ -90,6 +93,8 @@ Seerr returns `media.status` as a number. The same gate applies for Plex and Jel
 | 7 | DELETED | yes (treat as free) |
 
 When lookup fails, `SEERR_FAIL_CLOSED=true` (default) skips the title instead of recommending it blindly.
+
+On process start, Discoverr calls `SeerrClient.checkHealth()` (public `/api/v1/status` when available, then cookie login) and exits with an actionable error if Seerr is unreachable or credentials fail.
 
 ## Build and deploy
 

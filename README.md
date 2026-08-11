@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loafdaddy/discoverr-bot/releases/tag/v3.2.0">v3.2.0</a>
+  <a href="https://github.com/loafdaddy/discoverr-bot/releases/tag/v3.2.1">v3.2.1</a>
   ·
   <a href="SETUP.md">Setup</a>
   ·
@@ -173,9 +173,9 @@ Yes. Anyone who can see the channels and click **Request** can submit through th
 From [docs/ROADMAP.md](docs/ROADMAP.md) (day-to-day items: [docs/TODO.md](docs/TODO.md)):
 
 - Better discovery quality — less blockbuster repetition, clearer category identity
-- Operator UX — Seerr startup health checks; optional env only when needed
+- Operator UX — optional GHCR as default install once packages stay public
 - Integrations — stay Seerr-first; direct Plex/Jellyfin APIs only if demand is proven
-- Project hygiene — CI and SemVer releases
+- Project hygiene — SemVer releases
 
 ## Contributing
 
@@ -185,4 +185,4 @@ Parts of Discoverr may have been written or edited with AI assistance. Contribut
 
 ## License
 
-This project is provided as-is for personal and community use.
+[MIT](LICENSE) — free to use, modify, and contribute.

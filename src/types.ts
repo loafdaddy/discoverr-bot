@@ -68,6 +68,8 @@ export interface AppConfig {
   cronSchedule: string;
   timezone: string;
   tmdbLanguage: string;
+  /** Used when the primary TMDb language has no overview (issue #4). */
+  tmdbFallbackLanguage: string;
   /** Cooldown after a suggestion when the title was not requested. 0 = never re-enter. */
   suggestedTtlDays: number;
   /** Cooldown after a successful Request. 0 = never re-enter. */

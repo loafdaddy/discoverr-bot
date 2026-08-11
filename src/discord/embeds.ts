@@ -16,26 +16,27 @@ export async function buildRecommendationEmbed(
 ): Promise<EmbedBuilder | null> {
   if (!item) return null;
 
-  const type = mediaTypeOf(item);
-  const title = titleOf(item);
-  const year = yearOf(item);
-  const genres = await tmdb.getGenres(type, item.genre_ids || []);
+  const resolved = await tmdb.withOverviewFallback(item);
+  const type = mediaTypeOf(resolved);
+  const title = titleOf(resolved);
+  const year = yearOf(resolved);
+  const genres = await tmdb.getGenres(type, resolved.genre_ids || []);
 
   const embed = new EmbedBuilder()
     .setTitle(`${heading}: ${title}${year ? ` (${year})` : ""}`)
-    .setDescription(trimText(item.overview))
+    .setDescription(trimText(resolved.overview))
     .addFields(
       { name: "Type", value: type === "movie" ? "Movie" : "TV Show", inline: true },
       {
         name: "Rating",
-        value: item.vote_average ? `${item.vote_average.toFixed(1)}/10` : "N/A",
+        value: resolved.vote_average ? `${resolved.vote_average.toFixed(1)}/10` : "N/A",
         inline: true
       },
       { name: "Genres", value: genres || "N/A", inline: false }
     );
 
-  if (item.poster_path) {
-    embed.setThumbnail(`https://image.tmdb.org/t/p/w500${item.poster_path}`);
+  if (resolved.poster_path) {
+    embed.setThumbnail(`https://image.tmdb.org/t/p/w500${resolved.poster_path}`);
   }
 
   return embed;

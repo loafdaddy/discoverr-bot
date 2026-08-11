@@ -106,7 +106,7 @@ Optional: set the bot avatar from [`data/brand/discoverr-mark.svg`](data/brand/d
 TMDB_API_KEY=paste_key_here
 ```
 
-Optional later: `TMDB_LANGUAGE` (default `en-AU`) and `TMDB_PAGES` (default `4`). See [Environment reference](#environment-reference).
+Optional later: `TMDB_LANGUAGE` (default `en-AU`), `TMDB_FALLBACK_LANGUAGE` (default `en` — used when a title has no overview in the primary language), and `TMDB_PAGES` (default `4`). See [Environment reference](#environment-reference).
 
 **Checkpoint:** you have `TMDB_API_KEY`.
 
@@ -139,7 +139,7 @@ SEERR_USERNAME=Discoverr
 SEERR_PASSWORD=that_users_password
 ```
 
-Discoverr logs into Seerr with cookie-based local login (`email` + password). Before recommending a title it checks numeric `media.status` and skips pending, processing, partially available, available, and blacklisted items. Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+Discoverr logs into Seerr with cookie-based local login (`email` + password). On startup it probes Seerr (`/api/v1/status` + login) and exits with a clear error if the URL, TLS, or credentials are wrong. Before recommending a title it checks numeric `media.status` and skips pending, processing, partially available, available, and blacklisted items. Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ### Plex + Seerr
 
@@ -221,7 +221,9 @@ Leave any `*_CHANNEL_ID` blank to skip that category.
 
 ## 6. Run with Docker
 
-Same commands on a NAS (Synology / TrueNAS / Unraid / etc.) or a regular Docker host:
+Same commands on a NAS (Synology / TrueNAS / Unraid / etc.) or a regular Docker host.
+
+### Build from source (default)
 
 ```bash
 docker compose up -d --build
@@ -234,8 +236,21 @@ What this does:
 - Loads `.env`
 - Mounts `./data` for suggestion history (`suggested.json`) and streaming first-seen catalog (`streaming-catalog.json`)
 - Names the container `discoverr`
+- Probes Seerr on startup (fails fast with a clear message if login/URL is wrong)
 
-Look for a log line like `Scheduled discovery: every day at …`.
+Look for log lines like `Seerr reachable…`, `Logged into Seerr.`, and `Scheduled discovery: every day at …`.
+
+### Optional: prebuilt GHCR image
+
+Version tags publish `ghcr.io/loafdaddy/discoverr-bot` (GitHub Actions). To pull instead of building locally, set in `docker-compose.yml`:
+
+```yaml
+# build: .
+image: ghcr.io/loafdaddy/discoverr-bot:3.2.1
+# or: ghcr.io/loafdaddy/discoverr-bot:latest
+```
+
+Then `docker compose up -d`. Compose-from-source remains the primary path; GHCR is optional once the package is published.
 
 After changing `.env` or pulling code, recreate:
 
@@ -331,7 +346,8 @@ Default if nothing is set: **09:00** daily.
 | Variable | Default | Purpose |
 |----------|---------|---------|
 | `POST_ON_START` | `false` | `true` only while testing |
-| `TMDB_LANGUAGE` | `en-AU` | TMDb language |
+| `TMDB_LANGUAGE` | `en-AU` | TMDb language for discovery |
+| `TMDB_FALLBACK_LANGUAGE` | `en` | Overview language when primary has no description ([#4](https://github.com/loafdaddy/discoverr-bot/issues/4)) |
 | `TMDB_PAGES` | `4` | Pages fetched per source |
 | `HISTORY_TTL_DAYS` | `90` | Days before a title can be suggested again |
 | `MIN_RATING` / `MIN_VOTES` | `6.2` / `80` | Global quality floors |
@@ -379,7 +395,9 @@ docker compose up -d --build
 | Schedule wrong time | `POST_TIME` / `CRON_SCHEDULE` and `TZ`; recreate after `.env` edits |
 | Image build fails | Docker can pull `node:22-alpine`; disk space; valid `package-lock.json` |
 | Streaming category silent | Provider names match TMDb for `WATCH_REGION` |
+| Seerr unreachable / login fails at startup | `SEERR_URL` from **inside** the container; local email/password user; TLS certs; see startup error text |
 | Seerr unreachable | URL from **inside** the container (not host `localhost` unless networked) |
 | Seerr login fails on Plex stack | Use a **local** Seerr user with email/password; Plex OAuth users often cannot use Discoverr’s cookie login |
+| Empty Discord descriptions | Set `TMDB_FALLBACK_LANGUAGE` (default `en`) when `TMDB_LANGUAGE` lacks overviews |
 
 More on Seerr status codes and discovery: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).

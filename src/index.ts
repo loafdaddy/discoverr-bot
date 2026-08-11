@@ -21,6 +21,8 @@ async function main(): Promise<void> {
     config.requestedTtlDays
   );
 
+  await seerr.checkHealth();
+
   const client = new Client({ intents: [GatewayIntentBits.Guilds] });
   registerInteractions(client, seerr, history);
 
