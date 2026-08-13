@@ -1,10 +1,11 @@
 services:
   discoverr:
-    # Default: build from this repo (works offline / without GHCR).
+    # --- Option A: build from source (default) ---
     build: .
-    # Optional prebuilt image (published on version tags via GitHub Actions):
+    # --- Option B: prebuilt GitHub Packages image (see SETUP.md §6) ---
     # image: ghcr.io/loafdaddy/discoverr-bot:3.2.1
     # image: ghcr.io/loafdaddy/discoverr-bot:latest
+    # Package: https://github.com/loafdaddy/discoverr-bot/pkgs/container/discoverr-bot
     container_name: discoverr
     env_file:
       - .env

@@ -90,11 +90,43 @@ Setup for either stack: [SETUP.md § Seerr](SETUP.md#3-seerr-third).
 
 **Docker only** — no Node/npm on the host. Full walkthrough (Discord → TMDb → Seerr → `.env` → run): **[SETUP.md](SETUP.md)**.
 
+### Prebuilt image (GitHub Packages)
+
+Published on each release tag: **[Packages → discoverr-bot](https://github.com/loafdaddy/discoverr-bot/pkgs/container/discoverr-bot)** (`ghcr.io/loafdaddy/discoverr-bot`).
+
 ```bash
 git clone https://github.com/loafdaddy/discoverr-bot.git
 cd discoverr-bot
 cp .env.example .env
 # fill .env using SETUP.md (gather Discord, TMDb, Seerr values first)
+```
+
+Edit `docker-compose.yml` — comment out `build: .` and set the image (pick a [release tag](https://github.com/loafdaddy/discoverr-bot/releases) or `latest`):
+
+```yaml
+# build: .
+image: ghcr.io/loafdaddy/discoverr-bot:3.2.1
+```
+
+Then start:
+
+```bash
+docker compose pull
+docker compose up -d
+docker logs -f discoverr
+```
+
+If the package is **private**, log in once: `echo YOUR_GITHUB_PAT | docker login ghcr.io -u YOUR_GITHUB_USERNAME --password-stdin` (PAT needs `read:packages`). Full steps: [SETUP.md § Run with Docker](SETUP.md#6-run-with-docker).
+
+### Build from source
+
+Use this if you prefer to compile locally or are developing changes:
+
+```bash
+git clone https://github.com/loafdaddy/discoverr-bot.git
+cd discoverr-bot
+cp .env.example .env
+# fill .env using SETUP.md
 docker compose up -d --build
 docker logs -f discoverr
 ```
@@ -143,6 +175,17 @@ Discoverr talks to Discord, TMDb, and Seerr. It does not access Plex or Jellyfin
 
 ## Updating
 
+**GitHub Packages image** (when `docker-compose.yml` uses `image:` instead of `build:`):
+
+```bash
+cd discoverr-bot
+# optional: bump the tag in docker-compose.yml to a new release
+docker compose pull
+docker compose up -d
+```
+
+**Build from source** (default `build: .` in Compose):
+
 ```bash
 git pull
 docker compose down
@@ -173,7 +216,7 @@ Yes. Anyone who can see the channels and click **Request** can submit through th
 From [docs/ROADMAP.md](docs/ROADMAP.md) (day-to-day items: [docs/TODO.md](docs/TODO.md)):
 
 - Better discovery quality — less blockbuster repetition, clearer category identity
-- Operator UX — optional GHCR as default install once packages stay public
+- Operator UX — GHCR install path documented; may become default once packages stay public
 - Integrations — stay Seerr-first; direct Plex/Jellyfin APIs only if demand is proven
 - Project hygiene — SemVer releases
 

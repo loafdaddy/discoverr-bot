@@ -223,7 +223,76 @@ Leave any `*_CHANNEL_ID` blank to skip that category.
 
 Same commands on a NAS (Synology / TrueNAS / Unraid / etc.) or a regular Docker host.
 
-### Build from source (default)
+You still need this repo on disk for `.env`, `docker-compose.yml`, and the `./data` volume — even when using the prebuilt image from GitHub Packages.
+
+### Prebuilt image (GitHub Packages) — recommended
+
+Each [release tag](https://github.com/loafdaddy/discoverr-bot/releases) publishes a Docker image to **[Packages → discoverr-bot](https://github.com/loafdaddy/discoverr-bot/pkgs/container/discoverr-bot)**:
+
+| | |
+|--|--|
+| Registry | `ghcr.io` |
+| Image | `ghcr.io/loafdaddy/discoverr-bot` |
+| Tags | `latest`, semver (e.g. `3.2.1`), and `3.2` (major.minor) |
+
+**1. Configure Compose** — open [`docker-compose.yml`](docker-compose.yml) and switch from build to pull:
+
+```yaml
+services:
+  discoverr:
+    # build: .
+    image: ghcr.io/loafdaddy/discoverr-bot:3.2.1
+    # or: ghcr.io/loafdaddy/discoverr-bot:latest
+    container_name: discoverr
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+```
+
+Pin a version tag (e.g. `3.2.1`) for predictable upgrades; use `latest` to always track the newest release.
+
+**2. Pull and start**
+
+```bash
+docker compose pull
+docker compose up -d
+docker logs -f discoverr
+```
+
+**3. Private package?** If pull fails with “denied” or “unauthorized”, the package may be private. Create a GitHub [Personal Access Token](https://github.com/settings/tokens) with **`read:packages`**, then:
+
+```bash
+echo YOUR_GITHUB_PAT | docker login ghcr.io -u YOUR_GITHUB_USERNAME --password-stdin
+docker compose pull
+docker compose up -d
+```
+
+To make the image public (no login for pull): on the [package page](https://github.com/loafdaddy/discoverr-bot/pkgs/container/discoverr-bot) → **Package settings** → **Change visibility** → Public.
+
+**4. Upgrade** when a new release is published:
+
+```bash
+# edit docker-compose.yml if you pin a version tag, e.g. 3.2.1 → 3.2.2
+docker compose pull
+docker compose up -d
+docker logs -f discoverr
+```
+
+What this does:
+
+- Runs the published image (no local TypeScript build)
+- Loads `.env`
+- Mounts `./data` for suggestion history (`suggested.json`) and streaming first-seen catalog (`streaming-catalog.json`)
+- Names the container `discoverr`
+- Probes Seerr on startup (fails fast with a clear message if login/URL is wrong)
+
+Look for log lines like `Seerr reachable…`, `Logged into Seerr.`, and `Scheduled discovery: every day at …`.
+
+### Build from source
+
+Keep the default [`docker-compose.yml`](docker-compose.yml) (`build: .`) or use this when developing:
 
 ```bash
 docker compose up -d --build
@@ -233,29 +302,18 @@ docker logs -f discoverr
 What this does:
 
 - Builds from [`Dockerfile`](Dockerfile) (deps + TypeScript compile + `node dist/index.js`)
-- Loads `.env`
-- Mounts `./data` for suggestion history (`suggested.json`) and streaming first-seen catalog (`streaming-catalog.json`)
-- Names the container `discoverr`
-- Probes Seerr on startup (fails fast with a clear message if login/URL is wrong)
+- Same `.env`, `./data` mount, Seerr startup probe, and container name as the GHCR path
 
-Look for log lines like `Seerr reachable…`, `Logged into Seerr.`, and `Scheduled discovery: every day at …`.
-
-### Optional: prebuilt GHCR image
-
-Version tags publish `ghcr.io/loafdaddy/discoverr-bot` (GitHub Actions). To pull instead of building locally, set in `docker-compose.yml`:
-
-```yaml
-# build: .
-image: ghcr.io/loafdaddy/discoverr-bot:3.2.1
-# or: ghcr.io/loafdaddy/discoverr-bot:latest
-```
-
-Then `docker compose up -d`. Compose-from-source remains the primary path; GHCR is optional once the package is published.
-
-After changing `.env` or pulling code, recreate:
+After changing `.env` or pulling code (build path only), recreate:
 
 ```bash
 docker compose up -d --build
+```
+
+After changing `.env` (GHCR path), recreate:
+
+```bash
+docker compose up -d
 ```
 
 ---
@@ -270,6 +328,15 @@ POST_ON_START=true
 
 2. Recreate and watch logs:
 
+**GitHub Packages image** (`image:` in Compose):
+
+```bash
+docker compose up -d
+docker logs -f discoverr
+```
+
+**Build from source** (`build: .` in Compose):
+
 ```bash
 docker compose up -d --build
 docker logs -f discoverr
@@ -280,7 +347,8 @@ docker logs -f discoverr
 5. Set `POST_ON_START=false` and recreate again so you are not posting on every restart:
 
 ```bash
-docker compose up -d --build
+docker compose up -d
+# or, if building from source: docker compose up -d --build
 ```
 
 ---
@@ -359,6 +427,16 @@ Default if nothing is set: **09:00** daily.
 
 ## Updating
 
+**GitHub Packages image** (when Compose uses `image:` — see [§6](#6-run-with-docker)):
+
+```bash
+git pull   # optional: refresh compose/docs; bump image tag if you pin versions
+docker compose pull
+docker compose up -d
+```
+
+**Build from source** (default `build: .`):
+
 ```bash
 git pull
 docker compose down
@@ -394,6 +472,8 @@ docker compose up -d --build
 | Same titles return too soon | `data/suggested.json` and `HISTORY_TTL_DAYS` (or `memory.*` in settings) |
 | Schedule wrong time | `POST_TIME` / `CRON_SCHEDULE` and `TZ`; recreate after `.env` edits |
 | Image build fails | Docker can pull `node:22-alpine`; disk space; valid `package-lock.json` |
+| GHCR pull denied / unauthorized | Package may be private — `docker login ghcr.io` with a PAT (`read:packages`); or make the [package public](https://github.com/loafdaddy/discoverr-bot/pkgs/container/discoverr-bot) |
+| Wrong image after upgrade | Run `docker compose pull` after changing the tag in `docker-compose.yml` |
 | Streaming category silent | Provider names match TMDb for `WATCH_REGION` |
 | Seerr unreachable / login fails at startup | `SEERR_URL` from **inside** the container; local email/password user; TLS certs; see startup error text |
 | Seerr unreachable | URL from **inside** the container (not host `localhost` unless networked) |
