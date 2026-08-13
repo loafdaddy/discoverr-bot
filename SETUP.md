@@ -261,17 +261,9 @@ docker compose up -d
 docker logs -f discoverr
 ```
 
-**3. Private package?** If pull fails with “denied” or “unauthorized”, the package may be private. Create a GitHub [Personal Access Token](https://github.com/settings/tokens) with **`read:packages`**, then:
+No GitHub login is required — the package is **public**.
 
-```bash
-echo YOUR_GITHUB_PAT | docker login ghcr.io -u YOUR_GITHUB_USERNAME --password-stdin
-docker compose pull
-docker compose up -d
-```
-
-To make the image public (no login for pull): on the [package page](https://github.com/loafdaddy/discoverr-bot/pkgs/container/discoverr-bot) → **Package settings** → **Change visibility** → Public.
-
-**4. Upgrade** when a new release is published:
+**3. Upgrade** when a new release is published:
 
 ```bash
 # edit docker-compose.yml if you pin a version tag, e.g. 3.2.1 → 3.2.2
@@ -472,8 +464,7 @@ docker compose up -d --build
 | Same titles return too soon | `data/suggested.json` and `HISTORY_TTL_DAYS` (or `memory.*` in settings) |
 | Schedule wrong time | `POST_TIME` / `CRON_SCHEDULE` and `TZ`; recreate after `.env` edits |
 | Image build fails | Docker can pull `node:22-alpine`; disk space; valid `package-lock.json` |
-| GHCR pull denied / unauthorized | Package may be private — `docker login ghcr.io` with a PAT (`read:packages`); or make the [package public](https://github.com/loafdaddy/discoverr-bot/pkgs/container/discoverr-bot) |
-| Wrong image after upgrade | Run `docker compose pull` after changing the tag in `docker-compose.yml` |
+| GHCR pull fails | Check image tag on [Packages](https://github.com/loafdaddy/discoverr-bot/pkgs/container/discoverr-bot); run `docker compose pull` after changing the tag |
 | Streaming category silent | Provider names match TMDb for `WATCH_REGION` |
 | Seerr unreachable / login fails at startup | `SEERR_URL` from **inside** the container; local email/password user; TLS certs; see startup error text |
 | Seerr unreachable | URL from **inside** the container (not host `localhost` unless networked) |

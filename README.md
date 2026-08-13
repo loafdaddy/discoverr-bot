@@ -116,7 +116,7 @@ docker compose up -d
 docker logs -f discoverr
 ```
 
-If the package is **private**, log in once: `echo YOUR_GITHUB_PAT | docker login ghcr.io -u YOUR_GITHUB_USERNAME --password-stdin` (PAT needs `read:packages`). Full steps: [SETUP.md § Run with Docker](SETUP.md#6-run-with-docker).
+Full steps: [SETUP.md § Run with Docker](SETUP.md#6-run-with-docker).
 
 ### Build from source
 
