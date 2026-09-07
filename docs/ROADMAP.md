@@ -13,8 +13,8 @@ Supports **Plex** and **Jellyfin** servers that use Seerr for requests (same Dis
 ## Themes
 
 1. **Discovery quality** — less blockbuster repetition, clearer category identity
-2. **Operator UX** — boring Docker Compose installs (no host Node), honest docs, predictable `.env`; optional extra post config in `settings.json`; later: Seerr startup health checks
-3. **Integrations** — solid Seerr status/request handling; TMDb as the metadata source; Plex/Jellyfin via Seerr (not direct media-server APIs in 3.2.x)
+2. **Operator UX** — boring Docker Compose installs (no host Node), honest docs, predictable `.env`; optional extra post config in `settings.json`; Seerr startup health checks
+3. **Integrations** — solid Seerr status/request handling; TMDb as the metadata source (including trailer links); Plex/Jellyfin via Seerr (not direct media-server APIs in 3.3.x)
 4. **Project hygiene** — TypeScript, tests for filter/status logic, SemVer releases
 
 ## Milestones
@@ -28,12 +28,13 @@ Supports **Plex** and **Jellyfin** servers that use Seerr for requests (same Dis
 - **v3.1.1** — Discovery performance polish (fewer Seerr lookups, parallel TMDb fetches) — see [RELEASES.md](RELEASES.md)
 - **v3.2.0** — Docs for Plex and Jellyfin servers that use Seerr; no required env or app redesign — see [RELEASES.md](RELEASES.md) · [SETUP.md](../SETUP.md)
 - **v3.2.1** — CI, MIT license, TMDb overview fallback (#4), Seerr startup health check, GHCR workflow — see [RELEASES.md](RELEASES.md)
+- **v3.3.0** — Trending duplicate-button fix (#7), TMDb trailer hyperlinks (#6), timezone-local dates, history/Seerr reliability — see [RELEASES.md](RELEASES.md)
 - **Next** — items under **Next** in [TODO.md](TODO.md)
 
-## Post-3.2.0 (planned themes — not in 3.2.0)
+## Post-3.3.0 (planned themes)
 
-1. **Startup health checks / operator niceties** — Seerr reachability on boot (`GET /status` or login probe); clearer login errors. Still no media-server API.
-2. **Optional new env vars** — only when a concrete need appears (e.g. Seerr API-key auth, health-check toggle). Prefer optional; avoid required vars that break existing `.env` files.
+1. **Discord user → Seerr requester** ([#5](https://github.com/loafdaddy/discoverr-bot/issues/5)) — submit Request clicks as the mapped Seerr user so approval queues and Maintainerr see the real requester. Needs a careful Seerr permission design (Manage Users without auto-approve). Not in 3.3.0.
+2. **Optional new env vars** — only when a concrete need appears (e.g. Seerr API-key auth). Prefer optional; avoid required vars that break existing `.env` files.
 3. **Direct Plex / Jellyfin APIs** — larger product change (library browse, watchlist, continue watching). Out of ARR-companion scope until demand is proven; stay Seerr-only until then.
 
 ## Non-goals (for now)

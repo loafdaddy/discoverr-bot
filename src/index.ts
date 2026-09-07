@@ -18,20 +18,23 @@ async function main(): Promise<void> {
   const history = new SuggestionHistory(
     SuggestionHistory.defaultPath(),
     config.suggestedTtlDays,
-    config.requestedTtlDays
+    config.requestedTtlDays,
+    config.timezone
   );
 
   await seerr.checkHealth();
+  await history.load();
+
+  if (!cron.validate(config.cronSchedule)) {
+    console.error(`Invalid cron schedule: ${config.cronSchedule}`);
+    process.exit(1);
+  }
 
   const client = new Client({ intents: [GatewayIntentBits.Guilds] });
-  registerInteractions(client, seerr, history);
+  registerInteractions(client, seerr, history, config.timezone);
 
   client.once("ready", async () => {
     console.log(`Logged in as ${client.user?.tag}`);
-
-    if (!cron.validate(config.cronSchedule)) {
-      throw new Error(`Invalid cron schedule: ${config.cronSchedule}`);
-    }
 
     cron.schedule(
       config.cronSchedule,

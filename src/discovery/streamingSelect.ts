@@ -25,6 +25,7 @@ interface QualityBase {
   minRating: number;
   minVotes: number;
   requireEnglish: boolean;
+  today?: string;
 }
 
 function providerKey(entry: ResolvedStreamingService): string {

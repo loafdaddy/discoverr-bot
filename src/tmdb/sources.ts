@@ -1,5 +1,6 @@
 import { shuffleArray } from "../lib/shuffle";
-import { withMediaType } from "../lib/media";
+import { uniqueByItemKey, withMediaType } from "../lib/media";
+import { localDateIso } from "../lib/localDate";
 import type { AppConfig, MediaType, TmdbItem } from "../types";
 import type { TmdbClient } from "./client";
 
@@ -36,8 +37,8 @@ function pickRotated<T>(items: readonly T[], offset = 0): T {
   return items[index];
 }
 
-function todayIso(): string {
-  return new Date().toISOString().split("T")[0];
+function todayIso(timeZone: string): string {
+  return localDateIso(timeZone);
 }
 
 export async function fetchMovieOfDayCandidates(
@@ -51,7 +52,7 @@ export async function fetchMovieOfDayCandidates(
     `/discover/movie?language=${lang}&region=${config.watchRegion}` +
     `&sort_by=${sort}&with_genres=${genre}&include_adult=false` +
     `&vote_count.gte=${Math.max(50, Math.floor(config.minVotes * 0.75))}` +
-    `&primary_release_date.lte=${todayIso()}`;
+    `&primary_release_date.lte=${todayIso(config.timezone)}`;
 
   const items = await tmdb.fetchPages(path, config.pagesToFetch);
   return items.map((item) => withMediaType(item, "movie"));
@@ -68,7 +69,7 @@ export async function fetchTvOfDayCandidates(
     `/discover/tv?language=${lang}` +
     `&sort_by=${sort}&with_genres=${genre}&include_adult=false` +
     `&vote_count.gte=${Math.max(40, Math.floor(config.minVotes * 0.6))}` +
-    `&first_air_date.lte=${todayIso()}`;
+    `&first_air_date.lte=${todayIso(config.timezone)}`;
 
   const items = await tmdb.fetchPages(path, config.pagesToFetch);
   return items.map((item) => withMediaType(item, "tv"));
@@ -84,8 +85,10 @@ export async function fetchTrendingCandidates(
     tmdb.fetchPages(`/trending/all/day?language=${lang}`, pages),
     tmdb.fetchPages(`/trending/all/week?language=${lang}`, pages)
   ]);
-  const merged = [...day, ...week].filter(
-    (item) => item.media_type === "movie" || item.media_type === "tv"
+  const merged = uniqueByItemKey(
+    [...day, ...week].filter(
+      (item) => item.media_type === "movie" || item.media_type === "tv"
+    )
   );
   return shuffleArray(merged);
 }
@@ -94,8 +97,9 @@ export async function fetchNewReleaseCandidates(
   tmdb: TmdbClient,
   config: AppConfig
 ): Promise<TmdbItem[]> {
-  const today = todayIso();
-  const past = new Date();
+  const today = todayIso(config.timezone);
+  const [year, month, day] = today.split("-").map(Number);
+  const past = new Date(Date.UTC(year, (month || 1) - 1, day || 1));
   past.setUTCMonth(past.getUTCMonth() - 3);
   const from = past.toISOString().split("T")[0];
   const lang = config.tmdbLanguage;

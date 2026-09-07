@@ -1,5 +1,6 @@
 import type { AppConfig, TmdbItem } from "../types";
-import { mediaTypeOf } from "../lib/media";
+import { itemKey, mediaTypeOf } from "../lib/media";
+import { pickTrailerUrl, type TmdbVideo } from "./trailer";
 
 interface TmdbListResponse {
   results?: TmdbItem[];
@@ -21,6 +22,7 @@ export class TmdbClient {
   private genreCache = new Map<string, Map<number, string>>();
   private providerCache = new Map<string, TmdbProvider[]>();
   private overviewFallbackCache = new Map<string, string | null>();
+  private trailerCache = new Map<string, string | null>();
 
   constructor(private readonly config: AppConfig) {}
 
@@ -36,7 +38,7 @@ export class TmdbClient {
 
   async fetchPages(apiPath: string, pages: number): Promise<TmdbItem[]> {
     const results: TmdbItem[] = [];
-    const seen = new Set<number>();
+    const seen = new Set<string>();
     const maxPages = Math.max(1, pages);
 
     for (let page = 1; page <= maxPages; page += 1) {
@@ -46,8 +48,17 @@ export class TmdbClient {
       if (!batch.length) break;
 
       for (const item of batch) {
-        if (!item?.id || seen.has(item.id)) continue;
-        seen.add(item.id);
+        if (!item?.id) continue;
+        if (
+          item.media_type &&
+          item.media_type !== "movie" &&
+          item.media_type !== "tv"
+        ) {
+          continue;
+        }
+        const key = itemKey(item);
+        if (seen.has(key)) continue;
+        seen.add(key);
         results.push(item);
       }
 
@@ -90,7 +101,6 @@ export class TmdbClient {
       console.warn(
         `TMDb overview fallback failed for ${type}:${item.id}: ${(err as Error).message}`
       );
-      this.overviewFallbackCache.set(cacheKey, null);
       return item;
     }
   }
@@ -131,5 +141,32 @@ export class TmdbClient {
       .filter(Boolean)
       .slice(0, 3)
       .join(" · ");
+  }
+
+  /**
+   * YouTube trailer URL for a title, or null when TMDb has none.
+   * Fetches `/videos` once per title and ranks with pickTrailerUrl.
+   */
+  async getTrailerUrl(item: TmdbItem): Promise<string | null> {
+    const cacheKey = itemKey(item);
+    if (this.trailerCache.has(cacheKey)) {
+      return this.trailerCache.get(cacheKey) ?? null;
+    }
+
+    const type = mediaTypeOf(item);
+    try {
+      const data = await this.get<{ results?: TmdbVideo[] }>(`/${type}/${item.id}/videos`);
+      const url = pickTrailerUrl(data.results || [], [
+        this.config.tmdbLanguage,
+        this.config.tmdbFallbackLanguage
+      ]);
+      this.trailerCache.set(cacheKey, url);
+      return url;
+    } catch (err) {
+      console.warn(
+        `TMDb trailer lookup failed for ${cacheKey}: ${(err as Error).message}`
+      );
+      return null;
+    }
   }
 }

@@ -8,6 +8,8 @@ import type { SuggestionHistory } from "./history";
 export interface SelectOptions extends QualityFilters {
   /** Prefer mid-list weighted sampling after filtering. Default true. */
   weighted?: boolean;
+  /** Calendar date for release gating (`YYYY-MM-DD` in operator TZ). */
+  today?: string;
 }
 
 /**
@@ -29,16 +31,18 @@ export async function selectRecommendations(
 ): Promise<TmdbItem[]> {
   if (count <= 0) return [];
 
-  const { weighted = true, ...filters } = options;
+  const { weighted = true, today, ...filters } = options;
 
   const eligible: TmdbItem[] = [];
+  const seenEligible = new Set<string>();
   const candidates = shuffleArray((items || []).filter((item) => !!item && item.id));
   const poolTarget = seerrPoolTarget(count);
 
   for (const item of candidates) {
     const key = itemKey(item);
-    if (usedRecommendations.has(key) || history.has(key)) continue;
-    if (!isReleased(item)) continue;
+    if (usedRecommendations.has(key) || history.has(key) || seenEligible.has(key)) continue;
+    seenEligible.add(key);
+    if (!isReleased(item, today)) continue;
     if (!passesQualityFilters(item, filters)) continue;
     if (await seerr.isUnavailable(mediaTypeOf(item), item.id)) continue;
     eligible.push(item);

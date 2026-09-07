@@ -27,7 +27,7 @@ function optionalInt(env: NodeJS.ProcessEnv, name: string, fallback: number): nu
   const raw = env[name]?.trim();
   if (!raw) return fallback;
   const parsed = Number(raw);
-  if (!Number.isFinite(parsed)) {
+  if (!Number.isInteger(parsed)) {
     throw new Error(`Invalid integer for ${name}: ${raw}`);
   }
   return parsed;

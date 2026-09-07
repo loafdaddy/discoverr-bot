@@ -86,4 +86,25 @@ describe("selectRecommendations", () => {
     assert.equal(picked[0].id, 3);
     assert.ok(used.has("movie:3"));
   });
+
+  it("does not pick the same title twice when candidates contain duplicates", async () => {
+    const items = [movie(1), movie(1), movie(2), movie(2), movie(3)];
+    const used = new Set<string>();
+    const lookupLog: number[] = [];
+
+    const picked = await selectRecommendations(
+      items,
+      3,
+      used,
+      mockHistory(),
+      mockSeerr(lookupLog),
+      { minRating: 6, minVotes: 50, requireEnglish: true, weighted: false }
+    );
+
+    const keys = picked.map((item) => `movie:${item.id}`);
+    assert.equal(picked.length, 3);
+    assert.equal(new Set(keys).size, keys.length);
+    assert.deepEqual([...keys].sort(), ["movie:1", "movie:2", "movie:3"]);
+    assert.equal(lookupLog.length, 3);
+  });
 });

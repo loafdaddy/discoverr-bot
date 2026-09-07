@@ -15,6 +15,20 @@ export function itemKey(item: TmdbItem): string {
   return `${mediaTypeOf(item)}:${item.id}`;
 }
 
+/** First occurrence of each movie:/tv: identity; later copies are dropped. */
+export function uniqueByItemKey(items: readonly TmdbItem[]): TmdbItem[] {
+  const seen = new Set<string>();
+  const unique: TmdbItem[] = [];
+  for (const item of items) {
+    if (!item?.id) continue;
+    const key = itemKey(item);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    unique.push(item);
+  }
+  return unique;
+}
+
 export function yearOf(item: TmdbItem): string {
   const date = item.release_date || item.first_air_date || "";
   return date ? date.slice(0, 4) : "";

@@ -37,7 +37,7 @@ Docs:
 - [SETUP.md](SETUP.md) — ordered install (Discord → TMDb → Seerr → Docker)
 - [docs/README.md](docs/README.md) — docs index
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — modules and discovery pipeline
-- [docs/RELEASES.md](docs/RELEASES.md) — version history and how to cut a release
+- [docs/RELEASES.md](docs/RELEASES.md) — version history, patch notes, and how to cut a release
 - [docs/TODO.md](docs/TODO.md) / [docs/ROADMAP.md](docs/ROADMAP.md) — status and direction
 - [data/brand/README.md](data/brand/README.md) — brand assets
 
@@ -85,8 +85,10 @@ When shipping a version, follow [docs/RELEASES.md](docs/RELEASES.md): bump `pack
 - Keep runtime Discord strings plain text (no emoji in `src/**` user-facing messages).
 - Discovery changes should widen or diversify pools — avoid regressing to “page 1 popular only”.
 - Seerr availability must use numeric `media.status` (see `src/seerr/status.ts`).
-- Add or update unit tests when changing filters, history TTL, sampling, or status mapping.
-- Keep PRs focused; update README/SETUP when env vars or run commands change.
+- Add or update unit tests when changing filters, history TTL, sampling, status mapping, TMDb identity/paging, or trailer ranking.
+- Keep PRs focused; update README/SETUP/RELEASES when behaviour or env meaning changes.
+- Calendar “today” must use `TZ` (`src/lib/localDate.ts`), not UTC `Date#toISOString()`.
+- Recommendation trailers are embed hyperlinks, not Discord buttons.
 
 ## What helps most
 

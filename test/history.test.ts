@@ -119,4 +119,34 @@ describe("SuggestionHistory TTL", () => {
     assert.equal(entry.requestedAt, "2026-07-20");
     assert.equal(entry.suggestedAt, "2026-01-01");
   });
+
+  it("ensureLoaded does not reload and wipe in-memory entries", async () => {
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "discoverr-history-"));
+    const filePath = path.join(dir, "suggested.json");
+    await fs.writeFile(filePath, "{}", "utf8");
+    const history = new SuggestionHistory(filePath, 90, 90);
+    await history.load();
+    history.set("movie:1", {
+      title: "Unsaved",
+      type: "movie",
+      tmdbId: 1,
+      category: "trending",
+      suggestedAt: "2026-09-07"
+    });
+    await history.ensureLoaded();
+    assert.equal(history.has("movie:1"), true);
+  });
+
+  it("refuses to overwrite a corrupt history file", async () => {
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "discoverr-history-"));
+    const filePath = path.join(dir, "suggested.json");
+    const corrupt = "{not-json";
+    await fs.writeFile(filePath, corrupt, "utf8");
+    const history = new SuggestionHistory(filePath, 90, 90);
+    await history.load();
+    history.markRequested("movie", 1, "2026-09-07");
+    await history.save();
+    const onDisk = await fs.readFile(filePath, "utf8");
+    assert.equal(onDisk, corrupt);
+  });
 });

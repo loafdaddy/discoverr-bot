@@ -1,12 +1,15 @@
 import type { Client } from "discord.js";
+import { localDateIso } from "../lib/localDate";
 import type { SuggestionHistory } from "../discovery/history";
 import type { SeerrClient } from "../seerr/client";
 import type { MediaType } from "../types";
+import { userFacingRequestError } from "./requestErrors";
 
 export function registerInteractions(
   client: Client,
   seerr: SeerrClient,
-  history: SuggestionHistory
+  history: SuggestionHistory,
+  timeZone: string
 ): void {
   client.on("interactionCreate", async (interaction) => {
     if (!interaction.isButton()) return;
@@ -15,14 +18,16 @@ export function registerInteractions(
     const [, mediaType, tmdbId] = interaction.customId.split(":");
     if (!mediaType || !tmdbId) return;
     if (mediaType !== "movie" && mediaType !== "tv") return;
+    const id = Number(tmdbId);
+    if (!Number.isFinite(id) || id <= 0) return;
 
     try {
       await interaction.deferReply({ ephemeral: true });
-      await seerr.request(mediaType as MediaType, Number(tmdbId));
+      await seerr.request(mediaType as MediaType, id);
 
-      const today = new Date().toISOString().split("T")[0];
-      await history.load();
-      history.markRequested(mediaType as MediaType, Number(tmdbId), today);
+      const today = localDateIso(timeZone);
+      await history.ensureLoaded();
+      history.markRequested(mediaType as MediaType, id, today);
       await history.save();
 
       await interaction.editReply(
@@ -32,7 +37,7 @@ export function registerInteractions(
       console.error("Request button failed:", err);
 
       try {
-        const message = (err as Error).message || "Unable to submit request.";
+        const message = userFacingRequestError(err);
         if (interaction.deferred || interaction.replied) {
           await interaction.editReply(message);
         } else {

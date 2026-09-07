@@ -23,7 +23,7 @@ Overview: [README.md](README.md) · Architecture: [docs/ARCHITECTURE.md](docs/AR
 | 4 | Region & streaming | `WATCH_REGION`, `STREAMING_SERVICES` |
 | 5 | Fill `.env` | Complete config file |
 | 6 | Run | Container up |
-| 7 | Smoke test | Posts + Request buttons working |
+| 7 | Smoke test | Posts, **Request: {title}** buttons, Trailer links |
 | 8 | Extra post config *(optional)* | `data/settings.json` only if you want it |
 
 ---
@@ -86,7 +86,7 @@ DISCORD_TOKEN=paste_token_here
 | `hidden-gems` | `HIDDEN_GEMS_CHANNEL_ID` |
 
 3. For each channel: right-click → **Copy Channel ID** → paste into a note for step 5.
-4. Leave a variable blank in `.env` to disable that category.
+4. Leave a variable blank in `.env` to disable that category (no fetch, and those titles can still appear in other channels).
 5. Confirm the bot role can view and send in those channels.
 
 Optional: set the bot avatar from [`data/brand/discoverr-mark.svg`](data/brand/discoverr-mark.svg) (export PNG if Discord asks for it). Brand notes: [data/brand/README.md](data/brand/README.md).
@@ -174,7 +174,7 @@ Each daily **New on streaming** post picks up to **3** titles across a **shuffle
 
 TMDb does not expose “date added to Netflix.” Discoverr approximates “new” with a local first-seen snapshot in `data/streaming-catalog.json` (same Compose volume as suggestion history). It prefers titles newly visible in that snapshot, and falls back to available/popular on cold start or a thin new window. Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
-Also pick when to post (24-hour time + timezone):
+Also pick when to post (24-hour time + timezone). `TZ` is the cron clock **and** calendar “today” for new-release windows and suggestion history (not UTC):
 
 ```env
 POST_TIME=09:00
@@ -215,7 +215,7 @@ POST_TIME=09:00
 TZ=Australia/Melbourne
 ```
 
-Leave any `*_CHANNEL_ID` blank to skip that category.
+Leave any `*_CHANNEL_ID` blank to skip that category. Disabled categories do not reserve titles from the others.
 
 ---
 
@@ -233,7 +233,7 @@ Each [release tag](https://github.com/loafdaddy/discoverr-bot/releases) publishe
 |--|--|
 | Registry | `ghcr.io` |
 | Image | `ghcr.io/loafdaddy/discoverr-bot` |
-| Tags | `latest`, semver (e.g. `3.2.1`), and `3.2` (major.minor) |
+| Tags | `latest`, semver (e.g. `3.3.0`), and `3.3` (major.minor) |
 
 **1. Configure Compose** — open [`docker-compose.yml`](docker-compose.yml) and switch from build to pull:
 
@@ -241,7 +241,7 @@ Each [release tag](https://github.com/loafdaddy/discoverr-bot/releases) publishe
 services:
   discoverr:
     # build: .
-    image: ghcr.io/loafdaddy/discoverr-bot:3.2.1
+    image: ghcr.io/loafdaddy/discoverr-bot:3.3.0
     # or: ghcr.io/loafdaddy/discoverr-bot:latest
     container_name: discoverr
     env_file:
@@ -251,7 +251,7 @@ services:
     restart: unless-stopped
 ```
 
-Pin a version tag (e.g. `3.2.1`) for predictable upgrades; use `latest` to always track the newest release.
+Pin a version tag (e.g. `3.3.0`) for predictable upgrades; use `latest` to always track the newest release.
 
 **2. Pull and start**
 
@@ -266,7 +266,7 @@ No GitHub login is required — the package is **public**.
 **3. Upgrade** when a new release is published:
 
 ```bash
-# edit docker-compose.yml if you pin a version tag, e.g. 3.2.1 → 3.2.2
+# edit docker-compose.yml if you pin a version tag, e.g. 3.2.1 → 3.3.0
 docker compose pull
 docker compose up -d
 docker logs -f discoverr
@@ -334,8 +334,8 @@ docker compose up -d --build
 docker logs -f discoverr
 ```
 
-3. In Discord, confirm embeds and **Request** buttons appear in the configured channels.
-4. Click a Request button and confirm a request shows up in Seerr for the Discoverr user.
+3. In Discord, confirm embeds and **Request: {title}** buttons appear in the configured channels. Titles with a TMDb YouTube trailer also show a **Trailer** hyperlink on the card (not a button).
+4. Click a Request button and confirm a request shows up in Seerr for the Discoverr user (not the Discord user — that mapping is [issue #5](https://github.com/loafdaddy/discoverr-bot/issues/5)).
 5. Set `POST_ON_START=false` and recreate again so you are not posting on every restart:
 
 ```bash
@@ -388,7 +388,7 @@ docker compose up -d --build
 | `SEERR_USERNAME` / `SEERR_PASSWORD` | Dedicated Seerr user |
 | `WATCH_REGION` | Discovery region |
 | `STREAMING_SERVICES` | Comma-separated TMDb provider names (mixed across daily posts) |
-| `*_CHANNEL_ID` | Discord channel per category (blank to skip) |
+| `*_CHANNEL_ID` | Discord channel per category (blank to skip — no fetch, titles stay eligible elsewhere) |
 
 ### Schedule
 
@@ -397,7 +397,7 @@ docker compose up -d --build
 | `POST_TIME` | Daily time `HH:MM` (24-hour) in `TZ` — easiest |
 | `POST_HOUR` / `POST_MINUTE` | Alternative if `POST_TIME` is unset |
 | `CRON_SCHEDULE` | Full cron; **overrides** `POST_TIME` / `POST_HOUR` when set |
-| `TZ` | IANA timezone (`TIMEZONE` also accepted). Default `Australia/Melbourne` |
+| `TZ` | IANA timezone (`TIMEZONE` also accepted). Default `Australia/Melbourne`. Used for the post clock **and** calendar dates (release gates, history TTL). |
 
 Default if nothing is set: **09:00** daily.
 
@@ -405,12 +405,12 @@ Default if nothing is set: **09:00** daily.
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `POST_ON_START` | `false` | `true` only while testing |
+| `POST_ON_START` | `false` | `true` only while testing (if it fires at the same time as cron, the extra run is skipped) |
 | `TMDB_LANGUAGE` | `en-AU` | TMDb language for discovery |
 | `TMDB_FALLBACK_LANGUAGE` | `en` | Overview language when primary has no description ([#4](https://github.com/loafdaddy/discoverr-bot/issues/4)) |
-| `TMDB_PAGES` | `4` | Pages fetched per source |
+| `TMDB_PAGES` | `4` | Pages fetched per source (integer) |
 | `HISTORY_TTL_DAYS` | `90` | Days before a title can be suggested again |
-| `MIN_RATING` / `MIN_VOTES` | `6.2` / `80` | Global quality floors |
+| `MIN_RATING` / `MIN_VOTES` | `6.2` / `80` | Global quality floors (`MIN_VOTES` must be an integer) |
 | `SEERR_FAIL_CLOSED` | `true` | Skip titles when Seerr lookup fails |
 
 `WATCH_REGION` normalization lives in [`src/lib/watchRegion.ts`](src/lib/watchRegion.ts).
@@ -435,7 +435,7 @@ docker compose down
 docker compose up -d --build
 ```
 
-Your existing `.env` keeps working. You do not need `settings.json` unless you want [extra configuration for posts](#8-extra-configuration-for-posts-optional).
+Your existing `.env` keeps working (3.2.1 → 3.3.0 needs no new vars). Confirm `TZ` is where you live — it now also drives calendar “today”. You do not need `settings.json` unless you want [extra configuration for posts](#8-extra-configuration-for-posts-optional). Full notes: [docs/RELEASES.md](docs/RELEASES.md).
 
 ## Upgrading from `bot.js` (v1)
 
@@ -459,6 +459,10 @@ docker compose up -d --build
 | Bot posts nothing | Channel permissions and `*_CHANNEL_ID`; `docker logs -f discoverr` |
 | Startup fails on settings | Invalid `data/settings.json` — read the error line (`#` comments are fine) |
 | Request button fails | Seerr username/password and permissions; cookie login uses `email` (local Seerr user, not OAuth-only) |
+| Request says no seasons available | Seerr HTTP 202 — the show has no requestable seasons yet; not a successful request |
+| No Trailer link on a card | TMDb has no YouTube trailer for that title; Request still works |
+| Discord 50035 / duplicated custom id on Trending | Upgrade to 3.3.0 — day+week lists are deduped ([#7](https://github.com/loafdaddy/discoverr-bot/issues/7)) |
+| Blank channel still “uses up” titles | Upgrade to 3.3.0 — disabled categories skip fetch and do not reserve titles |
 | Library titles still appear | Seerr library sync (Plex or Jellyfin); numeric `media.status`; `SEERR_FAIL_CLOSED`; wait for scan to finish |
 | Recently added still recommended | Stale Seerr scan — trigger a manual Plex/Jellyfin sync in Seerr |
 | Same titles return too soon | `data/suggested.json` and `HISTORY_TTL_DAYS` (or `memory.*` in settings) |

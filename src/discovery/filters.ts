@@ -13,7 +13,7 @@ export function passesQualityFilters(item: TmdbItem, filters: QualityFilters = {
 
   if (requireEnglish) {
     const language = (item.original_language || item.language || "").toLowerCase();
-    if (language && language !== "en" && language !== "en-us" && language !== "en-gb") {
+    if (language !== "en" && language !== "en-us" && language !== "en-gb") {
       return false;
     }
   }

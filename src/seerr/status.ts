@@ -29,7 +29,7 @@ export function shouldSkipMediaStatus(status: unknown): boolean {
     if (Number.isFinite(asNumber) && SKIP_STATUSES.has(asNumber)) {
       return true;
     }
-    return /(available|requested|partially|pending|processing|downloading|queued|owned|blacklisted)/i.test(
+    return /\b(available|requested|partially(?:\s+available)?|pending|processing|downloading|queued|owned|blacklisted)\b/i.test(
       status
     );
   }

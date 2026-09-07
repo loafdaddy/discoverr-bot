@@ -4,9 +4,9 @@
 |-----|----------|
 | [../README.md](../README.md) | Short overview + quick start; links out |
 | [../SETUP.md](../SETUP.md) | Full install in order: Discord → TMDb → Seerr (Plex or Jellyfin) → `.env` → Docker |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | Modules, discovery pipeline, Seerr status (Plex/Jellyfin via Seerr) |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Modules, discovery pipeline, trailers, history, Seerr status (Plex/Jellyfin via Seerr) |
 | [assets/](assets/) | Screenshots used in README |
-| [RELEASES.md](RELEASES.md) | SemVer history and how to cut a release |
+| [RELEASES.md](RELEASES.md) | SemVer history, patch notes, and how to cut a release |
 | [ROADMAP.md](ROADMAP.md) | Direction and milestones |
 | [TODO.md](TODO.md) | Living status list |
 | [../CONTRIBUTING.md](../CONTRIBUTING.md) | Contributor workflow and conventions |

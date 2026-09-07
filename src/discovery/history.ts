@@ -1,70 +1,110 @@
 import fs from "fs/promises";
 import path from "path";
+import { writeJsonAtomic } from "../lib/atomicWrite";
+import { subtractDaysIso, localDateIso } from "../lib/localDate";
 import type { HistoryEntry, MediaType } from "../types";
 
-function cutoffIso(ttlDays: number): string {
-  const cutoff = new Date();
-  cutoff.setUTCDate(cutoff.getUTCDate() - ttlDays);
-  return cutoff.toISOString().split("T")[0];
+function cutoffIso(ttlDays: number, timeZone: string): string {
+  return subtractDaysIso(localDateIso(timeZone), ttlDays);
 }
 
 function isExpired(
   entry: HistoryEntry,
   suggestedTtlDays: number,
-  requestedTtlDays: number
+  requestedTtlDays: number,
+  timeZone: string
 ): boolean {
   if (entry.requestedAt) {
     if (requestedTtlDays <= 0) return false;
-    return entry.requestedAt < cutoffIso(requestedTtlDays);
+    return entry.requestedAt < cutoffIso(requestedTtlDays, timeZone);
   }
   if (suggestedTtlDays <= 0) return false;
   if (!entry.suggestedAt) return true;
-  return entry.suggestedAt < cutoffIso(suggestedTtlDays);
+  return entry.suggestedAt < cutoffIso(suggestedTtlDays, timeZone);
 }
 
 export class SuggestionHistory {
   private entries = new Map<string, HistoryEntry>();
+  private loaded = false;
+  private loadFailed = false;
+  private queue: Promise<void> = Promise.resolve();
 
   constructor(
     private readonly filePath: string,
     private readonly suggestedTtlDays: number,
-    private readonly requestedTtlDays: number = suggestedTtlDays
+    private readonly requestedTtlDays: number = suggestedTtlDays,
+    private readonly timeZone: string = "UTC"
   ) {}
 
   static defaultPath(): string {
     return path.join(process.cwd(), "data", "suggested.json");
   }
 
+  private enqueue<T>(fn: () => Promise<T>): Promise<T> {
+    const run = this.queue.then(fn, fn);
+    this.queue = run.then(
+      () => undefined,
+      () => undefined
+    );
+    return run;
+  }
+
+  /** Load from disk if this instance has not successfully loaded yet. */
+  async ensureLoaded(): Promise<void> {
+    if (this.loaded) return;
+    await this.load();
+  }
+
   async load(): Promise<void> {
+    await this.enqueue(() => this.loadUnlocked());
+  }
+
+  private async loadUnlocked(): Promise<void> {
     await fs.mkdir(path.dirname(this.filePath), { recursive: true });
     try {
       await fs.access(this.filePath);
     } catch (err) {
       const error = err as NodeJS.ErrnoException;
       if (error.code === "ENOENT") {
-        await fs.writeFile(this.filePath, "{}", "utf8");
+        await writeJsonAtomic(this.filePath, {});
       } else {
         throw err;
       }
     }
 
+    let raw: string;
     try {
-      const raw = await fs.readFile(this.filePath, "utf8");
+      raw = await fs.readFile(this.filePath, "utf8");
+    } catch (err) {
+      console.warn(`Unable to read suggestion history: ${(err as Error).message}`);
+      this.loadFailed = true;
+      return;
+    }
+
+    try {
       const parsed = JSON.parse(raw) as Record<string, HistoryEntry>;
       if (parsed && typeof parsed === "object") {
         this.entries = new Map(Object.entries(parsed));
+      } else {
+        this.entries = new Map();
       }
     } catch (err) {
-      console.warn(`Unable to read suggestion history: ${(err as Error).message}`);
-      this.entries = new Map();
+      console.warn(
+        `Unable to parse suggestion history (${this.filePath}): ${(err as Error).message}. ` +
+          "Keeping in-memory entries and refusing to overwrite the file."
+      );
+      this.loadFailed = true;
+      return;
     }
 
     this.pruneExpired();
+    this.loaded = true;
+    this.loadFailed = false;
   }
 
   private pruneExpired(): void {
     for (const [key, entry] of this.entries) {
-      if (isExpired(entry, this.suggestedTtlDays, this.requestedTtlDays)) {
+      if (isExpired(entry, this.suggestedTtlDays, this.requestedTtlDays, this.timeZone)) {
         this.entries.delete(key);
       }
     }
@@ -102,9 +142,18 @@ export class SuggestionHistory {
   }
 
   async save(): Promise<void> {
-    await fs.mkdir(path.dirname(this.filePath), { recursive: true });
+    await this.enqueue(() => this.saveUnlocked());
+  }
+
+  private async saveUnlocked(): Promise<void> {
+    if (this.loadFailed) {
+      console.warn(
+        `Skipping suggestion history save to avoid overwriting unreadable file ${this.filePath}`
+      );
+      return;
+    }
     const payload = Object.fromEntries(this.entries.entries());
-    await fs.writeFile(this.filePath, JSON.stringify(payload, null, 2), "utf8");
+    await writeJsonAtomic(this.filePath, payload);
   }
 
   /** Exposed for tests. */

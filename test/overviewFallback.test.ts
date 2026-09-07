@@ -92,4 +92,18 @@ describe("TmdbClient.withOverviewFallback", () => {
     const result = await tmdb.withOverviewFallback(item);
     assert.equal(result.overview, "TV overview");
   });
+
+  it("does not cache a failed fallback so a later attempt can retry", async () => {
+    const tmdb = new TmdbClient(baseConfig());
+    let calls = 0;
+    mock.method(tmdb, "get", async () => {
+      calls += 1;
+      if (calls === 1) throw new Error("timeout");
+      return { overview: "English overview" };
+    });
+    const item: TmdbItem = { id: 42, title: "Film", overview: "", media_type: "movie" };
+    assert.equal((await tmdb.withOverviewFallback(item)).overview, "");
+    assert.equal((await tmdb.withOverviewFallback(item)).overview, "English overview");
+    assert.equal(calls, 2);
+  });
 });

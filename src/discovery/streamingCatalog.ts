@@ -1,5 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
+import { writeJsonAtomic } from "../lib/atomicWrite";
 import { itemKey } from "../lib/media";
 import type { TmdbItem } from "../types";
 
@@ -26,6 +27,7 @@ function daysBefore(isoDate: string, days: number): string {
  */
 export class StreamingCatalog {
   private data: CatalogData = {};
+  private loadFailed = false;
 
   constructor(private readonly filePath: string) {}
 
@@ -50,15 +52,24 @@ export class StreamingCatalog {
       const raw = await fs.readFile(this.filePath, "utf8");
       const parsed = JSON.parse(raw) as CatalogData;
       this.data = parsed && typeof parsed === "object" ? parsed : {};
+      this.loadFailed = false;
     } catch (err) {
-      console.warn(`Unable to read streaming catalog: ${(err as Error).message}`);
-      this.data = {};
+      console.warn(
+        `Unable to read streaming catalog (${this.filePath}): ${(err as Error).message}. ` +
+          "Keeping in-memory catalog and refusing to overwrite the file."
+      );
+      this.loadFailed = true;
     }
   }
 
   async save(): Promise<void> {
-    await fs.mkdir(path.dirname(this.filePath), { recursive: true });
-    await fs.writeFile(this.filePath, JSON.stringify(this.data, null, 2), "utf8");
+    if (this.loadFailed) {
+      console.warn(
+        `Skipping streaming catalog save to avoid overwriting unreadable file ${this.filePath}`
+      );
+      return;
+    }
+    await writeJsonAtomic(this.filePath, this.data);
   }
 
   hasProvider(region: string, providerId: number): boolean {

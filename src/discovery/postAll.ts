@@ -1,6 +1,8 @@
 import type { Client, TextChannel } from "discord.js";
-import { itemKey, mediaTypeOf, titleOf } from "../lib/media";
 import { sendCategoryMessage } from "../discord/embeds";
+import { isConfiguredChannel } from "../lib/channels";
+import { localDateIso } from "../lib/localDate";
+import { itemKey, mediaTypeOf, titleOf } from "../lib/media";
 import type { SeerrClient } from "../seerr/client";
 import type { TmdbClient } from "../tmdb/client";
 import {
@@ -15,6 +17,8 @@ import type { SuggestionHistory } from "./history";
 import { selectRecommendations } from "./select";
 import { StreamingCatalog } from "./streamingCatalog";
 import { selectStreamingPicks } from "./streamingSelect";
+
+let discoveryInFlight: Promise<void> | null = null;
 
 async function postCategory(
   client: Client,
@@ -85,21 +89,43 @@ export async function postAll(
   seerr: SeerrClient,
   history: SuggestionHistory
 ): Promise<void> {
+  if (discoveryInFlight) {
+    console.warn("Skipping discovery; a run is already in progress.");
+    return;
+  }
+
+  const run = runDiscovery(client, config, tmdb, seerr, history);
+  discoveryInFlight = run.finally(() => {
+    discoveryInFlight = null;
+  });
+  await run;
+}
+
+async function runDiscovery(
+  client: Client,
+  config: AppConfig,
+  tmdb: TmdbClient,
+  seerr: SeerrClient,
+  history: SuggestionHistory
+): Promise<void> {
   console.log(config.dryRun ? "Dry-run discovery (no Discord posts)..." : "Posting daily discovery...");
 
   await history.load();
   seerr.clearCache();
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = localDateIso(config.timezone);
   const usedThisRun = new Set<string>();
   const counts = config.categoryPostCounts;
   const baseFilters = {
     minRating: config.minRating,
     minVotes: config.minVotes,
-    requireEnglish: config.requireEnglish
+    requireEnglish: config.requireEnglish,
+    today
   };
 
-  // Fetch category pools in parallel; selection stays sequential for usedThisRun.
+  const empty: TmdbItem[] = [];
+
+  // Fetch only enabled categories; selection stays sequential for usedThisRun.
   const [
     movieCandidates,
     tvCandidates,
@@ -107,187 +133,210 @@ export async function postAll(
     newReleaseCandidates,
     hiddenCandidates
   ] = await Promise.all([
-    fetchMovieOfDayCandidates(tmdb, config),
-    fetchTvOfDayCandidates(tmdb, config),
-    fetchTrendingCandidates(tmdb, config),
-    fetchNewReleaseCandidates(tmdb, config),
-    fetchHiddenGemCandidates(tmdb, config)
+    isConfiguredChannel(config.movieOfDayChannelId)
+      ? fetchMovieOfDayCandidates(tmdb, config)
+      : Promise.resolve(empty),
+    isConfiguredChannel(config.tvOfDayChannelId)
+      ? fetchTvOfDayCandidates(tmdb, config)
+      : Promise.resolve(empty),
+    isConfiguredChannel(config.trendingChannelId)
+      ? fetchTrendingCandidates(tmdb, config)
+      : Promise.resolve(empty),
+    isConfiguredChannel(config.newReleasesChannelId)
+      ? fetchNewReleaseCandidates(tmdb, config)
+      : Promise.resolve(empty),
+    isConfiguredChannel(config.hiddenGemsChannelId)
+      ? fetchHiddenGemCandidates(tmdb, config)
+      : Promise.resolve(empty)
   ]);
 
-  const movieOfDaySelection = await selectRecommendations(
-    movieCandidates,
-    counts.movieOfTheDay,
-    usedThisRun,
-    history,
-    seerr,
-    {
-      ...baseFilters,
-      minRating: Math.max(config.minRating, 6.5),
-      minVotes: Math.max(config.minVotes, 120)
-    }
-  );
-
-  if (movieOfDaySelection.length) {
-    await postCategory(
-      client,
-      tmdb,
-      config,
-      config.movieOfDayChannelId,
-      "Movie of the Day",
-      "movie-of-the-day",
-      movieOfDaySelection,
+  if (isConfiguredChannel(config.movieOfDayChannelId)) {
+    const movieOfDaySelection = await selectRecommendations(
+      movieCandidates,
+      counts.movieOfTheDay,
       usedThisRun,
       history,
-      today
-    );
-  }
-
-  const tvOfDaySelection = await selectRecommendations(
-    tvCandidates,
-    counts.tvOfTheDay,
-    usedThisRun,
-    history,
-    seerr,
-    {
-      ...baseFilters,
-      minRating: Math.max(config.minRating, 6.6),
-      minVotes: Math.max(config.minVotes, 100)
-    }
-  );
-
-  if (tvOfDaySelection.length) {
-    await postCategory(
-      client,
-      tmdb,
-      config,
-      config.tvOfDayChannelId,
-      "TV Show of the Day",
-      "tv-show-of-the-day",
-      tvOfDaySelection,
-      usedThisRun,
-      history,
-      today
-    );
-  }
-
-  const trendingSelection = await selectRecommendations(
-    trendingCandidates,
-    counts.trending,
-    usedThisRun,
-    history,
-    seerr,
-    baseFilters
-  );
-  if (trendingSelection.length) {
-    await postCategory(
-      client,
-      tmdb,
-      config,
-      config.trendingChannelId,
-      "Trending",
-      "trending",
-      trendingSelection,
-      usedThisRun,
-      history,
-      today
-    );
-  }
-
-  const newReleaseSelection = await selectRecommendations(
-    newReleaseCandidates,
-    counts.newReleases,
-    usedThisRun,
-    history,
-    seerr,
-    {
-      ...baseFilters,
-      minVotes: Math.max(20, Math.floor(config.minVotes * 0.5))
-    }
-  );
-  if (newReleaseSelection.length) {
-    await postCategory(
-      client,
-      tmdb,
-      config,
-      config.newReleasesChannelId,
-      "New Release",
-      "new-releases",
-      newReleaseSelection,
-      usedThisRun,
-      history,
-      today
-    );
-  }
-
-  const streamingCatalog = new StreamingCatalog(StreamingCatalog.defaultPath());
-  await streamingCatalog.load();
-  const { picks: streamingPicks, resolvedCount: streamingResolved } =
-    await selectStreamingPicks(
-      tmdb,
-      config,
       seerr,
-      history,
-      usedThisRun,
-      streamingCatalog,
-      today,
-      baseFilters,
-      counts.streaming
+      {
+        ...baseFilters,
+        minRating: Math.max(config.minRating, 6.5),
+        minVotes: Math.max(config.minVotes, 120)
+      }
     );
-  await streamingCatalog.save();
 
-  if (streamingPicks.length) {
-    const streamingItems = streamingPicks.map((pick) => pick.item);
-    const itemHeadings = streamingPicks.map(
-      (pick) => `New or popular on ${pick.service}`
-    );
-    const itemCategoryKeys = streamingPicks.map(
-      (pick) => `streaming-${pick.service.toLowerCase()}`
-    );
-    await postCategory(
-      client,
-      tmdb,
-      config,
-      config.streamingChannelId,
-      itemHeadings[0],
-      itemCategoryKeys[0],
-      streamingItems,
-      usedThisRun,
-      history,
-      today,
-      { itemHeadings, itemCategoryKeys }
-    );
-  } else if (streamingResolved === 0) {
-    console.warn("No streaming providers configured or available.");
+    if (movieOfDaySelection.length) {
+      await postCategory(
+        client,
+        tmdb,
+        config,
+        config.movieOfDayChannelId,
+        "Movie of the Day",
+        "movie-of-the-day",
+        movieOfDaySelection,
+        usedThisRun,
+        history,
+        today
+      );
+    }
   }
 
-  const cutoffYear = new Date().getFullYear() - 2;
-  const hiddenGemSelection = await selectRecommendations(
-    hiddenCandidates,
-    counts.hiddenGems,
-    usedThisRun,
-    history,
-    seerr,
-    {
-      minRating: 7.0,
-      minVotes: 300,
-      maxPopularity: 60,
-      maxReleaseYear: cutoffYear,
-      requireEnglish: config.requireEnglish
-    }
-  );
-  if (hiddenGemSelection.length) {
-    await postCategory(
-      client,
-      tmdb,
-      config,
-      config.hiddenGemsChannelId,
-      "Hidden Gem",
-      "hidden-gems",
-      hiddenGemSelection,
+  if (isConfiguredChannel(config.tvOfDayChannelId)) {
+    const tvOfDaySelection = await selectRecommendations(
+      tvCandidates,
+      counts.tvOfTheDay,
       usedThisRun,
       history,
-      today
+      seerr,
+      {
+        ...baseFilters,
+        minRating: Math.max(config.minRating, 6.6),
+        minVotes: Math.max(config.minVotes, 100)
+      }
     );
+
+    if (tvOfDaySelection.length) {
+      await postCategory(
+        client,
+        tmdb,
+        config,
+        config.tvOfDayChannelId,
+        "TV Show of the Day",
+        "tv-show-of-the-day",
+        tvOfDaySelection,
+        usedThisRun,
+        history,
+        today
+      );
+    }
+  }
+
+  if (isConfiguredChannel(config.trendingChannelId)) {
+    const trendingSelection = await selectRecommendations(
+      trendingCandidates,
+      counts.trending,
+      usedThisRun,
+      history,
+      seerr,
+      baseFilters
+    );
+    if (trendingSelection.length) {
+      await postCategory(
+        client,
+        tmdb,
+        config,
+        config.trendingChannelId,
+        "Trending",
+        "trending",
+        trendingSelection,
+        usedThisRun,
+        history,
+        today
+      );
+    }
+  }
+
+  if (isConfiguredChannel(config.newReleasesChannelId)) {
+    const newReleaseSelection = await selectRecommendations(
+      newReleaseCandidates,
+      counts.newReleases,
+      usedThisRun,
+      history,
+      seerr,
+      {
+        ...baseFilters,
+        minVotes: Math.max(20, Math.floor(config.minVotes * 0.5))
+      }
+    );
+    if (newReleaseSelection.length) {
+      await postCategory(
+        client,
+        tmdb,
+        config,
+        config.newReleasesChannelId,
+        "New Release",
+        "new-releases",
+        newReleaseSelection,
+        usedThisRun,
+        history,
+        today
+      );
+    }
+  }
+
+  if (isConfiguredChannel(config.streamingChannelId)) {
+    const streamingCatalog = new StreamingCatalog(StreamingCatalog.defaultPath());
+    await streamingCatalog.load();
+    const { picks: streamingPicks, resolvedCount: streamingResolved } =
+      await selectStreamingPicks(
+        tmdb,
+        config,
+        seerr,
+        history,
+        usedThisRun,
+        streamingCatalog,
+        today,
+        baseFilters,
+        counts.streaming
+      );
+    await streamingCatalog.save();
+
+    if (streamingPicks.length) {
+      const streamingItems = streamingPicks.map((pick) => pick.item);
+      const itemHeadings = streamingPicks.map(
+        (pick) => `New or popular on ${pick.service}`
+      );
+      const itemCategoryKeys = streamingPicks.map(
+        (pick) => `streaming-${pick.service.toLowerCase()}`
+      );
+      await postCategory(
+        client,
+        tmdb,
+        config,
+        config.streamingChannelId,
+        itemHeadings[0],
+        itemCategoryKeys[0],
+        streamingItems,
+        usedThisRun,
+        history,
+        today,
+        { itemHeadings, itemCategoryKeys }
+      );
+    } else if (streamingResolved === 0) {
+      console.warn("No streaming providers configured or available.");
+    }
+  }
+
+  if (isConfiguredChannel(config.hiddenGemsChannelId)) {
+    const cutoffYear = new Date().getFullYear() - 2;
+    const hiddenGemSelection = await selectRecommendations(
+      hiddenCandidates,
+      counts.hiddenGems,
+      usedThisRun,
+      history,
+      seerr,
+      {
+        minRating: 7.0,
+        minVotes: 300,
+        maxPopularity: 60,
+        maxReleaseYear: cutoffYear,
+        requireEnglish: config.requireEnglish,
+        today
+      }
+    );
+    if (hiddenGemSelection.length) {
+      await postCategory(
+        client,
+        tmdb,
+        config,
+        config.hiddenGemsChannelId,
+        "Hidden Gem",
+        "hidden-gems",
+        hiddenGemSelection,
+        usedThisRun,
+        history,
+        today
+      );
+    }
   }
 
   console.log(config.dryRun ? "Dry-run discovery finished." : "Daily discovery posted.");

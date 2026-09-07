@@ -25,6 +25,7 @@ function describeFetchFailure(seerrUrl: string, err: unknown): string {
 export class SeerrClient {
   private cookie = "";
   private readonly cache = new Map<string, SeerrMediaDetails | null>();
+  private loginQueue: Promise<void> = Promise.resolve();
 
   constructor(private readonly config: AppConfig) {}
 
@@ -33,6 +34,15 @@ export class SeerrClient {
   }
 
   private async login(): Promise<void> {
+    const run = this.loginQueue.then(() => this.loginUnlocked(), () => this.loginUnlocked());
+    this.loginQueue = run.then(
+      () => undefined,
+      () => undefined
+    );
+    await run;
+  }
+
+  private async loginUnlocked(): Promise<void> {
     let res: Response;
     try {
       res = await fetch(`${this.config.seerrUrl}/api/v1/auth/local`, {
@@ -156,7 +166,9 @@ export class SeerrClient {
       const res = await this.fetch(`/api/v1/${type}/${tmdbId}`);
       if (!res.ok) {
         console.warn(`Seerr lookup failed for ${type}:${tmdbId}: ${res.status}`);
-        this.cache.set(key, null);
+        if (res.status < 500) {
+          this.cache.set(key, null);
+        }
         return null;
       }
 
@@ -170,7 +182,6 @@ export class SeerrClient {
       return details;
     } catch (err) {
       console.warn(`Seerr lookup error for ${type}:${tmdbId}: ${(err as Error).message}`);
-      this.cache.set(key, null);
       return null;
     }
   }
@@ -207,7 +218,11 @@ export class SeerrClient {
     const text = await res.text();
     console.log("Seerr response:", res.status, text);
 
-    if (!res.ok) {
+    if (res.status === 202) {
+      throw new Error("Seerr accepted the request but no seasons were available to add.");
+    }
+
+    if (res.status !== 200 && res.status !== 201) {
       throw new Error(text || `Seerr request failed with status ${res.status}`);
     }
 

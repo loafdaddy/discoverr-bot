@@ -21,6 +21,12 @@ describe("shouldSkipMediaStatus", () => {
     assert.equal(shouldSkipMediaStatus("5"), true);
     assert.equal(shouldSkipMediaStatus("1"), false);
   });
+
+  it("does not treat unavailable as available", () => {
+    assert.equal(shouldSkipMediaStatus("unavailable"), false);
+    assert.equal(shouldSkipMediaStatus("available"), true);
+    assert.equal(shouldSkipMediaStatus("PENDING"), true);
+  });
 });
 
 describe("isUnavailableFromDetails", () => {

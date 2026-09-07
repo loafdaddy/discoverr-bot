@@ -2,7 +2,7 @@
 
 Track every published version here. Update this file when cutting a release, then tag and publish on GitHub.
 
-Current version in tree: **3.2.1** (`package.json`).
+Current version in tree: **3.3.0** (`package.json`).
 
 ## Versioning
 
@@ -22,7 +22,7 @@ Pre-1.0 history lived as an untagged JavaScript bot. **2.0.0** is the first SemV
 2. Set `version` in [`package.json`](../package.json) (and keep lockfile in sync if you use `npm version`)
 3. Add a section below in this file; bump version mentions in [`README.md`](../README.md) / [`SETUP.md`](../SETUP.md) if needed
 4. Commit on `main` (or merge the release PR)
-5. Tag: `git tag -a v3.2.1 -m "Discoverr 3.2.1"`
+5. Tag: `git tag -a v3.3.0 -m "Discoverr 3.3.0"`
 6. Push: `git push origin main --tags`
 7. Create the GitHub release (notes can mirror the section below)
 8. Sanity-check from a clean clone:
@@ -30,7 +30,7 @@ Pre-1.0 history lived as an untagged JavaScript bot. **2.0.0** is the first SemV
 ```bash
 git clone https://github.com/loafdaddy/discoverr-bot.git
 cd discoverr-bot
-git checkout v3.2.1
+git checkout v3.3.0
 cp .env.example .env
 # fill secrets in .env — see SETUP.md
 # optional: cp settings.example.json data/settings.json
@@ -47,6 +47,64 @@ docker logs -f discoverr
 - Include the AI note if the release involved substantial AI-assisted work
 
 ## Releases
+
+### 3.3.0 — Trending reliability, trailers, calendar TZ (2026-09-07)
+
+**Status:** published · [GitHub release](https://github.com/loafdaddy/discoverr-bot/releases/tag/v3.3.0)
+
+**Branch:** `release/3.3.0`
+
+**Headline:** Trending posts no longer fail when the same title appears twice in one Discord message ([#7](https://github.com/loafdaddy/discoverr-bot/issues/7)). Recommendation cards gain a YouTube **Trailer** hyperlink from TMDb ([#6](https://github.com/loafdaddy/discoverr-bot/issues/6)). Reliability fixes for history, Seerr requests, timezones, and disabled channels.
+
+**Highlights**
+
+Discovery and Discord
+- Deduplicate overlapping TMDb day+week Trending lists by `movie:` / `tv:` identity
+- Guard `selectRecommendations` against duplicate candidates in the eligible pool
+- `fetchPages` keys mixed `/trending/all` results by media type + id (a movie and a show can share a numeric TMDb id); people are skipped so they cannot hide a TV show with the same id
+- Embed **Trailer** field: `[Watch on YouTube](url)` when TMDb has a YouTube trailer (no extra config)
+- Request buttons stay on a shared row; labels are `Request: {title}` so multi-card posts are not ambiguous
+- Request `customId` stays `request:${type}:${id}` so already-posted messages still work
+- Blank `*_CHANNEL_ID` values skip that category entirely (no TMDb fetch, and those titles are not reserved from other channels)
+
+Reliability
+- Suggestion history and streaming catalog write via temp-file + rename; a corrupt file is not overwritten
+- Request clicks no longer reload history from disk (avoids wiping an in-progress daily post)
+- Overlapping `postAll` runs are skipped (`POST_ON_START` at the same time as cron)
+- Invalid `CRON_SCHEDULE` exits before Discord login
+- Calendar “today” uses `TZ` (not UTC) — release gates, history stamps, and TMDb date windows match the post schedule (important for default `Australia/Melbourne` morning posts)
+- Seerr `POST /request` treats only HTTP 200/201 as success; **202** (no seasons available) is an error, not a fake success
+- Seerr logins are serialized; transient lookup/trailer/overview failures are not sticky-cached for the process lifetime
+- Request button errors are short operator-safe messages (no raw Seerr JSON in Discord)
+- `requireEnglish` rejects titles with a missing language; `MIN_VOTES` / `TMDB_PAGES` must be integers
+- String Seerr statuses no longer treat `"unavailable"` as `"available"`
+
+**Not in 3.3.0:** Discord user → Seerr requester mapping ([#5](https://github.com/loafdaddy/discoverr-bot/issues/5)) — requests still file as the Discoverr Seerr user.
+
+**Upgrade from 3.2.1**
+
+```bash
+git pull
+docker compose up -d --build
+```
+
+No required env or `settings.json` changes. Keep `.env`. Trailer links appear automatically when TMDb has a YouTube trailer. Confirm `TZ` matches where you live — it now drives the calendar date as well as the cron clock.
+
+GHCR pins: `ghcr.io/loafdaddy/discoverr-bot:3.2.1` → `3.3.0`.
+
+**Install (new)**
+- Follow [SETUP.md](../SETUP.md)
+
+**Operator smoke (after upgrade)**
+- Trending with default `postCount: 3` should never 50035 (`COMPONENT_CUSTOM_ID_DUPLICATED`)
+- Cards with a trailer show a **Trailer** hyperlink; **Request: {title}** still submits as the Discoverr Seerr user
+- Blank channel IDs stay silent and do not starve other categories
+
+**Known gaps:** see [TODO.md](TODO.md)
+
+**AI note:** Parts of this release were developed with AI assistance. AI-assisted contributions remain welcome — see [CONTRIBUTING.md](../CONTRIBUTING.md).
+
+---
 
 ### 3.2.1 — CI, license, overview fallback, Seerr health (2026-08-11)
 
