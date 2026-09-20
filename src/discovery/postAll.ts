@@ -95,9 +95,18 @@ export async function postAll(
   }
 
   const run = runDiscovery(client, config, tmdb, seerr, history);
-  discoveryInFlight = run.finally(() => {
-    discoveryInFlight = null;
-  });
+  // `run` is awaited below, so the tracked copy must never reject on its own:
+  // a second rejected promise here has no handler and takes the process down,
+  // even though every caller wraps postAll in try/catch. Same settle-to-void
+  // pattern as SuggestionHistory#enqueue and SeerrClient#login.
+  discoveryInFlight = run
+    .then(
+      () => undefined,
+      () => undefined
+    )
+    .finally(() => {
+      discoveryInFlight = null;
+    });
   await run;
 }
 

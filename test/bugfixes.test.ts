@@ -5,6 +5,7 @@ import { requestButtonLabel } from "../src/discord/embeds";
 import { clipEmbedTitle, DISCORD_EMBED_TITLE_MAX } from "../src/discord/embedTitle";
 import { userFacingRequestError } from "../src/discord/requestErrors";
 import { passesQualityFilters } from "../src/discovery/filters";
+import { postAll } from "../src/discovery/postAll";
 import { isConfiguredChannel } from "../src/lib/channels";
 import { localDateIso, subtractDaysIso } from "../src/lib/localDate";
 import type { TmdbItem } from "../src/types";
@@ -103,5 +104,65 @@ describe("requestButtonLabel", () => {
   it("stays within Discord's 80-character button label limit", () => {
     const item: TmdbItem = { id: 1, title: "X".repeat(200), media_type: "movie" };
     assert.ok(requestButtonLabel(item).length <= 80);
+  });
+});
+
+describe("postAll in-flight guard", () => {
+  // A failing run used to leave a second, unhandled rejected promise behind,
+  // which terminates the process even though callers wrap postAll in try/catch.
+  function stubs(loadImpl: () => Promise<void>) {
+    return {
+      client: {} as never,
+      tmdb: {} as never,
+      seerr: { clearCache() {} } as never,
+      history: { load: loadImpl } as never,
+      config: {
+        dryRun: true,
+        timezone: "UTC",
+        minRating: 0,
+        minVotes: 0,
+        requireEnglish: false,
+        categoryPostCounts: {},
+        movieOfDayChannelId: "",
+        tvOfDayChannelId: "",
+        trendingChannelId: "",
+        newReleasesChannelId: "",
+        streamingChannelId: "",
+        hiddenGemsChannelId: ""
+      } as never
+    };
+  }
+
+  it("surfaces the failure without leaving an unhandled rejection", async () => {
+    const unhandled: unknown[] = [];
+    const onUnhandled = (reason: unknown) => unhandled.push(reason);
+    process.on("unhandledRejection", onUnhandled);
+    const log = console.log;
+    console.log = () => {};
+
+    try {
+      const failing = stubs(async () => {
+        throw new Error("TMDb error 429: rate limited");
+      });
+      await assert.rejects(
+        postAll(failing.client, failing.config, failing.tmdb, failing.seerr, failing.history),
+        /rate limited/
+      );
+
+      // Let Node settle the promise graph so any stray rejection is reported.
+      await new Promise((resolve) => setImmediate(resolve));
+      assert.deepEqual(unhandled, []);
+
+      // The guard must also reset, or every later run is skipped.
+      let ran = false;
+      const ok = stubs(async () => {
+        ran = true;
+      });
+      await postAll(ok.client, ok.config, ok.tmdb, ok.seerr, ok.history);
+      assert.equal(ran, true);
+    } finally {
+      console.log = log;
+      process.off("unhandledRejection", onUnhandled);
+    }
   });
 });
