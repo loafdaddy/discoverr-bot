@@ -10,7 +10,8 @@ import {
   fetchMovieOfDayCandidates,
   fetchNewReleaseCandidates,
   fetchTrendingCandidates,
-  fetchTvOfDayCandidates
+  fetchTvOfDayCandidates,
+  hiddenGemCutoffYear
 } from "../tmdb/sources";
 import type { AppConfig, TmdbItem } from "../types";
 import type { SuggestionHistory } from "./history";
@@ -307,7 +308,7 @@ async function runDiscovery(
   }
 
   if (isConfiguredChannel(config.hiddenGemsChannelId)) {
-    const cutoffYear = new Date().getFullYear() - 2;
+    const cutoffYear = hiddenGemCutoffYear(config.timezone);
     const hiddenGemSelection = await selectRecommendations(
       hiddenCandidates,
       counts.hiddenGems,

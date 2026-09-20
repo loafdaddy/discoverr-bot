@@ -6,7 +6,8 @@ import { clipEmbedTitle, DISCORD_EMBED_TITLE_MAX } from "../src/discord/embedTit
 import { userFacingRequestError } from "../src/discord/requestErrors";
 import { passesQualityFilters } from "../src/discovery/filters";
 import { isConfiguredChannel } from "../src/lib/channels";
-import { localDateIso, subtractDaysIso } from "../src/lib/localDate";
+import { localDateIso, localYear, subtractDaysIso } from "../src/lib/localDate";
+import { hiddenGemCutoffYear } from "../src/tmdb/sources";
 import type { TmdbItem } from "../src/types";
 
 function requiredEnv(overrides: Record<string, string> = {}): NodeJS.ProcessEnv {
@@ -103,5 +104,20 @@ describe("requestButtonLabel", () => {
   it("stays within Discord's 80-character button label limit", () => {
     const item: TmdbItem = { id: 1, title: "X".repeat(200), media_type: "movie" };
     assert.ok(requestButtonLabel(item).length <= 80);
+  });
+});
+
+describe("hidden gem release cutoff", () => {
+  // 20:00 UTC on New Year's Eve is already the next year in Melbourne.
+  const newYearEve = new Date("2026-12-31T20:00:00.000Z");
+
+  it("reads the year in the operator timezone, not UTC", () => {
+    assert.equal(localYear("UTC", newYearEve), 2026);
+    assert.equal(localYear("Australia/Melbourne", newYearEve), 2027);
+  });
+
+  it("derives the cutoff from that timezone-aware year", () => {
+    assert.equal(hiddenGemCutoffYear("Australia/Melbourne", newYearEve), 2025);
+    assert.equal(hiddenGemCutoffYear("UTC", newYearEve), 2024);
   });
 });

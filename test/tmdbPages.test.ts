@@ -3,7 +3,11 @@ import { describe, it, mock } from "node:test";
 import { buildRecommendationEmbed, trailerField } from "../src/discord/embeds";
 import { itemKey, uniqueByItemKey } from "../src/lib/media";
 import { TmdbClient } from "../src/tmdb/client";
-import { fetchTrendingCandidates } from "../src/tmdb/sources";
+import {
+  fetchHiddenGemCandidates,
+  fetchTrendingCandidates,
+  hiddenGemCutoffYear
+} from "../src/tmdb/sources";
 import type { AppConfig, TmdbItem } from "../src/types";
 
 function baseConfig(overrides: Partial<AppConfig> = {}): AppConfig {
@@ -158,5 +162,34 @@ describe("trailer embed field", () => {
       fields.some((field) => field.name === "Trailer"),
       false
     );
+  });
+});
+
+describe("fetchHiddenGemCandidates", () => {
+  // 20:00 UTC on New Year's Eve is already 07:00 on 1 January in Melbourne.
+  // A UTC-derived year picks 2024 here; the operator timezone gives 2025.
+  const newYearEve = new Date("2026-12-31T20:00:00.000Z");
+
+  it("builds its TMDb date window from the operator timezone, not UTC", async () => {
+    const config = baseConfig({ timezone: "Australia/Melbourne" });
+    const tmdb = new TmdbClient(config);
+    let requestedPath = "";
+    mock.method(tmdb, "fetchPages", async (path: string) => {
+      requestedPath = path;
+      return [];
+    });
+
+    mock.timers.enable({ apis: ["Date"], now: newYearEve });
+    try {
+      await fetchHiddenGemCandidates(tmdb, config);
+    } finally {
+      mock.timers.reset();
+    }
+
+    assert.ok(
+      requestedPath.includes("primary_release_date.lte=2025-12-31"),
+      `expected the Melbourne cutoff 2025-12-31 in ${requestedPath}`
+    );
+    assert.equal(hiddenGemCutoffYear(config.timezone, newYearEve), 2025);
   });
 });
