@@ -16,7 +16,7 @@ Related: [ARCHITECTURE.md](ARCHITECTURE.md) · [ROADMAP.md](ROADMAP.md) · [RELE
 - [x] Brand kit + Cadence-style docs / release structure
 - [x] Docker-only operator path (`Dockerfile` + Compose mount for `data/`)
 - [x] Simple `POST_TIME` / `POST_HOUR` schedule env (v2.1.0)
-- [x] Publish **v2.0.0**–**v3.3.0** on GitHub
+- [x] Publish **v2.0.0**–**v3.3.1** on GitHub
 - [x] Live Discord / NAS smoke test (`POST_ON_START` + Docker Compose) — verified by author
 - [x] New on streaming: shuffled multi-provider mix + first-seen catalog (v2.2.0)
 - [x] Optional `settings.json` extra post config (v3.0.0 / clarified v3.1.0)
@@ -46,6 +46,13 @@ Related: [ARCHITECTURE.md](ARCHITECTURE.md) · [ROADMAP.md](ROADMAP.md) · [RELE
 - [x] Safer Request error replies; `requireEnglish` / integer env / status regex fixes
 - [x] Cut **v3.3.0** release / tag / GHCR publish
 
+## v3.3.1 (`release/3.3.1`)
+
+- [x] Discovery failures no longer exit the process (issue #8)
+- [x] Successful Seerr request logs omit the response body (issue #11)
+- [x] Streaming catalog drops long-absent titles without resetting `firstSeen` (issue #11)
+- [x] Cut **v3.3.1** release / tag / GHCR publish
+
 ## Operator follow-up (live stack)
 
 - [ ] Live smoke against a **Plex-backed** Seerr instance (login, posts, Request button)
@@ -56,7 +63,7 @@ Related: [ARCHITECTURE.md](ARCHITECTURE.md) · [ROADMAP.md](ROADMAP.md) · [RELE
 - [ ] Confirm embed Trailer hyperlink opens YouTube; **Request: {title}** still submits as the Discoverr Seerr user
 - [ ] Confirm a blank `MOVIE_OF_DAY_CHANNEL_ID` still lets the same film appear in Trending
 
-## Next (after 3.3.0)
+## Next (after 3.3.1)
 
 - [ ] Discord user → Seerr requester mapping (issue #5) — Request clicks attributed to the Discord user’s Seerr account
 - [ ] Optional new env vars only if a concrete need appears (e.g. Seerr API-key auth)

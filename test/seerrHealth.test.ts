@@ -94,3 +94,66 @@ describe("SeerrClient.checkHealth", () => {
     fetchMock.mock.restore();
   });
 });
+
+function loggedInFetch(requestStatus: number, requestBody: string) {
+  return async (input: RequestInfo | URL) => {
+    const url = String(input);
+    if (url.endsWith("/api/v1/auth/local")) {
+      return new Response("{}", {
+        status: 200,
+        headers: { "set-cookie": "connect.sid=abc; Path=/" }
+      });
+    }
+    if (url.endsWith("/api/v1/request")) {
+      return new Response(requestBody, { status: requestStatus });
+    }
+    throw new Error(`unexpected url ${url}`);
+  };
+}
+
+describe("SeerrClient.request", () => {
+  it("logs the status and not the response body on success", async () => {
+    const secret = "secret@example.com";
+    const body = JSON.stringify({ id: 9, requestedBy: { email: secret, plexToken: "tok" } });
+    const seerr = new SeerrClient(baseConfig());
+    const fetchMock = mock.method(globalThis, "fetch", loggedInFetch(201, body));
+    const lines: string[] = [];
+    const original = console.log;
+    console.log = (...args: unknown[]) => {
+      lines.push(args.map(String).join(" "));
+    };
+
+    try {
+      await seerr.request("movie", 9);
+    } finally {
+      console.log = original;
+      fetchMock.mock.restore();
+    }
+
+    const logged = lines.join("\n");
+    assert.match(logged, /Seerr request accepted: 201/);
+    assert.equal(logged.includes(secret), false);
+    assert.equal(logged.includes("plexToken"), false);
+  });
+
+  it("still throws the failure body for request error matching", async () => {
+    const body = JSON.stringify({ message: "Request already exists" });
+    const seerr = new SeerrClient(baseConfig());
+    const fetchMock = mock.method(globalThis, "fetch", loggedInFetch(409, body));
+    const lines: string[] = [];
+    const original = console.log;
+    console.log = (...args: unknown[]) => {
+      lines.push(args.map(String).join(" "));
+    };
+
+    try {
+      await assert.rejects(() => seerr.request("movie", 9), /already exists/);
+    } finally {
+      console.log = original;
+      fetchMock.mock.restore();
+    }
+
+    assert.equal(lines.some((line) => line.includes("Seerr response:")), false);
+    assert.equal(lines.some((line) => line.includes("already exists")), false);
+  });
+});

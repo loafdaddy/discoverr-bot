@@ -216,7 +216,6 @@ export class SeerrClient {
     });
 
     const text = await res.text();
-    console.log("Seerr response:", res.status, text);
 
     if (res.status === 202) {
       throw new Error("Seerr accepted the request but no seasons were available to add.");
@@ -225,6 +224,8 @@ export class SeerrClient {
     if (res.status !== 200 && res.status !== 201) {
       throw new Error(text || `Seerr request failed with status ${res.status}`);
     }
+
+    console.log(`Seerr request accepted: ${res.status}`);
 
     try {
       return JSON.parse(text) as unknown;

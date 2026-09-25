@@ -5,7 +5,8 @@ import path from "path";
 import { describe, it } from "node:test";
 import {
   STREAMING_NEW_WINDOW_DAYS,
-  StreamingCatalog
+  StreamingCatalog,
+  streamingCatalogRetentionDays
 } from "../src/discovery/streamingCatalog";
 import {
   allocateStreamingSlots,
@@ -161,5 +162,42 @@ describe("StreamingCatalog", () => {
     const seeded = catalog.getFirstSeen("AU", 8, movie(10));
     catalog.observe("AU", 8, [movie(10)], "2026-07-15", STREAMING_NEW_WINDOW_DAYS);
     assert.equal(catalog.getFirstSeen("AU", 8, movie(10)), seeded);
+  });
+
+  it("drops old absences and keeps firstSeen for titles still in the fetch", async () => {
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "discoverr-catalog-"));
+    const filePath = path.join(dir, "streaming-catalog.json");
+    const retention = streamingCatalogRetentionDays(STREAMING_NEW_WINDOW_DAYS);
+    const today = "2026-07-20";
+    const recent = "2026-06-01";
+    const stale = "2020-01-01";
+    assert.ok(recent > "2026-03-16");
+    assert.ok(retention >= 90);
+
+    await fs.writeFile(
+      filePath,
+      JSON.stringify({
+        AU: {
+          "8": {
+            "movie:1": { firstSeen: stale },
+            "movie:2": { firstSeen: recent },
+            "movie:3": { firstSeen: "2025-01-01" }
+          },
+          "9": {
+            "movie:7": { firstSeen: stale }
+          }
+        }
+      }),
+      "utf8"
+    );
+
+    const catalog = new StreamingCatalog(filePath);
+    await catalog.load();
+    const { coldStart } = catalog.observe("AU", 8, [movie(3)], today, STREAMING_NEW_WINDOW_DAYS);
+    assert.equal(coldStart, false);
+    assert.equal(catalog.getFirstSeen("AU", 8, movie(3)), "2025-01-01");
+    assert.equal(catalog.getFirstSeen("AU", 8, movie(1)), null);
+    assert.equal(catalog.getFirstSeen("AU", 8, movie(2)), recent);
+    assert.equal(catalog.getFirstSeen("AU", 9, movie(7)), stale);
   });
 });

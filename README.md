@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loafdaddy/discoverr-bot/releases/tag/v3.3.0">v3.3.0</a>
+  <a href="https://github.com/loafdaddy/discoverr-bot/releases/tag/v3.3.1">v3.3.1</a>
   ·
   <a href="SETUP.md">Setup</a>
   ·
@@ -48,7 +48,7 @@ Most media servers rely on users searching for something to watch. Discoverr fli
 - 🐳 Docker-first deployment
 - ⚡ Lightweight and self-hosted
 
-**v3.3.0:** Trending no longer posts duplicate buttons ([#7](https://github.com/loafdaddy/discoverr-bot/issues/7)); trailer links on cards ([#6](https://github.com/loafdaddy/discoverr-bot/issues/6)); calendar dates follow `TZ`. Full notes: [docs/RELEASES.md](docs/RELEASES.md#330--trending-reliability-trailers-calendar-tz-2026-09-07).
+**v3.3.1:** A failed discovery run no longer stops the bot ([#8](https://github.com/loafdaddy/discoverr-bot/issues/8)); successful Seerr requests are not dumped into the logs ([#11](https://github.com/loafdaddy/discoverr-bot/issues/11)). Full notes: [docs/RELEASES.md](docs/RELEASES.md#331--discovery-stays-up-2026-09-25).
 
 Discovery pipeline details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
@@ -108,7 +108,7 @@ Edit `docker-compose.yml` — comment out `build: .` and set the image (pick a [
 
 ```yaml
 # build: .
-image: ghcr.io/loafdaddy/discoverr-bot:3.3.0
+image: ghcr.io/loafdaddy/discoverr-bot:3.3.1
 ```
 
 Then start:
@@ -140,7 +140,7 @@ docker logs -f discoverr
 |-----|----------------|
 | **[SETUP.md](SETUP.md)** | Step-by-step install: Discord, TMDb, Seerr (Plex or Jellyfin), env, Docker, smoke test |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Modules, discovery pipeline, trailers, history, Seerr status |
-| [docs/RELEASES.md](docs/RELEASES.md) | Version history, 3.3.0 patch notes, how to cut a release |
+| [docs/RELEASES.md](docs/RELEASES.md) | Version history, 3.3.1 patch notes, how to cut a release |
 | [docs/TODO.md](docs/TODO.md) / [docs/ROADMAP.md](docs/ROADMAP.md) | Status and direction |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Contributor workflow (npm for tests) |
 | [data/brand/README.md](data/brand/README.md) | Lockup, mark, palette |
@@ -195,7 +195,7 @@ docker compose down
 docker compose up -d --build
 ```
 
-Your existing `.env` keeps working. **3.2.1 → 3.3.0** needs no new vars; bump GHCR pins from `3.2.1` to `3.3.0`. Notes: [docs/RELEASES.md](docs/RELEASES.md). Upgrading from the old JavaScript bot: [SETUP.md § Upgrading](SETUP.md#upgrading-from-botjs-v1).
+Your existing `.env` keeps working. **3.3.0 → 3.3.1** needs no new vars; bump GHCR pins from `3.3.0` to `3.3.1`. Do not delete `data/streaming-catalog.json`. Notes: [docs/RELEASES.md](docs/RELEASES.md). Upgrading from the old JavaScript bot: [SETUP.md § Upgrading](SETUP.md#upgrading-from-botjs-v1).
 
 ## FAQ
 
@@ -212,7 +212,7 @@ Yes — use Plex (or Emby) with Seerr instead. Discoverr only requires Seerr + D
 No. Operators run it with Docker Compose only. Node is for contributors (tests / typecheck).
 
 **Can multiple Discord users use it?**  
-Yes. Anyone who can see the channels and click **Request** can submit through the bot’s Seerr account (subject to that account’s permissions). Mapping Discord users to their own Seerr accounts is [issue #5](https://github.com/loafdaddy/discoverr-bot/issues/5) — not in 3.3.0.
+Yes. Anyone who can see the channels and click **Request** can submit through the bot’s Seerr account (subject to that account’s permissions). Mapping Discord users to their own Seerr accounts is [issue #5](https://github.com/loafdaddy/discoverr-bot/issues/5) — not in 3.3.1.
 
 **Where do trailer links come from?**  
 TMDb video metadata. When a YouTube trailer exists, the embed shows a **Trailer** hyperlink. Request stays a Discord button.

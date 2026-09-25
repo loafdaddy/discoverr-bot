@@ -233,7 +233,7 @@ Each [release tag](https://github.com/loafdaddy/discoverr-bot/releases) publishe
 |--|--|
 | Registry | `ghcr.io` |
 | Image | `ghcr.io/loafdaddy/discoverr-bot` |
-| Tags | `latest`, semver (e.g. `3.3.0`), and `3.3` (major.minor) |
+| Tags | `latest`, semver (e.g. `3.3.1`), and `3.3` (major.minor) |
 
 **1. Configure Compose** — open [`docker-compose.yml`](docker-compose.yml) and switch from build to pull:
 
@@ -241,7 +241,7 @@ Each [release tag](https://github.com/loafdaddy/discoverr-bot/releases) publishe
 services:
   discoverr:
     # build: .
-    image: ghcr.io/loafdaddy/discoverr-bot:3.3.0
+    image: ghcr.io/loafdaddy/discoverr-bot:3.3.1
     # or: ghcr.io/loafdaddy/discoverr-bot:latest
     container_name: discoverr
     env_file:
@@ -251,7 +251,7 @@ services:
     restart: unless-stopped
 ```
 
-Pin a version tag (e.g. `3.3.0`) for predictable upgrades; use `latest` to always track the newest release.
+Pin a version tag (e.g. `3.3.1`) for predictable upgrades; use `latest` to always track the newest release.
 
 **2. Pull and start**
 
@@ -266,7 +266,7 @@ No GitHub login is required — the package is **public**.
 **3. Upgrade** when a new release is published:
 
 ```bash
-# edit docker-compose.yml if you pin a version tag, e.g. 3.2.1 → 3.3.0
+# edit docker-compose.yml if you pin a version tag, e.g. 3.3.0 → 3.3.1
 docker compose pull
 docker compose up -d
 docker logs -f discoverr
@@ -435,7 +435,7 @@ docker compose down
 docker compose up -d --build
 ```
 
-Your existing `.env` keeps working (3.2.1 → 3.3.0 needs no new vars). Confirm `TZ` is where you live — it now also drives calendar “today”. You do not need `settings.json` unless you want [extra configuration for posts](#8-extra-configuration-for-posts-optional). Full notes: [docs/RELEASES.md](docs/RELEASES.md).
+Your existing `.env` keeps working (3.3.0 → 3.3.1 needs no new vars). Do not delete `data/streaming-catalog.json`; the next streaming run trims long-absent titles and keeps first-seen dates for titles still in the fetch. You do not need `settings.json` unless you want [extra configuration for posts](#8-extra-configuration-for-posts-optional). Full notes: [docs/RELEASES.md](docs/RELEASES.md).
 
 ## Upgrading from `bot.js` (v1)
 

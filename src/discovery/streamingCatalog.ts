@@ -7,6 +7,15 @@ import type { TmdbItem } from "../types";
 /** Prefer titles first seen on a provider within this many days. */
 export const STREAMING_NEW_WINDOW_DAYS = 21;
 
+/**
+ * Drop catalog rows that were not in the latest fetch and are older than this.
+ * Six windows, and at least 90 days, so a title that slips off the discover
+ * pages and returns is not treated as new.
+ */
+export function streamingCatalogRetentionDays(windowDays: number): number {
+  return Math.max(windowDays * 6, 90);
+}
+
 interface CatalogEntry {
   firstSeen: string;
 }
@@ -100,12 +109,22 @@ export class StreamingCatalog {
 
     const bucket = this.data[region][providerKey];
     const seedDate = daysBefore(todayIso, windowDays + 1);
+    const seen = new Set<string>();
 
     for (const item of items) {
       if (!item?.id) continue;
       const key = itemKey(item);
+      seen.add(key);
       if (bucket[key]?.firstSeen) continue;
       bucket[key] = { firstSeen: coldStart ? seedDate : todayIso };
+    }
+
+    const cutoff = daysBefore(todayIso, streamingCatalogRetentionDays(windowDays));
+    for (const [key, entry] of Object.entries(bucket)) {
+      if (seen.has(key)) continue;
+      if (entry?.firstSeen && entry.firstSeen < cutoff) {
+        delete bucket[key];
+      }
     }
 
     return { coldStart };

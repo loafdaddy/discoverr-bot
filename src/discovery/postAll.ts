@@ -95,7 +95,9 @@ export async function postAll(
   }
 
   const run = runDiscovery(client, config, tmdb, seerr, history);
-  discoveryInFlight = run.finally(() => {
+  // Swallow the tracked copy. `.finally()` alone still rejects, and that
+  // un-awaited rejection terminates the process even when `await run` is caught.
+  discoveryInFlight = run.then(() => undefined, () => undefined).finally(() => {
     discoveryInFlight = null;
   });
   await run;

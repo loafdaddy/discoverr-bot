@@ -2,7 +2,7 @@
 
 Track every published version here. Update this file when cutting a release, then tag and publish on GitHub.
 
-Current version in tree: **3.3.0** (`package.json`).
+Current version in tree: **3.3.1** (`package.json`).
 
 ## Versioning
 
@@ -22,7 +22,7 @@ Pre-1.0 history lived as an untagged JavaScript bot. **2.0.0** is the first SemV
 2. Set `version` in [`package.json`](../package.json) (and keep lockfile in sync if you use `npm version`)
 3. Add a section below in this file; bump version mentions in [`README.md`](../README.md) / [`SETUP.md`](../SETUP.md) if needed
 4. Commit on `main` (or merge the release PR)
-5. Tag: `git tag -a v3.3.0 -m "Discoverr 3.3.0"`
+5. Tag: `git tag -a v3.3.1 -m "Discoverr 3.3.1"`
 6. Push: `git push origin main --tags`
 7. Create the GitHub release (notes can mirror the section below)
 8. Sanity-check from a clean clone:
@@ -30,7 +30,7 @@ Pre-1.0 history lived as an untagged JavaScript bot. **2.0.0** is the first SemV
 ```bash
 git clone https://github.com/loafdaddy/discoverr-bot.git
 cd discoverr-bot
-git checkout v3.3.0
+git checkout v3.3.1
 cp .env.example .env
 # fill secrets in .env — see SETUP.md
 # optional: cp settings.example.json data/settings.json
@@ -47,6 +47,36 @@ docker logs -f discoverr
 - Include the AI note if the release involved substantial AI-assisted work
 
 ## Releases
+
+### 3.3.1 — Discovery stays up (2026-09-25)
+
+**Status:** published · [GitHub release](https://github.com/loafdaddy/discoverr-bot/releases/tag/v3.3.1)
+
+**Branch:** `release/3.3.1`
+
+**Headline:** A failed discovery run no longer takes the process down ([#8](https://github.com/loafdaddy/discoverr-bot/issues/8)). Successful Seerr request logs no longer include the response body ([#11](https://github.com/loafdaddy/discoverr-bot/issues/11)).
+
+**Highlights**
+
+- The in-flight discovery guard no longer leaves an unhandled rejection. Cron and `POST_ON_START` still catch the error, log it, and the next scheduled run proceeds. A run already in progress is still skipped.
+- `POST /api/v1/request` success logs the HTTP status only. Failure text is still thrown so Discord error replies can match “already requested”, quota, and permission cases. The raw body is not written on the success path.
+- `streaming-catalog.json` drops titles that were absent from the latest fetch for that provider and whose `firstSeen` is older than six new-windows, or 90 days, whichever is longer (126 days at the default 21-day window). Titles still on the fetched pages keep their original `firstSeen`, so they are not treated as new. Providers that were not fetched this run are left alone.
+
+**Not in 3.3.1**
+
+- Running the container as the `node` user ([#11](https://github.com/loafdaddy/discoverr-bot/issues/11)). Existing `./data` volumes are root-owned; switching user would make them unwritable until an operator `chown`s them.
+- Discord user → Seerr requester mapping ([#5](https://github.com/loafdaddy/discoverr-bot/issues/5)).
+
+**Upgrade from 3.3.0**
+
+```bash
+git pull
+docker compose up -d --build
+```
+
+No new env vars or `settings.json` keys. Do not delete `data/streaming-catalog.json`. The next streaming run trims titles that have been absent longer than the retention above; first-seen dates for titles still in the fetch stay as they are.
+
+GHCR pins: `ghcr.io/loafdaddy/discoverr-bot:3.3.0` → `3.3.1`.
 
 ### 3.3.0 — Trending reliability, trailers, calendar TZ (2026-09-07)
 
