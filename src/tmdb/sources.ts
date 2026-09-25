@@ -1,6 +1,6 @@
 import { shuffleArray } from "../lib/shuffle";
 import { uniqueByItemKey, withMediaType } from "../lib/media";
-import { localDateIso } from "../lib/localDate";
+import { localDateIso, localYear } from "../lib/localDate";
 import type { AppConfig, MediaType, TmdbItem } from "../types";
 import type { TmdbClient } from "./client";
 
@@ -39,6 +39,14 @@ function pickRotated<T>(items: readonly T[], offset = 0): T {
 
 function todayIso(timeZone: string): string {
   return localDateIso(timeZone);
+}
+
+/**
+ * Hidden gems exclude the current and previous calendar year.
+ * Shared so the TMDb date window and the local release filter cannot drift.
+ */
+export function hiddenGemCutoffYear(timeZone: string, date = new Date()): number {
+  return localYear(timeZone, date) - 2;
 }
 
 export async function fetchMovieOfDayCandidates(
@@ -183,7 +191,7 @@ export async function fetchHiddenGemCandidates(
   tmdb: TmdbClient,
   config: AppConfig
 ): Promise<TmdbItem[]> {
-  const cutoffYear = new Date().getFullYear() - 2;
+  const cutoffYear = hiddenGemCutoffYear(config.timezone);
   const cutoffDate = `${cutoffYear}-12-31`;
   const lang = config.tmdbLanguage;
   const genre = pickRotated(MOVIE_GENRE_ROTATION, 7);

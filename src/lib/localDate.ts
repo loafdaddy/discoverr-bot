@@ -13,6 +13,11 @@ export function localDateIso(timeZone: string, date = new Date()): string {
   }
 }
 
+/** Calendar year in an IANA timezone (not UTC). */
+export function localYear(timeZone: string, date = new Date()): number {
+  return Number(localDateIso(timeZone, date).slice(0, 4));
+}
+
 /** Subtract calendar days from a `YYYY-MM-DD` stamp. */
 export function subtractDaysIso(isoDate: string, days: number): string {
   const [year, month, day] = isoDate.split("-").map(Number);
