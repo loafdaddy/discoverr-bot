@@ -1,6 +1,6 @@
 {
   "name": "discoverr",
-  "version": "3.3.1",
+  "version": "3.3.2",
   "private": true,
   "description": "Discord bot for daily media recommendations with Seerr request buttons",
   "engines": {

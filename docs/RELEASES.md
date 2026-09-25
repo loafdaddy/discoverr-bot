@@ -2,7 +2,7 @@
 
 Track every published version here. Update this file when cutting a release, then tag and publish on GitHub.
 
-Current version in tree: **3.3.1** (`package.json`).
+Current version in tree: **3.3.2** (`package.json`).
 
 ## Versioning
 
@@ -22,7 +22,7 @@ Pre-1.0 history lived as an untagged JavaScript bot. **2.0.0** is the first SemV
 2. Set `version` in [`package.json`](../package.json) (and keep lockfile in sync if you use `npm version`)
 3. Add a section below in this file; bump version mentions in [`README.md`](../README.md) / [`SETUP.md`](../SETUP.md) if needed
 4. Commit on `main` (or merge the release PR)
-5. Tag: `git tag -a v3.3.1 -m "Discoverr 3.3.1"`
+5. Tag: `git tag -a v3.3.2 -m "Discoverr 3.3.2"`
 6. Push: `git push origin main --tags`
 7. Create the GitHub release (notes can mirror the section below)
 8. Sanity-check from a clean clone:
@@ -30,7 +30,7 @@ Pre-1.0 history lived as an untagged JavaScript bot. **2.0.0** is the first SemV
 ```bash
 git clone https://github.com/loafdaddy/discoverr-bot.git
 cd discoverr-bot
-git checkout v3.3.1
+git checkout v3.3.2
 cp .env.example .env
 # fill secrets in .env — see SETUP.md
 # optional: cp settings.example.json data/settings.json
@@ -47,6 +47,35 @@ docker logs -f discoverr
 - Include the AI note if the release involved substantial AI-assisted work
 
 ## Releases
+
+### 3.3.2 — Hidden gem cutoff follows TZ (2026-09-25)
+
+**Status:** published · [GitHub release](https://github.com/loafdaddy/discoverr-bot/releases/tag/v3.3.2)
+
+**Branch:** `release/3.3.2`
+
+**Headline:** Hidden gems use the operator timezone for their “at least two years old” cutoff ([#10](https://github.com/loafdaddy/discoverr-bot/pull/10)). Thanks to [Kisnov](https://github.com/Kisnov).
+
+**Highlights**
+
+- The TMDb `primary_release_date.lte` window and the local `maxReleaseYear` filter now share `hiddenGemCutoffYear()`, derived from `config.timezone` via `localYear()`.
+- Installs that set `TZ` are unchanged. The cutoff no longer follows the container clock when only `TIMEZONE` is set, or when neither is set and the default `Australia/Melbourne` calendar disagrees with a UTC container.
+
+**Not in 3.3.2**
+
+- Running the container as the `node` user. Existing `./data` volumes are root-owned.
+- Discord user → Seerr requester mapping ([#5](https://github.com/loafdaddy/discoverr-bot/issues/5)).
+
+**Upgrade from 3.3.1**
+
+```bash
+git pull
+docker compose up -d --build
+```
+
+No new env vars or `settings.json` keys. Keep `data/streaming-catalog.json`.
+
+GHCR pins: `ghcr.io/loafdaddy/discoverr-bot:3.3.1` → `3.3.2`.
 
 ### 3.3.1 — Discovery stays up (2026-09-25)
 

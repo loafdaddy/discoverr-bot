@@ -30,11 +30,12 @@ Supports **Plex** and **Jellyfin** servers that use Seerr for requests (same Dis
 - **v3.2.1** — CI, MIT license, TMDb overview fallback (#4), Seerr startup health check, GHCR workflow — see [RELEASES.md](RELEASES.md)
 - **v3.3.0** — Trending duplicate-button fix (#7), TMDb trailer hyperlinks (#6), timezone-local dates, history/Seerr reliability — see [RELEASES.md](RELEASES.md)
 - **v3.3.1** — Discovery run failures no longer exit the process (#8); Seerr success logs omit the response body; streaming catalog prunes long-absent titles (#11) — see [RELEASES.md](RELEASES.md)
+- **v3.3.2** — Hidden gem cutoff follows `TZ` ([#10](https://github.com/loafdaddy/discoverr-bot/pull/10)) — see [RELEASES.md](RELEASES.md)
 - **Next** — items under **Next** in [TODO.md](TODO.md)
 
-## Post-3.3.1 (planned themes)
+## Post-3.3.2 (planned themes)
 
-1. **Discord user → Seerr requester** ([#5](https://github.com/loafdaddy/discoverr-bot/issues/5)) — submit Request clicks as the mapped Seerr user so approval queues and Maintainerr see the real requester. Needs a careful Seerr permission design (Manage Users without auto-approve). Not in 3.3.1.
+1. **Discord user → Seerr requester** ([#5](https://github.com/loafdaddy/discoverr-bot/issues/5)) — submit Request clicks as the mapped Seerr user so approval queues and Maintainerr see the real requester. Needs a careful Seerr permission design (Manage Users without auto-approve). Not in 3.3.2.
 2. **Optional new env vars** — only when a concrete need appears (e.g. Seerr API-key auth). Prefer optional; avoid required vars that break existing `.env` files.
 3. **Direct Plex / Jellyfin APIs** — larger product change (library browse, watchlist, continue watching). Out of ARR-companion scope until demand is proven; stay Seerr-only until then.
 
